@@ -20,6 +20,32 @@ typedef uint64_t tc_func_id_t
  */
 void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return);
 
+/**
+ * adds a function to be proccesed paralell
+ * you cann ad as many functions (with their specific args)
+ * as you want thei will pe progressed in random order by the
+ * thread clients
+ */
+void tc_add_func(void *(*func)(void *), void *args);
 
+/**
+ * Returns the return value of the function with the given id
+ * or NULL, if there is no such function.
+ *
+ * NOTE: you should call tc_join() becor calling this
+ *       else the return value mybe not yet avilable
+ */
+void *tc_get_return(uint64_t id);
+
+/**
+ * waiting utill all current work is done
+ * (all functions are progressed)
+ */
+void tc_join();
+
+/**
+ * stops all clients and destroys waiting and finished work
+ */
+void tc_destroy();
 
 #endif // __THREAD_CLIENTS_H__

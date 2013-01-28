@@ -28,14 +28,17 @@ DEF_ARY(TCFuncs, TCFuncsAry);
  * Struc holding the thread client and the work array
  */
 typedef struct {
- pthread_t *clients;    /* the client threads */
- pthread_mutex_t mutex; /* mutex object to avoid race conditions */
- TCFuncsAry work;       /* the work for the clients */
- TCFuncsAry finished;   /* finished functions and their return value */
- uint8_t running;       /* while true clients keep running */
- uint8_t use_return;    /* wheter to use the return values or not */
+ pthread_t       *clients;    /* the client threads */
+ pthread_mutex_t  mutex;      /* mutex object to avoid race conditions */
+ TCFuncsAry       work;       /* the work for the clients */
+ TCFuncsAry       finished;   /* finished functions and their return value */
+ uint8_t          running;    /* while true clients keep running */
+ uint8_t          use_return; /* wheter to use the return values or not */
+ uint64_t         last_id;    /* last func id */
 } TClients;
 
+/* to share values between clients */
+static TClients tc_clients;
 
 /**
  * Initializes Thread-Clients Lib
@@ -50,15 +53,101 @@ typedef struct {
  *                      return values memory will soooon be full
  */
 void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
-  TClients tc_clients;
 
   ARY_INIT(TCFuncs, tc_clients.work, max_work);
   if (use_return)
   ARY_INIT(TCFuncs, tc_clients.finished, max_work);
   tc_clients.clients    = malloc(sizeof(pthread_t) * n_clients);
   tc_clients.mutex      = PTHREAD_MUTEX_INITIALIZER;
-  tc_clients.running    =  1;
+  tc_clients.running    = 1;
   tc_clients.use_return = use_return;
+  tc_clients.last_id    = 1;
+
+  /* create client threads */
+  int i;
+  for (i = 0; i < n_clients; i++)
+    pthread_create(tc_clients.client + i, 
+                   NULL, 
+                   tc_client_func, 
+                   (void *) &tc_clients);
+}
+
+/**
+ * adds a function to be proccesed paralell
+ * you cann ad as many functions (with their specific args)
+ * as you want thei will pe progressed in random order by the
+ * thread clients
+ *
+ * return:
+ *    it returns the function id of the inserted function
+ *    you will ned this id to get the return value of that function
+ */
+uint64_t tc_add_func(void *(*func)(void *), void *args) {
+  
+  TCFunc new_func;
+
+  new_func.func = func;
+  new_func.args = args;
+  new_func.id   = ++tc_clients.last_id;
+  
+  
+  /* avoid race conditions */
+  pthread_mutex_lock(&tc_clients.mutex);
+
+  ARY_ADD(tc_clients, new_func);
+
+  pthread_mutex_unlock(&tc_clients.mutex);
+
+}
+
+/**
+ * Returns the return value of the function with the given id
+ * or NULL, if there is no such function.
+ *
+ * NOTE: you should call tc_join() becor calling this
+ *       else the return value mybe not yet avilable
+ */
+void *tc_get_return(uint64_t id) {
+
+  uint64_t i;
+  for (i = 0; i < ARY_LEN(tc_clients.finished); i++) {
+    if (ARY_AT(tc_clients.finished, i).id == id)
+      return ARY_AT(tc_clients.finished, i).args;
+  }
+
+  return NULL;
+}
+
+
+
+/**
+ * waiting utill all current work is done
+ * (all functions are progressed)
+ */
+void tc_join() {
+
+  while (ARY_LEN(tc_clients.work) > 0)
+    sched_yield();
+
+}
+
+/**
+ * stops all clients and destroys waiting and finished work
+ */
+void tc_destroy() {
+
+  tc_clients.running = 0;
+
+  /* waiting for clients to finish */
+  for (i = 0; i < n_clients; i++)
+    pthread_join(tc_clients.clients[i], NULL);
+
+  ARY_FREE(tc_clients.work);
+  if (tc_clients.use_return)
+    ARY_FREE(tc_clients.finish);
+
+  free(tc_clients.clients);
+
 }
 
 /**
@@ -84,7 +173,7 @@ static void *tc_client_func(void *arg) {
     
     if (ARY_LEN(tc_clients->work) > 0) {
       
-      ARY_PULL(tc_clients->work, next_work); /* get next ework */
+      ARY_EXTRACT(tc_clients->work, next_work); /* get next ework */
       pthread_mutex_unlock(&tc_clients->mutex); /* call work paralell */
 
       /* start working */
