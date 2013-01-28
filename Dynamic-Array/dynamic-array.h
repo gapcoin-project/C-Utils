@@ -5,8 +5,8 @@
  * Its just like an Generic ArrayList from Java
  * exclusively the maximum size
  */
-#ifndef ARRAY
-#define ARRAY
+#ifndef __DYNAMIC_ARRAY_H__
+#define __DYNAMIC_ARRAY_H__
 #include <time.h>
 #include <sys/types.h>
 #include <inttypes.h>
@@ -26,7 +26,7 @@
 /**
  * Generates an random index for the given Array
  */
-#define RAND_INDEX(ARY) LONG_RAND % ARY.length
+#define RAND_INDEX(ARY) LONG_RAND % (ARY).length
 
 /**
  * defines an new Array struct with a given type as content
@@ -37,73 +37,85 @@ typedef struct {                          \
   TYPE *ptr;                              \
   u_int64_t length;                       \
   u_int64_t max_len;                      \
-} NAME;
+} NAME
 
 /**
  * returns the Element at the given possition
  */
-#define ARY_AT(ARY, INDEX) ARY.ptr[INDEX]
+#define ARY_AT(ARY, INDEX) (ARY).ptr[INDEX]
 
 /**
  * returns the last Element of the given ARY
  */
-#define ARY_LAST(ARY) ARY_AT(ARY, ARY.length - 1)
+#define ARY_LAST(ARY) ARY_AT(ARY, (ARY).length - 1)
 
 /**
- * Initialize an given Array with an given maximal length
+ * Initialize an given Array with an given start length
  * also initialize rand
  */
-#define ARY_INIT(TYPE, ARY, START_LEN)                    \
-  ARY.ptr = (TYPE *) malloc(sizeof(TYPE) * START_LEN);    \
-  ARY.length = 0;                                         \
-  ARY.max_len = START_LEN;                                \
-  srand(time(NULL) * rand());
+#define ARY_INIT(TYPE, ARY, START_LEN)                                \
+  do {                                                                \
+    (ARY).ptr     = (TYPE *) malloc(sizeof(TYPE) * (START_LEN));      \
+    (ARY).length  = 0;                                                \
+    (ARY).max_len = START_LEN;                                        \
+    srand(time(NULL) * rand());
+  } while (0)
 
 /**
  * Insert an given element at the end of a given Array if possible
- * NOTE the Arry content type should be the same as th type of 
- * the given element
+ *
+ * NOTE: the Array content type should be the same as the type of 
+ *       the given element!
  */
-#define ARY_ADD(ARY, E)                                                 \
-  if (ARY.length >= ARY.max_len) {                                      \
-    ARY.ptr = realloc(ARY.ptr, ARY.length * 2 * sizeof(ARY.ptr[0]));    \
-    ARY.max_len = ARY.length * 2;                                       \
-  }                                                                     \
-  ARY.ptr[ARY.length] = E;                                              \
-  ARY.length++;
+#define ARY_ADD(ARY, E)                                                   \
+  do {                                                                    \
+    if (ARY.length >= ARY.max_len) {                                      \
+      ARY.ptr = realloc(ARY.ptr, ARY.length * 2 * sizeof(ARY.ptr[0]));    \
+      ARY.max_len = ARY.length * 2;                                       \
+    }                                                                     \
+    ARY.ptr[ARY.length] = E;                                              \
+    ARY.length++;
+  } while (0)
 
 /**
- * grows if neccesary
+ * grows if neccesary 
+ * (expecting you want to store an Element at Index)
  */
-#define ARY_GROW(ARY, I)                                                \
-  while (I >= ARY.max_len) {                                            \
-    ARY.ptr = realloc(ARY.ptr, ARY.max_len * 2 * sizeof(ARY.ptr[0]));   \
-    ARY.max_len *= 2;                                                   \
-  }                                                                     
+#define ARY_GROW(ARY, INDEX)                                                \
+  do {                                                                      \
+    while ((INDEX) >= (ARY).max_len) {                                      \
+      (ARY).ptr = realloc( (ARY).ptr,                                       \
+                           (ARY).max_len * 2 * sizeof((ARY).ptr[0]) );      \
+      (ARY).max_len *= 2;                                                   \
+    }                                                                     
+  } while (0)
 
 /**
  * Insert an given element at the end of a given Array
- * NOTE the TYPE should be the same as th type of 
- * the given element
  *
  * Note it my reallocates space if array is to smal
  */
-#define ARY_PUSH(TYPE, ARY, E)\
-  if (ARY.length >= ARY.max_len) {\
-    ARY.ptr = (TYPE *) realloc(ARY.ptr, sizeof(TYPE) * ARY.max_len * 2);\
-    ARY.max_len *= 2;\
-  }\
-  ARY.ptr[ARY.length] = E;\
-  ARY.length++;
+#define ARY_PUSH(ARY, E)                                                  \
+  do {                                                                    \
+    if (ARY.length >= ARY.max_len) {                                      \
+      void *ptr = realloc( (ARY).ptr,                                     \
+                           sizeof((ARY).ptr[0]) * (ARY).max_len * 2 );    \
+      (ARY).max_len *= 2;                                                 \
+    }                                                                     \
+    (ARY).ptr[(ARY).length] = E;                                          \
+    (ARY).length++;                                                       \
+  } while (0)
   
 /**
- * Removes and saves the last element in E
+ * Removes and stores the last element from ARY in E
  */
-#define ARY_PULL(ARY, E)\
-  if (ARY.length > 0) {\
-    ARY.length--;\
-    E = ARY.ptr[ARY.length];\
-  }
+#define ARY_PULL(ARY, E)                    \
+  do {                                      \
+    if ((ARY).length > 0) {                 \
+      (ARY).length--;                       \
+      E = (ARY).ptr[(ARY).length];          \
+    }                                       \
+  } while ()
 
 /**
  * Extract a random element from a given array
@@ -148,4 +160,4 @@ typedef struct {                          \
 #define EMPTY(ARY) ARY.length == 0
 #define NOTEMPTY(ARY) ARY.length != 0
 
-#endif // end of Array.h
+#endif // end of __DYNAMIC_ARRAY_H__
