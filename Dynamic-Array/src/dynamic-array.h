@@ -115,23 +115,25 @@ typedef struct {                          \
       (ARY).length--;                       \
       E = (ARY).ptr[(ARY).length];          \
     }                                       \
-  } while ()
+  } while (0)
 
 /**
  * Extract a random element from a given array
  * and saves it into a given value if possible
  *
  * note it changes the order of the given array
- * NOTE the Arry content type should be the same as th type of 
- * the given value
+ * NOTE: the Arry content type should be the same as th type of 
+ *       the given value
  */
-#define ARY_EXTRACT(ARY, VALUE)\
-  if (ARY.length > 0) {\
-    u_int64_t ary_ext_i = RAND_INDEX(ARY);\
-    VALUE = ARY.ptr[ary_ext_i];\
-    ARY.ptr[ary_ext_i] = ARY.ptr[ARY.length - 1];\
-    ARY.length--;\
-  }
+#define ARY_EXTRACT(ARY, VALUE)                                   \
+  do {                                                            \
+    if ((ARY).length > 0) {                                       \
+      uint64_t ary_ext_i = RAND_INDEX(ARY);                       \
+      VALUE = (ARY).ptr[ary_ext_i];                               \
+      (ARY).ptr[ary_ext_i] = (ARY).ptr[(ARY).length - 1];         \
+      (ARY).length--;                                             \
+    }                                                             \
+  } while (0)
 
 
 /**
@@ -139,25 +141,25 @@ typedef struct {                          \
  * NOTE the Arry content type should be the same as th type of 
  * the given element
  */
-#define ARY_DELETE(ARY, E)\
-{\
-  u_int64_t adi, new_len;\
-  for (adi = new_len = 0; adi < ARY.length; adi++) {\
-    ARY.ptr[new_len] = ARY.ptr[adi];\
-    if (ARY.ptr[adi] != E) { new_len++; }\
-  }\
-  ARY.length = new_len;\
-}
+#define ARY_DELETE(ARY, E)                                          \
+  do {                                                              \
+    u_int64_t adi, new_len;                                         \
+    for (adi = new_len = 0; adi < (ARY).length; adi++) {            \
+      (ARY).ptr[new_len] = (ARY).ptr[adi];                          \
+      if (ARY).ptr[adi] != (E) { new_len++; }                       \
+    }                                                               \
+    (ARY).length = new_len;                                         \
+  } while (0)
 
 /**
  * frees an given ARY
  */
-#define ARY_FREE(ARY) free(ARY.ptr);
+#define ARY_FREE(ARY) free((ARY).ptr)
 
 /**
  * Returns wheter the given Array is empty or not
  */
-#define EMPTY(ARY) ARY.length == 0
-#define NOTEMPTY(ARY) ARY.length != 0
+#define EMPTY(ARY) ((ARY).length == 0)
+#define NOTEMPTY(ARY) ((ARY).length != 0)
 
-#endif // end of __DYNAMIC_ARRAY_H__
+#endif // __DYNAMIC_ARRAY_H__
