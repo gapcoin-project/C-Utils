@@ -9,6 +9,14 @@
 #include "thread-clients.h"
 
 /**
+ * client function which processes work and then 
+ * yields proccessor until new work is threre
+ *
+ * args will be the TClients struct
+ */
+static void *tc_client_func(void *arg);
+
+/**
  * Struct holding one function and her args
  * (function must return an void pointer,
  *  and gehts an void pointer (args))
@@ -22,23 +30,26 @@ typedef struct {
 /**
  * Dynamic Array of TCFuncs
  */
-DEF_ARY(TCFuncs, TCFuncsAry);
+DEF_ARY(TCFunc, TCFuncsAry);
 
 /**
  * Struc holding the thread client and the work array
  */
 typedef struct {
- pthread_t       *clients;    /* the client threads */
- pthread_mutex_t  mutex;      /* mutex object to avoid race conditions */
- TCFuncsAry       work;       /* the work for the clients */
- TCFuncsAry       finished;   /* finished functions and their return value */
- uint8_t          running;    /* while true clients keep running */
- uint8_t          use_return; /* wheter to use the return values or not */
- uint64_t         last_id;    /* last func id */
+ pthread_t   *clients;    /* the client threads */
+ TCFuncsAry   work;       /* the work for the clients */
+ TCFuncsAry   finished;   /* finished functions and their return value */
+ uint8_t      running;    /* while true clients keep running */
+ uint8_t      use_return; /* wheter to use the return values or not */
+ uint64_t     last_id;    /* last func id */
+ uint32_t     n_clients;  /* number of thread clients */
 } TClients;
 
 /* to share values between clients */
 static TClients tc_clients;
+
+/* to avoid race conditions */
+static pthread_mutex_t tc_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
  * Initializes Thread-Clients Lib
@@ -54,19 +65,19 @@ static TClients tc_clients;
  */
 void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
 
-  ARY_INIT(TCFuncs, tc_clients.work, max_work);
+  ARY_INIT(TCFunc, tc_clients.work, max_work);
   if (use_return)
-  ARY_INIT(TCFuncs, tc_clients.finished, max_work);
+  ARY_INIT(TCFunc, tc_clients.finished, max_work);
   tc_clients.clients    = malloc(sizeof(pthread_t) * n_clients);
-  tc_clients.mutex      = PTHREAD_MUTEX_INITIALIZER;
   tc_clients.running    = 1;
   tc_clients.use_return = use_return;
   tc_clients.last_id    = 1;
+  tc_clients.n_clients  = n_clients;
 
   /* create client threads */
-  int i;
+  uint32_t i;
   for (i = 0; i < n_clients; i++)
-    pthread_create(tc_clients.client + i, 
+    pthread_create(tc_clients.clients + i, 
                    NULL, 
                    tc_client_func, 
                    (void *) &tc_clients);
@@ -92,12 +103,13 @@ uint64_t tc_add_func(void *(*func)(void *), void *args) {
   
   
   /* avoid race conditions */
-  pthread_mutex_lock(&tc_clients.mutex);
+  pthread_mutex_lock(&tc_mutex);
 
-  ARY_ADD(tc_clients, new_func);
+  ARY_ADD(tc_clients.finished, new_func);
 
-  pthread_mutex_unlock(&tc_clients.mutex);
+  pthread_mutex_unlock(&tc_mutex);
 
+  return new_func.id;
 }
 
 /**
@@ -139,12 +151,13 @@ void tc_destroy() {
   tc_clients.running = 0;
 
   /* waiting for clients to finish */
-  for (i = 0; i < n_clients; i++)
+  uint32_t i;
+  for (i = 0; i < tc_clients.n_clients; i++)
     pthread_join(tc_clients.clients[i], NULL);
 
   ARY_FREE(tc_clients.work);
   if (tc_clients.use_return)
-    ARY_FREE(tc_clients.finish);
+    ARY_FREE(tc_clients.finished);
 
   free(tc_clients.clients);
 
@@ -169,27 +182,27 @@ static void *tc_client_func(void *arg) {
   while (tc_clients->running) {
     
     /* pull next work funcion savely */
-    pthread_mutex_lock(&tc_clients->mutex);
+    pthread_mutex_lock(&tc_mutex);
     
     if (ARY_LEN(tc_clients->work) > 0) {
       
       ARY_EXTRACT(tc_clients->work, next_work); /* get next ework */
-      pthread_mutex_unlock(&tc_clients->mutex); /* call work paralell */
+      pthread_mutex_unlock(&tc_mutex); /* call work paralell */
 
       /* start working */
       next_work.args = next_work.func(next_work.args);
 
       /* save return if wanted */
-      if (tc_clients.use_return) {
-        pthread_mutex_lock(&tc_clients->mutex);
+      if (tc_clients->use_return) {
+        pthread_mutex_lock(&tc_mutex);
 
-        ARY_PUSH(tc_clients.finished, next_work);
+        ARY_PUSH(tc_clients->finished, next_work);
 
-        pthread_mutex_unlock(&tc_clients->mutex);
+        pthread_mutex_unlock(&tc_mutex);
       }
       
     } else { /* nothing to do release cpu */
-      pthread_mutex_unlock(&tc_clients->mutex);
+      pthread_mutex_unlock(&tc_mutex);
       sched_yield();
     }
 

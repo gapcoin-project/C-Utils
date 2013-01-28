@@ -1,10 +1,9 @@
 #ifndef __THREAD_CLIENTS_H__
 #define __THREAD_CLIENTS_H__
 
+#include <inttypes.h>
 #include <pthread.h>
-
-/* function id type */
-typedef uint64_t tc_func_id_t
+#include "../../Dynamic-Array/src/dynamic-array.h"
 
 /**
  * Initializes Thread-Clients Lib
@@ -25,8 +24,12 @@ void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return);
  * you cann ad as many functions (with their specific args)
  * as you want thei will pe progressed in random order by the
  * thread clients
+ *
+ * return:
+ *    it returns the function id of the inserted function
+ *    you will ned this id to get the return value of that function
  */
-void tc_add_func(void *(*func)(void *), void *args);
+uint64_t tc_add_func(void *(*func)(void *), void *args);
 
 /**
  * Returns the return value of the function with the given id
