@@ -63,7 +63,7 @@ typedef struct {                          \
     (ARY).ptr     = (TYPE *) malloc(sizeof(TYPE) * (START_LEN));      \
     (ARY).length  = 0;                                                \
     (ARY).max_len = START_LEN;                                        \
-    srand(time(NULL) * rand());
+    srand(time(NULL) * rand());                                       \
   } while (0)
 
 /**
@@ -76,12 +76,13 @@ typedef struct {                          \
  */
 #define ARY_ADD(ARY, E)                                                   \
   do {                                                                    \
-    if (ARY.length >= ARY.max_len) {                                      \
-      ARY.ptr = realloc(ARY.ptr, ARY.length * 2 * sizeof(ARY.ptr[0]));    \
-      ARY.max_len = ARY.length * 2;                                       \
+    if ((ARY).length >= (ARY).max_len) {                                  \
+      (ARY).ptr = realloc((ARY).ptr,                                      \
+                        (ARY).length * 2 * sizeof((ARY).ptr[0]));         \
+      (ARY).max_len = (ARY).length * 2;                                   \
     }                                                                     \
-    ARY.ptr[ARY.length] = E;                                              \
-    ARY.length++;
+    (ARY).ptr[(ARY).length] = E;                                          \
+    (ARY).length++;                                                       \
   } while (0)
 
 /* other name */
@@ -98,7 +99,7 @@ typedef struct {                          \
       (ARY).ptr = realloc( (ARY).ptr,                                       \
                            (ARY).max_len * 2 * sizeof((ARY).ptr[0]) );      \
       (ARY).max_len *= 2;                                                   \
-    }                                                                     
+    }                                                                       \
   } while (0)
 
   
@@ -139,7 +140,7 @@ typedef struct {                          \
  */
 #define ARY_DELETE(ARY, E)                                          \
   do {                                                              \
-    u_int64_t adi, new_len;                                         \
+    uint64_t adi, new_len;                                          \
     for (adi = new_len = 0; adi < (ARY).length; adi++) {            \
       (ARY).ptr[new_len] = (ARY).ptr[adi];                          \
       if (ARY).ptr[adi] != (E) { new_len++; }                       \
