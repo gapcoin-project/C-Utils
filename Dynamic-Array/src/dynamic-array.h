@@ -167,4 +167,9 @@ typedef struct {                          \
 #define EMPTY(ARY) ((ARY).length == 0)
 #define NOTEMPTY(ARY) ((ARY).length != 0)
 
+/**
+ * Return the Length of the given ARRAY
+ */
+#define ARY_LEN(ARY) ((ARY).length)
+
 #endif // __DYNAMIC_ARRAY_H__
