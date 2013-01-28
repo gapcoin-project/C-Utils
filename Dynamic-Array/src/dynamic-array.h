@@ -40,6 +40,11 @@ typedef struct {                          \
 } NAME
 
 /**
+ * Shorter Macro
+ */
+#define DEF_ARY(TYPE, NAME) DEFINE_ARRAY(TYPE, NAME)
+
+/**
  * returns the Element at the given possition
  */
 #define ARY_AT(ARY, INDEX) (ARY).ptr[INDEX]
