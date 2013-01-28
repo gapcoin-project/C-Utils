@@ -67,7 +67,9 @@ typedef struct {                          \
   } while (0)
 
 /**
- * Insert an given element at the end of a given Array if possible
+ * Insert an given element at the end of a given Array 
+ *
+ * Note it my reallocates space if array is to smal
  *
  * NOTE: the Array content type should be the same as the type of 
  *       the given element!
@@ -82,6 +84,10 @@ typedef struct {                          \
     ARY.length++;
   } while (0)
 
+/* other name */
+#define ARY_PUSH(ARY, E) ARY_ADD(ARY, E)
+
+
 /**
  * grows if neccesary 
  * (expecting you want to store an Element at Index)
@@ -95,21 +101,6 @@ typedef struct {                          \
     }                                                                     
   } while (0)
 
-/**
- * Insert an given element at the end of a given Array
- *
- * Note it my reallocates space if array is to smal
- */
-#define ARY_PUSH(ARY, E)                                                  \
-  do {                                                                    \
-    if (ARY.length >= ARY.max_len) {                                      \
-      void *ptr = realloc( (ARY).ptr,                                     \
-                           sizeof((ARY).ptr[0]) * (ARY).max_len * 2 );    \
-      (ARY).max_len *= 2;                                                 \
-    }                                                                     \
-    (ARY).ptr[(ARY).length] = E;                                          \
-    (ARY).length++;                                                       \
-  } while (0)
   
 /**
  * Removes and stores the last element from ARY in E
