@@ -164,4 +164,29 @@ typedef struct {                          \
  */
 #define ARY_LEN(ARY) ((ARY).length)
 
+/**
+ * Switches two Elements at the given indexes
+ */
+#define ARY_SWITCH(ARY, I, J)               \
+  do {                                      \
+    ARY_PUSH(ARY, ARY_AT(ARY, I));          \
+    ARY_AT(ARY, I) = ARY_AT(ARY, J);        \
+    ARY_PULL(ARY, ARY_AT(ARY, J));          \
+  } while (0)
+
+/**
+ * Puts an given Array into revers order
+ */
+#define ARY_REVERSE(ARY)                    \
+  do {                                      \
+    uint64_t len = ARY_LEN(ARY);            \
+    uint64_t i, j = len;                    \
+    for (i = 0; i < j; i++, j--)            \
+      ARY_SWITCH(ARY, i, j);                \
+  } while (0)
+
+
+
+
+
 #endif // __DYNAMIC_ARRAY_H__
