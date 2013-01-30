@@ -179,7 +179,7 @@ typedef struct {                          \
  */
 #define ARY_REVERSE(ARY)                    \
   do {                                      \
-    uint64_t len = ARY_LEN(ARY);            \
+    uint64_t len = ARY_LEN(ARY) - 1;        \
     uint64_t i, j = len;                    \
     for (i = 0; i < j; i++, j--)            \
       ARY_SWITCH(ARY, i, j);                \
