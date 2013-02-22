@@ -163,43 +163,46 @@ typedef struct {
 /**
  * Sets the main diagonal
  */
-#define MATRIX_SET_MAIN_DIAGONAL(MATRIX)                                                \
-{                                                                                       \
-  u_int32_t i, min = (MATRIX.width < MATRIX.height) ? MATRIX.width : MATRIX.height;     \
-  for (i = 0; i < min; i++) {                                                           \
-    MATRIX_SET(MATRIX, i, i);                                                           \
-  }                                                                                     \
-}
+#define MATRIX_SET_MAIN_DIAGONAL(MATRIX)                                      \
+  do {                                                                        \
+    u_int32_t i, min = ((MATRIX).width < (MATRIX).height) ? (MATRIX).width    \
+                                                          : (MATRIX).height;  \
+    for (i = 0; i < min; i++) {                                               \
+      MATRIX_SET(MATRIX, i, i);                                               \
+    }                                                                         \
+  } while (0)
 
 /**
  * Clears and sets the main diagonal
  */
-#define MATRIX_SET_CLEAR_MAIN_DIAGONAL(MATRIX)                                    \
-MATRIX_CLEAR(MATRIX)                                                              \
-MATRIX_SET_MAIN_DIAGONAL(MATRIX)
+#define MATRIX_SET_CLEAR_MAIN_DIAGONAL(MATRIX)            \
+  do {                                                    \
+    MATRIX_CLEAR(MATRIX)                                  \
+    MATRIX_SET_MAIN_DIAGONAL(MATRIX)                      \
+  } while (0)
 
 /**
  * Sets the main diagonal
  */
-#define MATRIX_SET_MAIN_DIAGONAL_PART(MATRIX, N)                                        \
-{                                                                                       \
-  for (i = 0; i <= N; i++) {                                                            \
-    MATRIX_SET(MATRIX, i, i);                                                           \
-  }                                                                                     \
-}
+#define MATRIX_SET_MAIN_DIAGONAL_PART(MATRIX, N)                              \
+  do {                                                                        \
+    for (i = 0; i <= (N); i++) {                                              \
+      MATRIX_SET(MATRIX, i, i);                                               \
+    }                                                                         \
+  } while (0)
 
 /**
  * returns wheter the given entry is setted or not
  */
-#define IS_MATRIX_SETTED(MATRIX, X, Y)                \
-((Y % 8 == 0 && (MATRIX.ptr[X][Y / 8] & BIT0)) ||     \
- (Y % 8 == 1 && (MATRIX.ptr[X][Y / 8] & BIT1)) ||     \
- (Y % 8 == 2 && (MATRIX.ptr[X][Y / 8] & BIT2)) ||     \
- (Y % 8 == 3 && (MATRIX.ptr[X][Y / 8] & BIT3)) ||     \
- (Y % 8 == 4 && (MATRIX.ptr[X][Y / 8] & BIT4)) ||     \
- (Y % 8 == 5 && (MATRIX.ptr[X][Y / 8] & BIT5)) ||     \
- (Y % 8 == 6 && (MATRIX.ptr[X][Y / 8] & BIT6)) ||     \
- (Y % 8 == 7 && (MATRIX.ptr[X][Y / 8] & BIT7)))
+#define IS_MATRIX_SETTED(MATRIX, X, Y)                  \
+  ((Y % 8 == 0 && (MATRIX.ptr[X][Y / 8] & BIT0)) ||     \
+   (Y % 8 == 1 && (MATRIX.ptr[X][Y / 8] & BIT1)) ||     \
+   (Y % 8 == 2 && (MATRIX.ptr[X][Y / 8] & BIT2)) ||     \
+   (Y % 8 == 3 && (MATRIX.ptr[X][Y / 8] & BIT3)) ||     \
+   (Y % 8 == 4 && (MATRIX.ptr[X][Y / 8] & BIT4)) ||     \
+   (Y % 8 == 5 && (MATRIX.ptr[X][Y / 8] & BIT5)) ||     \
+   (Y % 8 == 6 && (MATRIX.ptr[X][Y / 8] & BIT6)) ||     \
+   (Y % 8 == 7 && (MATRIX.ptr[X][Y / 8] & BIT7)))
    
 
 #define MATRIX_AT(MATRIX, X, Y) IS_MATRIX_SETTED(MATRIX, X, Y)
@@ -214,18 +217,18 @@ MATRIX_SET_MAIN_DIAGONAL(MATRIX)
  * Because the Matrix spaces resevation and realy used part
  * can different you have to give the n
  */
-#define MATRIX_CALC_PATHS_WITHOUT(MATRIX, N)                                                        \
-{                                                                                                   \
-  u_int32_t k, i, j;                                                                                \
-  for (k = 0; k <= N; k++) {                                                                        \
-    for (i = 0; i <= N; i++) {                                                                      \
-      for (j = 0; j <= N; j++) {                                                                    \
-        if ((MATRIX_AT(MATRIX, i, k) && MATRIX_AT(MATRIX, k, j))) {                                 \
-          MATRIX_SET(MATRIX, i , j)                                                                 \
-        }                                                                                           \
-      }                                                                                             \
-    }                                                                                               \
-  }                                                                                                 \
-}
+#define MATRIX_CALC_PATHS_WITHOUT(MATRIX, N)                                  \
+  do {                                                                        \
+    u_int32_t k, i, j;                                                        \
+    for (k = 0; k <= N; k++) {                                                \
+      for (i = 0; i <= N; i++) {                                              \
+        for (j = 0; j <= N; j++) {                                            \
+          if ((MATRIX_AT(MATRIX, i, k) && MATRIX_AT(MATRIX, k, j))) {         \
+            MATRIX_SET(MATRIX, i , j)                                         \
+          }                                                                   \
+        }                                                                     \
+      }                                                                       \
+    }                                                                         \
+  } while (0)
 
 #endif // __BOOL_MATRIX_H__
