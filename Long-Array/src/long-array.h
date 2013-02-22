@@ -58,65 +58,80 @@ typedef struct {                        \
 /**
  * Makro for Accressing the Last Element of the given Array
  */
-#define LONG_ARY_LAST(ARY) LONG_ARY_AT(ARY, (ARY.length - 1))
+#define LONG_ARY_LAST(ARY) LONG_ARY_AT(ARY, ((ARY).length - 1))
 
 /**
- * Makro for Accressing the Element after the Last Element of the given Array
- */
-#define LONG_ARY_AT_LENGTH(ARY) LONG_ARY_AT(ARY, ARY.length)
-
-/**
- * Insert an given element at the end of a given Array if possible
+ * Insert an given element at the end of a given Array
+ * (mallocs space if neccesary)
  *
  * NOTE the Arry content type should be the same as the type of 
- * the given element and TYPE
- *
- * TODO Realloc space if needed
+ *      the given element
  */
-#define LONG_ARY_ADD(TYPE, ARY, E)                                                                   \
-  if (ARY.length < ARY.max_len) {                                                                    \
-    if (ARY.length / ARY.col_len == ARY.cur_rows) {                                                  \
-      ARY.ptr[ARY.cur_rows] = (TYPE *) malloc(sizeof(TYPE) * ARY.col_len);                           \
-      ARY.cur_rows++;                                                                                \
-    }                                                                                                \
-                                                                                                     \
-    LONG_ARY_AT(ARY, ARY.length) = E;                                                                \
-    ARY.length++;                                                                                    \
-  } else {                                                                                           \
-    printf("[ERROR] couldn't add element to Array max size (%" PRIu64 ") reatched\n", ARY.length);   \
-  }
+#define LONG_ARY_ADD(ARY, E)                                                  \
+  do {                                                                        \
+    if ((ARY).length >= (ARY).max_len) {                                      \
+      (ARY).max_len *= 2;                                                     \
+      (ARY).ptr = realloc((ARY).ptr, sizeof((ARY).ptr[0]) * (ARY).max_len);   \
+    }                                                                         \
+    if ((ARY).length / (ARY).col_len == (ARY).cur_rows) {                     \
+      (ARY).ptr[(ARY).cur_rows] = malloc(sizeof((ARY).ptr[0][0])              \
+                                         * (ARY).col_len);                    \
+      (ARY).cur_rows++;                                                       \
+    }                                                                         \
+                                                                              \
+    LONG_ARY_AT(ARY, (ARY).length) = E;                                       \
+    (ARY).length++;                                                           \
+  } while (0)
 
 /**
  * Reserves Space for one more Element if nedded
  *
  * NOTE the Arry content type should be the same as the type of 
  * the given element and TYPE
- *
- * TODO Realloc space if needed
  */
-#define LONG_ARY_ADD_SPACE(TYPE, ARY)                                                                        \
-  if (ARY.length < ARY.max_len) {                                                                            \
-    if (ARY.length / ARY.col_len == ARY.cur_rows) {                                                          \
-      ARY.ptr[ARY.cur_rows] = (TYPE *) malloc(sizeof(TYPE) * ARY.col_len);                                   \
-      ARY.cur_rows++;                                                                                        \
-    }                                                                                                        \
-  } else {                                                                                                   \
-    printf("[ERROR] couldn't reserve more space in Array, max size (%" PRIu64 ") reatched\n", ARY.length);   \
-  }
+#define LONG_ARY_ADD_SPACE(ARY)                                                                        \
+  do {                                                                        \
+    if ((ARY).length >= (ARY).max_len) {                                      \
+      (ARY).max_len *= 2;                                                     \
+      (ARY).ptr = realloc((ARY).ptr, sizeof((ARY).ptr[0]) * (ARY).max_len);   \
+    }                                                                         \
+    if ((ARY).length / (ARY).col_len == (ARY).cur_rows) {                     \
+      (ARY).ptr[(ARY).cur_rows] = malloc(sizeof((ARY).ptr[0][0])              \
+                                         * (ARY).col_len);                    \
+      (ARY).cur_rows++;                                                       \
+    }                                                                         \
+  } while (0)
 
 /**
  * Removes and Returns the Last Element of a given Array if possible
  *
  * NOTE the Arry content type should be the same as the type of 
- * the given element and TYPE
+ *      the given element
+ * NOTE it returns NULL if there is no more element in the Array
  */
-#define LONG_ARY_PULL(ARY, VALUE)                   \
-  if (ARY.length > 0) {                             \
-    ARY.length--;                                   \
-    VALUE = LONG_ARY_AT(ARY, ARY.length);           \
-  } else {                                          \
-    printf("[ERROR] no more elements in Array\n");  \
-  }
+#ifdef DEBUG
+#define LONG_ARY_PULL(ARY, VALUE)                                         \
+  do {                                                                    \
+    if ((ARY).length > 0) {                                               \
+      (ARY).length--;                                                     \
+      VALUE = LONG_ARY_AT(ARY, (ARY).length);                             \
+    } else {                                                              \
+      printf("[DEBUG] no more elements in Array, in %s at Line %s\n",     \
+             __FILE__, __LINE__);                                         \
+      exit(1);                                                            \
+    }                                                                     \
+  } while (0)                                                            
+#else                                                                    
+#define LONG_ARY_PULL(ARY, VALUE)                                         \
+  do {                                                                    \
+    if ((ARY).length > 0) {                                               \
+      (ARY).length--;                                                     \
+      VALUE = LONG_ARY_AT(ARY, (ARY).length);                             \
+    } else {                                                              \
+      VALUE = NULL;                                                       \
+    }                                                                     \
+  } while (0)
+#endif
 
 /**
  * Extract a random element from a given array
@@ -124,48 +139,74 @@ typedef struct {                        \
  *
  * note it changes the order of the given array
  * NOTE the Arry content type should be the same as th type of 
- * the given value
+ *      the given value
+ *      It returns Null if the is no more element in the given Array
  */
-#define LONG_ARY_EXTRACT(ARY, VALUE)\
-  if (ARY.length > 0) {\
-    u_int64_t ary_ext_i = RAND_INDEX(ARY);\
-    VALUE = LONG_ARY_AT(ARY, ary_ext_i);\
-    ARY.length--;\
-    LONG_ARY_AT(ARY, ary_ext_i) = LONG_ARY_AT(ARY, ARY.length);\
-  }
+#ifdef DEBUG
+#define LONG_ARY_EXTRACT(ARY, VALUE)                                      \
+  do {                                                                    \
+    if ((ARY).length > 0) {                                               \
+      u_int64_t ary_ext_i = RAND_INDEX(ARY);                              \
+      VALUE = LONG_ARY_AT(ARY, ary_ext_i);                                \
+      (ARY).length--;                                                     \
+      LONG_ARY_AT(ARY, ary_ext_i) = LONG_ARY_AT(ARY, (ARY).length);       \
+    } else {                                                              \
+      printf("[DEBUG] no more elements in Array, in %s at Line %s\n",     \
+             __FILE__, __LINE__);                                         \
+      exit(1);                                                            \
+    }                                                                     \
+  } while (0)                                                            
+#else
+#define LONG_ARY_EXTRACT(ARY, VALUE)                                      \
+  do {                                                                    \
+    if ((ARY).length > 0) {                                               \
+      u_int64_t ary_ext_i = RAND_INDEX(ARY);                              \
+      VALUE = LONG_ARY_AT(ARY, ary_ext_i);                                \
+      (ARY).length--;                                                     \
+      LONG_ARY_AT(ARY, ary_ext_i) = LONG_ARY_AT(ARY, (ARY).length);       \
+    } else {                                                              \
+      VALUE = NULL;                                                       \
+    }                                                                     \
+  } while (0)                                                            
 
 /**
  * Frees an given Long Array
  */
-#define LONG_ARY_FREE(ARY)                                            \
-  {                                                                   \
-    u_int64_t laryfree_i;                                    \
-    for (laryfree_i = 0; laryfree_i < ARY.cur_rows; laryfree_i++) {   \
-      free(ARY.ptr[laryfree_i]);                                     \
-    }                                                                 \
-    free(ARY.ptr);                                                    \
-  }
+#define LONG_ARY_FREE(ARY)                                                  \
+  do {                                                                      \
+    u_int64_t laryfree_i;                                                   \
+    for (laryfree_i = 0; laryfree_i < (ARY).cur_rows; laryfree_i++) {       \
+      free((ARY).ptr[laryfree_i]);                                          \
+    }                                                                       \
+    free((ARY).ptr);                                                        \
+  } while (0)
 
 /**
  * Clones an given LongArray into DST.
  *
  * Note both Arrays should have the same TYPE
  */
-#define LONG_ARY_CLONE(TYPE, DST, SRC)                                                      \
-  {                                                                                         \
-    DST.length   = SRC.length;                                                              \
-    DST.col_len  = SRC.col_len;                                                             \
-    DST.max_rows = SRC.max_rows;                                                            \
-    DST.cur_rows = SRC.cur_rows;                                                            \
-    DST.max_len  = SRC.max_len;                                                             \
-    DST.ptr      = (TYPE **) malloc(sizeof(TYPE *) * DST.col_len);                          \
-                                                                                            \
-    u_int64_t lary_clone_i;                                                                 \
-    for (lary_clone_i = 0; lary_clone_i < DST.cur_rows; lary_clone_i++) {                   \
-      DST.ptr[lary_clone_i] = (TYPE *) malloc(sizeof(TYPE) * DST.col_len);                  \
-      memcpy(DST.ptr[lary_clone_i], SRC.ptr[lary_clone_i], sizeof(TYPE) * DST.col_len);     \
-    }                                                                                       \
-  }
+#define LONG_ARY_CLONE(DST, SRC)                                              \
+  do {                                                                        \
+    (DST).length   = (SRC).length;                                            \
+    (DST).col_len  = (SRC).col_len;                                           \
+    (DST).max_rows = (SRC).max_rows;                                          \
+    (DST).cur_rows = (SRC).cur_rows;                                          \
+    (DST).max_len  = (SRC).max_len;                                           \
+    (DST).ptr      = malloc(sizeof((SRC).ptr[0]) * (DST).col_len);            \
+                                                                              \
+    u_int64_t lary_clone_i;                                                   \
+    for (lary_clone_i = 0;                                                    \
+         lary_clone_i < (DST).cur_rows;                                       \
+         lary_clone_i++) {                                                    \
+                                                                              \
+      (DST).ptr[lary_clone_i] = malloc(sizeof((SRC).ptr[0][0])                \
+                                              * (DST).col_len);               \
+      memcpy((DST).ptr[lary_clone_i],                                         \
+             (SRC).ptr[lary_clone_i],                                         \
+             sizeof((SRC).ptr[0][0]) * (DST).col_len);                        \
+    }                                                                         \
+  } while (0)
 
 /**
  * Some shorter Markros
@@ -186,4 +227,4 @@ typedef struct {                        \
 #define LARY_ADD_SPACE(TYPE, ARY)       LONG_ARY_ADD_SPACE(TYPE, ARY)
 #endif
 
-#endif // end of LongArray.h
+#endif // __LONG_ARRAY_H__
