@@ -168,6 +168,7 @@ typedef struct {                        \
       VALUE = NULL;                                                       \
     }                                                                     \
   } while (0)                                                            
+#endif
 
 /**
  * Frees an given Long Array
