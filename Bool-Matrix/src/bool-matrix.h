@@ -5,9 +5,12 @@
 #ifndef __BOOL_MATRIX_H__
 #define __BOOL_MATRIX_H__
 
+#include <sys/types.h>
+#include <inttypes.h>
+
 typedef struct {
-  u_int8_t **ptr;
-  u_int32_t width, height;
+  uint8_t **ptr;
+  uint32_t width, height;
 } BoolMatrix;
 
 #define BIT0 1
@@ -28,15 +31,15 @@ typedef struct {
     uint32_t h = HEIGHT;                                                      \
     if (w <= 0) w = 1;                                                        \
     if (h <= 0) h = 1;                                                        \
-    (MATRIX).ptr = (u_int8_t **) malloc(sizeof(u_int8_t *) * w);              \
+    (MATRIX).ptr = (uint8_t **) malloc(sizeof(uint8_t *) * w);                \
                                                                               \
-    u_int32_t i;                                                              \
+    uint32_t i;                                                               \
     for (i = 0; i < w; i++) {                                                 \
-      (MATRIX).ptr[i] = (u_int8_t *) calloc(h / 8 + 1, sizeof(u_int8_t));     \
+      (MATRIX).ptr[i] = (uint8_t *) calloc(h / 8 + 1, sizeof(uint8_t));       \
     }                                                                         \
     (MATRIX).width = w;                                                       \
     (MATRIX).height = (h / 8 + 1) * 8;                                        \
-  } while (0)                                                                              \
+  } while (0)                                                            
 
 /**
  * Doubles the size in X direction
@@ -44,10 +47,10 @@ typedef struct {
 #define MATRIX_GROW_X(MATRIX)                                                 \
  do {                                                                         \
     (MATRIX).ptr = realloc((MATRIX).ptr,                                      \
-                           (MATRIX).width * 2 * sizeof(u_int8_t *));          \
-    u_int32_t i;                                                              \
+                           (MATRIX).width * 2 * sizeof(uint8_t *));           \
+    uint32_t i;                                                               \
     for (i = (MATRIX).width; i < (MATRIX).width * 2; i++) {                   \
-      (MATRIX).ptr[i] = calloc((MATRIX).height / 8, sizeof(u_int8_t));        \
+      (MATRIX).ptr[i] = calloc((MATRIX).height / 8, sizeof(uint8_t));         \
     }                                                                         \
     (MATRIX).width *= 2;                                                      \
   } while (0)
@@ -62,7 +65,7 @@ typedef struct {
     uint32_t newheight = ((MATRIX).height / 8) * 2;                       \
     for (i = 0; i < (MATRIX).width; i++) {                                \
       (MATRIX).ptr[i] = realloc((MATRIX).ptr[i],                          \
-                                newheight * sizeof(u_int8_t));            \
+                                newheight * sizeof(uint8_t));             \
       memset((MATRIX).ptr[i] + height, 0, height);                        \
     }                                                                     \
     (MATRIX).height *= 2;                                                 \
@@ -137,7 +140,7 @@ typedef struct {
  */
 #define MATRIX_CLEAR(MATRIX)                          \
   do {                                                \
-    u_int32_t i;                                      \
+    uint32_t i;                                       \
     for (i = 0; i < MATRIX.width; i++) {              \
       memset(MATRIX.ptr[i], 0, MATRIX.height / 8);    \
     }                                                 \
@@ -154,7 +157,7 @@ typedef struct {
     while ((MATRIX).height <= (N)) {                          \
       MATRIX_GROW_Y((MATRIX))                                 \
     }                                                         \
-    u_int32_t i;                                              \
+    uint32_t i;                                               \
     for (i = 0; i <= (N); i++) {                              \
       memset((MATRIX).ptr[i], 0, (MATRIX).height / 8);        \
     }                                                         \
@@ -165,7 +168,7 @@ typedef struct {
  */
 #define MATRIX_SET_MAIN_DIAGONAL(MATRIX)                                      \
   do {                                                                        \
-    u_int32_t i, min = ((MATRIX).width < (MATRIX).height) ? (MATRIX).width    \
+    uint32_t i, min = ((MATRIX).width < (MATRIX).height) ? (MATRIX).width     \
                                                           : (MATRIX).height;  \
     for (i = 0; i < min; i++) {                                               \
       MATRIX_SET(MATRIX, i, i);                                               \
@@ -219,7 +222,7 @@ typedef struct {
  */
 #define MATRIX_CALC_PATHS_WITHOUT(MATRIX, N)                                  \
   do {                                                                        \
-    u_int32_t k, i, j;                                                        \
+    uint32_t k, i, j;                                                         \
     for (k = 0; k <= N; k++) {                                                \
       for (i = 0; i <= N; i++) {                                              \
         for (j = 0; j <= N; j++) {                                            \
