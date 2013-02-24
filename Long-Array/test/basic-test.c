@@ -3,9 +3,9 @@
 #include <memory.h>
 #include <time.h>
 #include <math.h>
-#include "../src/dynamic-array.h"
+#include "../src/long-array.h"
 
-DEF_ARY(uint64_t, IntAry);
+DEF_LARY(uint64_t, IntAry);
 
 /**
  * returns the human readable Bytes as a String
@@ -33,28 +33,31 @@ int main(int argc, char *argv[]) {
   uint32_t n = atoi(argv[1]);
   srand(time(0));
 
-  char buf[256];
-  readable_fs(n * sizeof(uint64_t), buf);
-  printf("Expected Size: %s\n", buf);
-
   IntAry ary;
 
-  ARY_INIT(uint64_t, ary, 2);
+  LARY_INIT(uint64_t, ary, n);
+
+  char buf[256];
+  readable_fs(ary.col_len * ary.max_rows * sizeof(uint64_t) 
+              + ary.col_len * sizeof(uint64_t *), buf);
+  printf("Expected Size: %s\n", buf);
+  readable_fs(ary.col_len * sizeof(uint64_t), buf);
+  printf("Expected Col Size: %s\n", buf);
 
   uint64_t i, x = 0;
   for (i = 0; i < n; i++) {
-    if (ARY_LEN(ary) == (ary.max_len - 1)) {
-      readable_fs((ARY_LEN(ary) + 1) * sizeof(uint64_t), buf);
-      printf("[ARY GROW] length = 2^%" PRIu64 "  %15s\n", 
-             (uint64_t) log2(ARY_LEN(ary) + 1),
+    if (ary.length / ary.col_len == ary.cur_rows) {
+      readable_fs(ary.col_len * ary.cur_rows * sizeof(uint64_t), buf);
+      printf("[LARY GROW] length = 2^%" PRIu64 "  %15s\n", 
+             (uint64_t) log2(LARY_LEN(ary) + 1),
              buf);
     }
 
-    ARY_PUSH(ary, rand());
+    LARY_PUSH(ary, rand());
   }
 
   for (i = 0; i < n; i++) {
-    ARY_PULL(ary, x);
+    LARY_PULL(ary, x);
     (void) x;
   }
 

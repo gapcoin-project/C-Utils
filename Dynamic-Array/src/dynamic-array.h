@@ -106,12 +106,16 @@ typedef struct {                          \
 /**
  * Removes and stores the last element from ARY in E
  */
-#define ARY_PULL(ARY, E)                    \
-  do {                                      \
-    if ((ARY).length > 0) {                 \
-      (ARY).length--;                       \
-      E = (ARY).ptr[(ARY).length];          \
-    }                                       \
+#define ARY_PULL(ARY, E)                                                  \
+  do {                                                                    \
+    if ((ARY).length > 0) {                                               \
+      (ARY).length--;                                                     \
+      E = (ARY).ptr[(ARY).length];                                        \
+    } else {                                                              \
+      printf("[DEBUG] no more elements in Array, in %s at Line %d\n",     \
+             __FILE__, __LINE__);                                         \
+      exit(1);                                                            \
+    }                                                                     \
   } while (0)
 
 /**
@@ -129,6 +133,10 @@ typedef struct {                          \
       VALUE = (ARY).ptr[ary_ext_i];                               \
       (ARY).ptr[ary_ext_i] = (ARY).ptr[(ARY).length - 1];         \
       (ARY).length--;                                             \
+    } else {                                                              \
+      printf("[DEBUG] no more elements in Array, in %s at Line %d\n",     \
+             __FILE__, __LINE__);                                         \
+      exit(1);                                                            \
     }                                                             \
   } while (0)
 

@@ -7,6 +7,8 @@
  */
 #ifndef __LONG_ARRAY_H__
 #define __LONG_ARRAY_H__
+
+#include <inttypes.h>
 #include <math.h>
 
 /**
@@ -16,11 +18,11 @@
 #define DEFINE_LONG_ARRAY(TYPE, NAME)   \
 typedef struct {                        \
   TYPE **ptr;                           \
-  u_int64_t length;                     \
-  u_int64_t col_len;                    \
-  u_int64_t max_rows;                   \
-  u_int64_t cur_rows;                   \
-  u_int64_t max_len;                    \
+  uint64_t length;                      \
+  uint64_t col_len;                     \
+  uint64_t max_rows;                    \
+  uint64_t cur_rows;                    \
+  uint64_t max_len;                     \
 } NAME
 
 
@@ -34,7 +36,7 @@ typedef struct {                        \
  */
 #define LONG_ARY_INIT(TYPE, ARY, MAX_LEN)                               \
   do {                                                                  \
-    (ARY).col_len = (ARY).max_rows = (u_int64_t) sqrt(MAX_LEN) + 1;     \
+    (ARY).col_len = (ARY).max_rows = (uint64_t) sqrt(MAX_LEN) + 1;      \
     (ARY).ptr = (TYPE **) malloc(sizeof(TYPE *) * (ARY).col_len);       \
     (ARY).ptr[0] = (TYPE *) malloc(sizeof(TYPE) * (ARY).col_len);       \
     (ARY).length = 0;                                                   \
@@ -47,7 +49,7 @@ typedef struct {                        \
  * Makro for accressing an Long Arry index
  */
 #define LONG_ARY_AT(ARY, INDEX)                                         \
-    (ARY).ptr[(INDEX) / (ARY).col_len][(INDEX) % (ARY).col_len]
+    ((ARY).ptr[(INDEX) / (ARY).col_len][(INDEX) % (ARY).col_len])
   
 /**
  * Makro for the address of an Long Array Element at index
@@ -89,7 +91,7 @@ typedef struct {                        \
  * NOTE the Arry content type should be the same as the type of 
  * the given element and TYPE
  */
-#define LONG_ARY_ADD_SPACE(ARY)                                                                        \
+#define LONG_ARY_ADD_SPACE(ARY)                                               \
   do {                                                                        \
     if ((ARY).length >= (ARY).max_len) {                                      \
       (ARY).max_len *= 2;                                                     \
@@ -109,29 +111,17 @@ typedef struct {                        \
  *      the given element
  * NOTE it returns NULL if there is no more element in the Array
  */
-#ifdef DEBUG
 #define LONG_ARY_PULL(ARY, VALUE)                                         \
   do {                                                                    \
     if ((ARY).length > 0) {                                               \
       (ARY).length--;                                                     \
       VALUE = LONG_ARY_AT(ARY, (ARY).length);                             \
     } else {                                                              \
-      printf("[DEBUG] no more elements in Array, in %s at Line %s\n",     \
+      printf("[ERROR] no more elements in Array, in %s at Line %d\n",     \
              __FILE__, __LINE__);                                         \
       exit(1);                                                            \
     }                                                                     \
   } while (0)                                                            
-#else                                                                    
-#define LONG_ARY_PULL(ARY, VALUE)                                         \
-  do {                                                                    \
-    if ((ARY).length > 0) {                                               \
-      (ARY).length--;                                                     \
-      VALUE = LONG_ARY_AT(ARY, (ARY).length);                             \
-    } else {                                                              \
-      VALUE = NULL;                                                       \
-    }                                                                     \
-  } while (0)
-#endif
 
 /**
  * Extract a random element from a given array
@@ -142,40 +132,26 @@ typedef struct {                        \
  *      the given value
  *      It returns Null if the is no more element in the given Array
  */
-#ifdef DEBUG
 #define LONG_ARY_EXTRACT(ARY, VALUE)                                      \
   do {                                                                    \
     if ((ARY).length > 0) {                                               \
-      u_int64_t ary_ext_i = RAND_INDEX(ARY);                              \
+      uint64_t ary_ext_i = RAND_INDEX(ARY);                               \
       VALUE = LONG_ARY_AT(ARY, ary_ext_i);                                \
       (ARY).length--;                                                     \
       LONG_ARY_AT(ARY, ary_ext_i) = LONG_ARY_AT(ARY, (ARY).length);       \
     } else {                                                              \
-      printf("[DEBUG] no more elements in Array, in %s at Line %s\n",     \
+      printf("[ERROR] no more elements in Array, in %s at Line %d\n",     \
              __FILE__, __LINE__);                                         \
       exit(1);                                                            \
     }                                                                     \
   } while (0)                                                            
-#else
-#define LONG_ARY_EXTRACT(ARY, VALUE)                                      \
-  do {                                                                    \
-    if ((ARY).length > 0) {                                               \
-      u_int64_t ary_ext_i = RAND_INDEX(ARY);                              \
-      VALUE = LONG_ARY_AT(ARY, ary_ext_i);                                \
-      (ARY).length--;                                                     \
-      LONG_ARY_AT(ARY, ary_ext_i) = LONG_ARY_AT(ARY, (ARY).length);       \
-    } else {                                                              \
-      VALUE = NULL;                                                       \
-    }                                                                     \
-  } while (0)                                                            
-#endif
 
 /**
  * Frees an given Long Array
  */
 #define LONG_ARY_FREE(ARY)                                                  \
   do {                                                                      \
-    u_int64_t laryfree_i;                                                   \
+    uint64_t laryfree_i;                                                    \
     for (laryfree_i = 0; laryfree_i < (ARY).cur_rows; laryfree_i++) {       \
       free((ARY).ptr[laryfree_i]);                                          \
     }                                                                       \
@@ -196,7 +172,7 @@ typedef struct {                        \
     (DST).max_len  = (SRC).max_len;                                           \
     (DST).ptr      = malloc(sizeof((SRC).ptr[0]) * (DST).col_len);            \
                                                                               \
-    u_int64_t lary_clone_i;                                                   \
+    uint64_t lary_clone_i;                                                    \
     for (lary_clone_i = 0;                                                    \
          lary_clone_i < (DST).cur_rows;                                       \
          lary_clone_i++) {                                                    \
@@ -210,6 +186,11 @@ typedef struct {                        \
   } while (0)
 
 /**
+ * Returns the Length of an given Long Array
+ */
+#define LONG_ARY_LENGTH(ARY) (ARY).length
+
+/**
  * Some shorter Markros
  */
 #ifndef LARY
@@ -218,14 +199,15 @@ typedef struct {                        \
 #define LARY_AT(ARY, INDEX)             LONG_ARY_AT(ARY, INDEX)
 #define LARY_PTR(ARY, INDEX)            LONG_ARY_PTR_AT(ARY, INDEX)
 #define LARY_RAND_PULL(ARY, VALUE)      LONG_ARY_EXTRACT(ARY, VALUE)
-#define LARY_ADD(TYPE, ARY, E)          LONG_ARY_ADD(TYPE, ARY, E)
-#define LARY_PUSH(TYPE, ARY, E)         LONG_ARY_ADD(TYPE, ARY, E)
+#define LARY_ADD(ARY, E)                LONG_ARY_ADD(ARY, E)
+#define LARY_PUSH(ARY, E)               LONG_ARY_ADD(ARY, E)
 #define LARY_PULL(ARY, VALUE)           LONG_ARY_PULL(ARY, VALUE)
 #define LARY_FREE(ARY)                  LONG_ARY_FREE(ARY)
-#define LARY_CLONE(TYPE, DST, SRC)      LONG_ARY_CLONE(TYPE, DST, SRC)
+#define LARY_CLONE(DST, SRC)            LONG_ARY_CLONE(DST, SRC)
 #define LARY_LAST(ARY)                  LONG_ARY_LAST(ARY)
 #define LARY_AT_LEN(ARY)                LONG_ARY_AT_LENGTH(ARY)
 #define LARY_ADD_SPACE(TYPE, ARY)       LONG_ARY_ADD_SPACE(TYPE, ARY)
+#define LARY_LEN(ARY)                   LONG_ARY_LENGTH(ARY)                        
 #endif
 
 #endif // __LONG_ARRAY_H__
