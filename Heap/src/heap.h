@@ -12,6 +12,15 @@
 #define MINHEAP 'm'
 
 /**
+ * internal Macro for ERROR  handling
+ */
+#define ERR_MSG(MESSAGE)                                                \
+  do {                                                                  \
+    printf("[ERROR] %s in %s: %d\n", MESSAGE, __FILE__, __LINE__);      \
+    exit(1);                                                            \
+  } while (0)
+
+/**
  * Define a new Heap with a given Name and Content Typ
  */
 #define DEF_HEAP(TYPE, NAME)              \
@@ -34,12 +43,8 @@
     (HEAP).ptr = (CONTENT_TYPE *) malloc(sizeof(                              \
                   CONTENT_TYPE) * ((MAX_LEN) + 1));                           \
                                                                               \
-    if ((HEAP).ptr == 0) {                                                    \
-      printf("[ERROR] couldn't allocate memory in heap_init at %s: %d\n",     \
-             __FILE__,                                                        \
-             __LINE__);                                                       \
-      exit(1);                                                                \
-    }                                                                         \
+    if ((HEAP).ptr == 0)                                                      \
+      ERR_MSG(("couldn't allocate memory");                                   \
                                                                               \
     (HEAP).length      = MAX_LEN;                                             \
     (HEAP).heap_length = 0;                                                   \
@@ -146,85 +151,106 @@
 
 /**
  * Extract the max or min element of the given heap, depending on the type
- * returns -1 if it failed to extract the element
+ *
+ * BIGGER and SMALER are to function pointer or Macros, which
+ * should take two Heap elements and return if the first one is
+ * bigger or smaler as the second one
+ *
+ * note: it terminates the programm if you try to exctract an element
+ *       from an empty Heap
  */
-int heap_extract(Heap *heap, CONTENT *e) {
-  if (heap->heap_length < 1)
-    return -1;
-
-  *e = heap->ptr[1];
-  heap->ptr[1] = heap->ptr[heap->heap_length];
-  heap->heap_length--;
-  
-  if (heap->type == MAXHEAP)
-    max_heapify(heap, 1);
-  else if (heap->type == MINHEAP)
-    min_heapify(heap, 1);
-  else
-    return -1;
-
-  return 1;
-}
+#define heap_extract(HEAP, VALUE, BIGGER, SMALER)             \
+  do {                                                        \
+    if ((HEAP).heap_length < 1)                               \
+      ERR_MSG("Heap underflow");                              \
+                                                              \
+    VALUE = (HEAP).ptr[1];                                    \
+    (HEAP).ptr[1] = (HEAP).ptr[(HEAP).heap_length];           \
+    (HEAP).heap_length--;                                     \
+                                                              \
+    if ((HEAP).type == MAXHEAP)                               \
+      MAX_HEAPIFY(HEAP, 1);                                   \
+    else if ((HEAP).type == MINHEAP)                          \
+      MIN_HEAPIFY(HEAP, 1);                                   \
+    else                                                      \
+      ERR_MSG("unknowen Heap type");                          \
+                                                              \
+  } while (0)
 
 /**
  * insert a given element to a given Heap
- * returns 1 on sucess and -1 when failed
+ *
+ * BIGGER and SMALER are to function pointer or Macros, which
+ * should take two Heap elements and return if the first one is
+ * bigger or smaler as the second one
+ *
+ * note: it terminates the programm if it failed to alloc more memory
  */
-int heap_add(Heap *heap, CONTENT *e) {
-  if (heap->length <= heap->heap_length ) {
-    heap->ptr = (CONTENT *) realloc(heap->ptr, heap->length *  2 * sizeof(CONTENT)); 
-    heap->length *= 2;
-
-    #ifdef VERBOSE
-      #ifndef VERBOSE_ONELINE
-        printf("Heap Overflow expected: length: %lu   heap_length %lu\n", heap->length, heap->heap_length);
-      #endif
-    #endif
-  }
-
-  heap->heap_length++;
-  heap->ptr[heap->heap_length] = *e;
-
-  long i = heap->heap_length;
-
-  if (heap->type == MAXHEAP) {
-    while (i > 1 && SMALER(heap->ptr[HEAP_PARENT(i)], heap->ptr[i])) {
-      HEAP_SWITCH(heap, i, HEAP_PARENT(i));
-      i = HEAP_PARENT(i);
-    }
-  } else if (heap->type == MINHEAP) {
-    while (i > 1 && BIGGER(heap->ptr[HEAP_PARENT(i)], heap->ptr[i])) {
-      HEAP_SWITCH(heap, i, HEAP_PARENT(i));
-      i = HEAP_PARENT(i);
-    }
-  }
-
-  return 1;
-}
-
-/**
- * searches for a lement in the given Heap and returns the index
- */
-long long heap_search(Heap *heap, CONTENT *e) {
-  long long i;
-
-  for (i = 0; i < heap->heap_length; i++) {
-    if (EQUAL(heap->ptr[i], (*e))) return i;
-  }
-
-  return -1;
-}
-
-// functions
-int heap_extract(Heap *heap, CONTENT *e);
-int heap_add(Heap *heap, CONTENT *e);
-long long heap_search(Heap *heap, CONTENT *e);
-
-/**
- * Undefine satic Macros
- */
-#undef HEAP_SWITCH
-#undef HEAP_PARENT
+#define heap_add(HEAP, VALUE, BIGGER, SMALER)                                 \
+  do {                                                                        \
+    if ((HEAP).length <= (HEAP).heap_length) {                                \
+      (HEAP).ptr = realloc((HEAP).ptr,                                        \
+                           (HEAP).length * 2 * sizeof((HEAP).ptr[0]));        \
+      (HEAP).length *= 2;                                                     \
+                                                                              \
+      if ((HEAP).ptr == NULL)                                                 \
+        ERR_MSG("heap_add faild to alloc more memory");                       \
+    }                                                                         \
+                                                                              \
+    (HEAP).heap_length++;                                                     \
+    (HEAP).ptr[(HEAP).heap_length] = VALUE;                                   \
+                                                                              \
+    long i = (HEAP).heap_length;                                              \
+                                                                              \
+    if ((HEAP).type == MAXHEAP) {                                             \
+                                                                              \
+      while (i > 1 && SMALER((HEAP).ptr[HEAP_PARENT(i)],                      \
+                             (HEAP).ptr[i])) {                                \
+                                                                              \
+        HEAP_SWITCH(heap, i, HEAP_PARENT(i));                                 \
+        i = HEAP_PARENT(i);                                                   \
+      }                                                                       \
+                                                                              \
+    } else if ((HEAP).type == MINHEAP) {                                      \
+                                                                              \
+      while (i > 1 && BIGGER((HEAP).ptr[HEAP_PARENT(i)],                      \
+                             (HEAP).ptr[i])) {                                \
+                                                                              \
+        HEAP_SWITCH(heap, i, HEAP_PARENT(i));                                 \
+        i = HEAP_PARENT(i);                                                   \
+      }                                                                       \
+    }                                                                         \
+  } while (0)                                                                 
+                                                                              
+/**                                                                           
+ * searches for a lement in the given Heap and
+ * saves the Index in INDEX
+ *
+ * EQUAL should be a functionpointer or macro
+ * which indecates if two Heap elements are equal
+ *
+ * NOTE index will be -1 if the given element was not found
+ */                                                                           
+#define heap_search(HEAP, VALUE, INDEX, EQUAL)            \
+  do                                                      \
+    long long i;                                          \
+    INDEX = -1;                                           \
+                                                          \
+    for (i = 0; i < (HEAP).heap_length; i++) {            \
+      if (EQUAL((HEAP).ptr[i], VALUE)) {                  \
+        INDEX = i;                                        \
+        break;                                            \
+      }                                                   \
+    }                                                     \
+                                                          \
+  } while (0)                                             
+                                                          
+/**                                                       
+ * Undefine satic Macros                                  
+ */                                                       
+#undef ERR_MSG                                            
+#undef HEAP_SWITCH                                        
+#undef HEAP_PARENT                                        
 #undef HEAP_LEFT
 #undef HEAP_RIGHT
 
