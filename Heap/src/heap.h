@@ -74,18 +74,148 @@
  */
 #define HEAP_RIGHT(I) ((I) * 2 + 1)
 
+/**
+ * returns wheter the given heap is not empty 
+ */
+#define heap_notempty(HEAP)  ((HEAP).heap_length != 0)
 
-// returns wheter the given heap is not empty 
-#define HEAP_NOTEMPTY(HEAP)\
-  HEAP.heap_length != 0
+/**
+ * returns wheter the given heap is empty 
+ */
+#define heap_empty(HEAP)  ((HEAP).heap_length == 0)
+
+/**
+ * restors the Heap property for a max heap
+ * BIGGER must be a macro or function pointer
+ * who takes two Heap Elements and returns
+ * if the first one is bigger than the second one
+ */
+#define MAX_HEAPIFY(HEAP, I, BIGGER)                      \
+  do {                                                    \
+    long l, r, max;                                       \
+                                                          \
+    do {                                                  \
+      l = HEAP_LEFT(I);                                   \
+      r = HEAP_RIGHT(I);                                  \
+                                                          \
+      if (l <= (HEAP).heap_length                         \
+          && BIGGER((HEAP).ptr[l], (HEAP).ptr[I]))        \
+        max = l;                                          \
+      else                                                \
+        max = I;                                          \
+                                                          \
+      if (r <= heap->heap_length                          \
+          && BIGGER((HEAP).ptr[r], (HEAP).ptr[max]))      \
+        max = r;                                          \
+                                                          \
+      if (max != (I))                                     \
+        HEAP_SWITCH((heap), I, max);                      \
+                                                          \
+    } while (max != (I));                                 \
+  } while (0)                                             
+
+/**
+ * restors the Heap property for a min heap
+ * SMALER must be a macro or function pointer
+ * who takes two Heap Elements and returns
+ * if the first one is smaler than the second one
+ */
+#define MIN_HEAPIFY(HEAP, I, SMALER)                      \
+  do {                                                    \
+    long l, r, min;                                       \
+                                                          \
+    do {                                                  \
+      l = HEAP_LEFT(I);                                   \
+      r = HEAP_RIGHT(I);                                  \
+                                                          \
+      if (l <= (HEAP).heap_length                         \
+          && SMALER((HEAP).ptr[l], (HEAP).ptr[I]))        \
+        min = l;                                          \
+      else                                                \
+        min = I;                                          \
+                                                          \
+      if (r <= (HEAP).heap_length                         \
+          && SMALER((HEAP).ptr[r], (HEAP).ptr[min]))      \
+        min = r;                                          \
+                                                          \
+      if (min != (I))                                     \
+        HEAP_SWITCH((heap), I, min);                      \
+                                                          \
+    } while (min != (I));                                 \
+  } while (0)
+
+/**
+ * Extract the max or min element of the given heap, depending on the type
+ * returns -1 if it failed to extract the element
+ */
+int heap_extract(Heap *heap, CONTENT *e) {
+  if (heap->heap_length < 1)
+    return -1;
+
+  *e = heap->ptr[1];
+  heap->ptr[1] = heap->ptr[heap->heap_length];
+  heap->heap_length--;
+  
+  if (heap->type == MAXHEAP)
+    max_heapify(heap, 1);
+  else if (heap->type == MINHEAP)
+    min_heapify(heap, 1);
+  else
+    return -1;
+
+  return 1;
+}
+
+/**
+ * insert a given element to a given Heap
+ * returns 1 on sucess and -1 when failed
+ */
+int heap_add(Heap *heap, CONTENT *e) {
+  if (heap->length <= heap->heap_length ) {
+    heap->ptr = (CONTENT *) realloc(heap->ptr, heap->length *  2 * sizeof(CONTENT)); 
+    heap->length *= 2;
+
+    #ifdef VERBOSE
+      #ifndef VERBOSE_ONELINE
+        printf("Heap Overflow expected: length: %lu   heap_length %lu\n", heap->length, heap->heap_length);
+      #endif
+    #endif
+  }
+
+  heap->heap_length++;
+  heap->ptr[heap->heap_length] = *e;
+
+  long i = heap->heap_length;
+
+  if (heap->type == MAXHEAP) {
+    while (i > 1 && SMALER(heap->ptr[HEAP_PARENT(i)], heap->ptr[i])) {
+      HEAP_SWITCH(heap, i, HEAP_PARENT(i));
+      i = HEAP_PARENT(i);
+    }
+  } else if (heap->type == MINHEAP) {
+    while (i > 1 && BIGGER(heap->ptr[HEAP_PARENT(i)], heap->ptr[i])) {
+      HEAP_SWITCH(heap, i, HEAP_PARENT(i));
+      i = HEAP_PARENT(i);
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * searches for a lement in the given Heap and returns the index
+ */
+long long heap_search(Heap *heap, CONTENT *e) {
+  long long i;
+
+  for (i = 0; i < heap->heap_length; i++) {
+    if (EQUAL(heap->ptr[i], (*e))) return i;
+  }
+
+  return -1;
+}
 
 // functions
-void heap_switch(Heap *heap, long x, long y);
-long heap_parent(long i);
-long heap_left(long i);
-long heap_right(long i);
-void max_heapify(Heap *heap, long i);
-void min_heapify(Heap *heap, long i);
 int heap_extract(Heap *heap, CONTENT *e);
 int heap_add(Heap *heap, CONTENT *e);
 long long heap_search(Heap *heap, CONTENT *e);
@@ -94,5 +224,8 @@ long long heap_search(Heap *heap, CONTENT *e);
  * Undefine satic Macros
  */
 #undef HEAP_SWITCH
+#undef HEAP_PARENT
+#undef HEAP_LEFT
+#undef HEAP_RIGHT
 
 #endif // __HEAP_H__
