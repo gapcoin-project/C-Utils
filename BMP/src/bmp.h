@@ -1,8 +1,8 @@
 /**
  * Header for some BMP creation functions
  */
-#ifndef BMP_HEADER
-#define BMP_HEADER
+#ifndef __BMP_H__
+#define __BMP_H__
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -36,14 +36,12 @@ typedef struct {
 /**
  * The BMP structur
  */
-#ifdef BMP_T
 typedef struct {
   BMPHeader head;
   char     *body;
  } BMP;
-#endif
 
 // functions
 void init_RGB_BMPHeader(BMPHeader *head, u_int32_t width, u_int32_t height);
 int bmp_write_header(BMPHeader *head, int fd);
-#endif // end of BMP_HEADER
+#endif // __BMP_H__

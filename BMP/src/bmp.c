@@ -1,8 +1,8 @@
 /**
  * Some BMP creation function
  */
-#ifndef BMP
-#define BMP
+#ifndef __BMP__
+#define __BMP__
 #include "bmp.h"
 
 /**
@@ -57,4 +57,4 @@ int bmp_write_header(BMPHeader *head, int fd) {
   return 1;
 
 } 
-#endif // end of BMP
+#endif // __BMP__
