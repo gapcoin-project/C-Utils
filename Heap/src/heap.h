@@ -29,22 +29,51 @@
  * note the first array element will not be used by this heap,
  * because of the speed
  */
-#define heap_init(TYPE, HEAP, MAX_LEN, TYPE) {                                \
+#define heap_init(CONTENT_TYPE, HEAP, MAX_LEN, HEAP_TYPE) {                   \
   do {                                                                        \
-    heap->ptr = (TYPE *) malloc(sizeof(                                       \
-                  TYPE) * (max_length + 1));                                  \
+    (HEAP).ptr = (CONTENT_TYPE *) malloc(sizeof(                              \
+                  CONTENT_TYPE) * ((MAX_LEN) + 1));                           \
                                                                               \
-    if (heap->ptr == 0) {                                                     \
+    if ((HEAP).ptr == 0) {                                                    \
       printf("[ERROR] couldn't allocate memory in heap_init at %s: %d\n",     \
              __FILE__,                                                        \
              __LINE__);                                                       \
       exit(1);                                                                \
     }                                                                         \
                                                                               \
-    heap->length = max_length;                                                \
-    heap->heap_length = 0;                                                    \
-    heap->type = type;                                                        \
+    (HEAP).length      = MAX_LEN;                                             \
+    (HEAP).heap_length = 0;                                                   \
+    (HEAP).type        = HEAP_TYPE;                                           \
   } while (0)
+
+
+/**
+ *  switches x, and y in the given Heap
+ *
+ *  note heap.ptr[0] is not an heap element
+ */
+#define HEAP_SWITCH(HEAP, X, Y)         \
+  do {                                  \
+    (HEAP).ptr[0] = (HEAP).ptr[x];      \
+    (HEAP).ptr[x] = (HEAP).ptr[y];      \
+    (HEAP).ptr[y] = (HEAP).ptr[0];      \
+  } while (0)
+
+/**
+ * Returns the index of parent of the given index
+ */
+#define HEAP_PARENT(I) ((I) / 2)
+
+/**
+ * Returs the index of the left child of the given index
+ */
+#define HEAP_LEFT(I) ((I) * 2)
+
+/**
+ * Returs the index of the right child of the given index
+ */
+#define HEAP_RIGHT(I) ((I) * 2 + 1)
+
 
 // returns wheter the given heap is not empty 
 #define HEAP_NOTEMPTY(HEAP)\
@@ -60,4 +89,10 @@ void min_heapify(Heap *heap, long i);
 int heap_extract(Heap *heap, CONTENT *e);
 int heap_add(Heap *heap, CONTENT *e);
 long long heap_search(Heap *heap, CONTENT *e);
+
+/**
+ * Undefine satic Macros
+ */
+#undef HEAP_SWITCH
+
 #endif // __HEAP_H__
