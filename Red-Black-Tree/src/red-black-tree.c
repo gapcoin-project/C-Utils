@@ -6,8 +6,8 @@
  * Note this is a smal implementation with onley uint64_t keys
  * in each node, bute someone could later easyly add void pointer maybee
  */
-#ifndef REDBLACKTREE
-#define REDBLACKTREE
+#ifndef __RED_BLACK_TREE__
+#define __RED_BLACK_TREE__
 #include "RedBlackTree.h"
 
 /**
@@ -629,4 +629,4 @@ uint64_t rbtree_min(RBTree *tree) {
 
   return cur->key;
 }
-#endif // end of RedBlackTree.c
+#endif // __RED_BLACK_TREE__

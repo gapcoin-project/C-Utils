@@ -4,6 +4,8 @@
  * Note this is a smal implementation with onley uint64_t keys
  * in each node, bute someone could later easyly add void pointer maybee
  */
+#ifndef __RED_BLACK_TREE_H__
+#define __RED_BLACK_TREE_H__
 #include <sys/types.h>
 #include <inttypes.h>
 #include <string.h>
@@ -80,3 +82,4 @@ void rbtree_free(RBTree *tree);
 void rbtree_clone(RBTree *dst, RBTree *src);
 uint64_t rbtree_max(RBTree *tree);
 uint64_t rbtree_min(RBTree *tree);
+#endif // __RED_BLACK_TREE_H__
