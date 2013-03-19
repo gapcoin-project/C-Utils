@@ -6,10 +6,10 @@
 /**
  * returns the human readable Bytes as a String
  */
-char* readable_fs(u_int64_t size, char *buf) {
+char* readable_fs(uint64_t size, char *buf) {
   int i = 0;
-  u_int64_t comma = 0;
-  const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+  uint64_t comma = 0;
+  const char* units[] = {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
   while (size > 1024) {
       comma = size % 1024;
       size /= 1024;
@@ -25,16 +25,20 @@ int main(int argc, char *argv[]) {
     printf("%s <length>\n", argv[0]);
     exit(1);
   }
-  int length = atoi(argv[0]);
+  uint64_t length = atoi(argv[1]);
 
-  u_int64_t space = length * sizeof(Node) + sizeof(RBTree);
+  uint64_t space = length * sizeof(RBTNode) + sizeof(RBTree);
   char buf[100];
-  printf("Working with: %d Objects needing %" PRIu64  " Bytes Space: %s\n", 
-          length, space, readable_fs(space, buf));
+  printf("Working with: %" PRIu64 
+         " Objects needing %" PRIu64  
+         " Bytes Space: %s\n", 
+         length, 
+         space, 
+         readable_fs(space, buf));
 
   RBTree tree;
   init_rbtree(&tree, length);
-  u_int64_t i;
+  uint64_t i;
 
   for (i = 0; i < length; i++) {
     rbtree_add(&tree, i);

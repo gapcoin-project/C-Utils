@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "LongArray.h"
+#include "../../Long-Array/src/long-array.h"
 
 /**
  * Some Makros
@@ -37,7 +37,7 @@ struct RBTNode {
 /**
  * Long Array for storing the RBTNodes
  */
-DEF_LARY(RBTNode, RBTNodeAry)
+DEF_LARY(RBTNode, RBTNodeAry);
 
 /**
  * The Red-Balck-Tree 

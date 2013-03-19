@@ -8,7 +8,7 @@
  */
 #ifndef __RED_BLACK_TREE__
 #define __RED_BLACK_TREE__
-#include "RedBlackTree.h"
+#include "red-black-tree.h"
 
 /**
  * Initializes an given Red-Back-Tree with given
@@ -17,7 +17,7 @@
 void init_rbtree(RBTree *tree, uint64_t max_nodes) {
 
   tree->root        = NULL;                         
-  LARY_INIT(RBTNode, tree->nodes, max_nodes)
+  LARY_INIT(RBTNode, tree->nodes, max_nodes);
 
 }
 
@@ -144,7 +144,7 @@ void rbt_rotate_left(RBTree *tree, RBTNode *n) {
 void rbtree_add(RBTree *tree, uint64_t key) {
 
   // reserving memory for next element
-  LARY_ADD_SPACE(RBTNode, tree->nodes)
+  LARY_ADD_SPACE(tree->nodes);
 
   // pointer to the last element
   RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
@@ -196,7 +196,7 @@ void rbtree_add(RBTree *tree, uint64_t key) {
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
 
   // reserving memory for next element
-  LARY_ADD_SPACE(RBTNode, tree->nodes)
+  LARY_ADD_SPACE(tree->nodes);
 
   // pointer to the last element
   RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
@@ -588,7 +588,7 @@ void rbt_delete_case6(RBTree *tree, RBTNode *n) {
  * frees an given RedBlackTree
  */
 void rbtree_free(RBTree *tree) {
-  LARY_FREE(tree->nodes)
+  LARY_FREE(tree->nodes);
 }
 
 
@@ -597,7 +597,7 @@ void rbtree_free(RBTree *tree) {
  */
 void rbtree_clone(RBTree *dst, RBTree *src) {
   dst->root = src->root;
-  LARY_CLONE(RBTNode, dst->nodes, src->nodes)
+  LARY_CLONE(dst->nodes, src->nodes);
 }
 
 /**
