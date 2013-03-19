@@ -8,6 +8,7 @@
 #ifndef __LONG_ARRAY_H__
 #define __LONG_ARRAY_H__
 
+#include <time.h>
 #include <inttypes.h>
 #include <math.h>
 
@@ -206,7 +207,7 @@ typedef struct {                        \
 #define LARY_CLONE(DST, SRC)            LONG_ARY_CLONE(DST, SRC)
 #define LARY_LAST(ARY)                  LONG_ARY_LAST(ARY)
 #define LARY_AT_LEN(ARY)                LONG_ARY_AT_LENGTH(ARY)
-#define LARY_ADD_SPACE(TYPE, ARY)       LONG_ARY_ADD_SPACE(TYPE, ARY)
+#define LARY_ADD_SPACE(ARY)             LONG_ARY_ADD_SPACE(ARY)
 #define LARY_LEN(ARY)                   LONG_ARY_LENGTH(ARY)                        
 #endif
 
