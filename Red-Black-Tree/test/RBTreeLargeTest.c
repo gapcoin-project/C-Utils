@@ -1,7 +1,6 @@
 #define VERBOSE 1
-#include "RedBlackTree.h"
+#include "../src/red-black-tree.h"
 
-#define LENGTH   100000000
 #define REFRESH  12345
 
 /**
@@ -20,38 +19,45 @@ char* readable_fs(u_int64_t size, char *buf) {
   return buf;
 }
 
-int main() {
-  u_int64_t space = LENGTH * sizeof(Node) + sizeof(RBTree);
+int main(int argc, char *argv[]) {
+
+  if (argc != 2) {
+    printf("%s <length>\n", argv[0]);
+    exit(1);
+  }
+  int length = atoi(argv[0]);
+
+  u_int64_t space = length * sizeof(Node) + sizeof(RBTree);
   char buf[100];
   printf("Working with: %d Objects needing %" PRIu64  " Bytes Space: %s\n", 
-          LENGTH, space, readable_fs(space, buf));
+          length, space, readable_fs(space, buf));
 
   RBTree tree;
-  init_rbtree(&tree, LENGTH);
+  init_rbtree(&tree, length);
   u_int64_t i;
 
-  for (i = 0; i < LENGTH; i++) {
+  for (i = 0; i < length; i++) {
     rbtree_add(&tree, i);
     if (i % REFRESH == 0)
-      printf("Adding\t\t %10" PRIu64 "    \r", LENGTH - i);
+      printf("Adding\t\t %10" PRIu64 "    \r", length - i);
   }
   printf("\n");
 
-  for (i = 0; i < LENGTH; i++) {
+  for (i = 0; i < length; i++) {
     if (rbtree_contains(&tree, i) == RBT_FALSE)
       printf("[DEBUG] search faile on Key %" PRIu64 "\n", i);
       
     if (i % REFRESH == 0)
-      printf("Searching\t %10" PRIu64 "    \r", LENGTH - i);
+      printf("Searching\t %10" PRIu64 "    \r", length - i);
   }
   printf("\n");
 
-  for (i = 0; i < LENGTH; i++) {
+  for (i = 0; i < length; i++) {
     if (rbtree_remove(&tree, i) == 0) 
       printf("[DEBUG] remove faile on Key %" PRIu64 "\n", i);
 
     if (i % REFRESH == 0)
-      printf("Removing\t %10" PRIu64 "    \r", LENGTH - i);
+      printf("Removing\t %10" PRIu64 "    \r", length - i);
   }
   printf("\n");
 
