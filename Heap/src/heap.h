@@ -1,9 +1,10 @@
 /**
  * Implementation of an Array based Heap
  * methods are:
- *  heap_init(heap, max_length)
- *  heap_add(heap, element)
- *  heap_extract(heap) => element
+ *  heap_init(content_type, heap, max_length, heap_type)
+ *  heap_add(heap, element, bigger_func, smaler_func)
+ *  heap_extract(heap, element, bigger_func, smaler_func)
+ *  heap_search(heap, element, index, equal_func)
  */
 #ifndef __HEAP_H__
 #define __HEAP_H__
@@ -91,7 +92,7 @@
 
 /**
  * restors the Heap property for a max heap
- * BIGGER must be a macro or function pointer
+ * BIGGER must be a function
  * who takes two Heap Elements and returns
  * if the first one is bigger than the second one
  */
@@ -123,7 +124,7 @@
 
 /**
  * restors the Heap property for a min heap
- * SMALER must be a macro or function pointer
+ * SMALER must be a function 
  * who takes two Heap Elements and returns
  * if the first one is smaler than the second one
  */
@@ -156,7 +157,7 @@
 /**
  * Extract the max or min element of the given heap, depending on the type
  *
- * BIGGER and SMALER are to function pointer or Macros, which
+ * BIGGER and SMALER are to functions, which
  * should take two Heap elements and return if the first one is
  * bigger or smaler as the second one
  *
@@ -184,7 +185,7 @@
 /**
  * insert a given element to a given Heap
  *
- * BIGGER and SMALER are to function pointer or Macros, which
+ * BIGGER and SMALER are to functions, which
  * should take two Heap elements and return if the first one is
  * bigger or smaler as the second one
  *
@@ -230,7 +231,7 @@
  * searches for a lement in the given Heap and
  * saves the Index in INDEX
  *
- * EQUAL should be a functionpointer or macro
+ * EQUAL should be a function
  * which indecates if two Heap elements are equal
  *
  * NOTE index will be -1 if the given element was not found
