@@ -14,7 +14,7 @@
 /**
  * internal Macro for ERROR  handling
  */
-#define ERR_MSG(MESSAGE)                                                \
+#define HEAP_ERR_MSG(MESSAGE)                                           \
   do {                                                                  \
     printf("[ERROR] %s in %s: %d\n", MESSAGE, __FILE__, __LINE__);      \
     exit(1);                                                            \
@@ -38,13 +38,13 @@
  * note the first array element will not be used by this heap,
  * because of the speed
  */
-#define heap_init(CONTENT_TYPE, HEAP, MAX_LEN, HEAP_TYPE) {                   \
+#define heap_init(CONTENT_TYPE, HEAP, MAX_LEN, HEAP_TYPE)                     \
   do {                                                                        \
     (HEAP).ptr = (CONTENT_TYPE *) malloc(sizeof(                              \
                   CONTENT_TYPE) * ((MAX_LEN) + 1));                           \
                                                                               \
     if ((HEAP).ptr == 0)                                                      \
-      ERR_MSG(("couldn't allocate memory");                                   \
+      HEAP_ERR_MSG("couldn't allocate memory");                               \
                                                                               \
     (HEAP).length      = MAX_LEN;                                             \
     (HEAP).heap_length = 0;                                                   \
@@ -59,9 +59,9 @@
  */
 #define HEAP_SWITCH(HEAP, X, Y)         \
   do {                                  \
-    (HEAP).ptr[0] = (HEAP).ptr[x];      \
-    (HEAP).ptr[x] = (HEAP).ptr[y];      \
-    (HEAP).ptr[y] = (HEAP).ptr[0];      \
+    (HEAP).ptr[0] = (HEAP).ptr[X];      \
+    (HEAP).ptr[X] = (HEAP).ptr[Y];      \
+    (HEAP).ptr[Y] = (HEAP).ptr[0];      \
   } while (0)
 
 /**
@@ -97,26 +97,28 @@
  */
 #define MAX_HEAPIFY(HEAP, I, BIGGER)                      \
   do {                                                    \
-    long l, r, max;                                       \
+    long i, l, r, max;                                    \
+    max = I;                                              \
                                                           \
     do {                                                  \
-      l = HEAP_LEFT(I);                                   \
-      r = HEAP_RIGHT(I);                                  \
+      i = max;                                            \
+      l = HEAP_LEFT(i);                                   \
+      r = HEAP_RIGHT(i);                                  \
                                                           \
       if (l <= (HEAP).heap_length                         \
-          && BIGGER((HEAP).ptr[l], (HEAP).ptr[I]))        \
+          && BIGGER((HEAP).ptr[l], (HEAP).ptr[i]))        \
         max = l;                                          \
       else                                                \
-        max = I;                                          \
+        max = i;                                          \
                                                           \
-      if (r <= heap->heap_length                          \
+      if (r <= (HEAP).heap_length                         \
           && BIGGER((HEAP).ptr[r], (HEAP).ptr[max]))      \
         max = r;                                          \
                                                           \
-      if (max != (I))                                     \
-        HEAP_SWITCH((heap), I, max);                      \
+      if (max != i)                                       \
+        HEAP_SWITCH(HEAP, i, max);                        \
                                                           \
-    } while (max != (I));                                 \
+    } while (max != (i));                                 \
   } while (0)                                             
 
 /**
@@ -127,26 +129,28 @@
  */
 #define MIN_HEAPIFY(HEAP, I, SMALER)                      \
   do {                                                    \
-    long l, r, min;                                       \
+    long i, l, r, min;                                    \
+    min = I;                                              \
                                                           \
     do {                                                  \
-      l = HEAP_LEFT(I);                                   \
-      r = HEAP_RIGHT(I);                                  \
+      i = min;                                            \
+      l = HEAP_LEFT(i);                                   \
+      r = HEAP_RIGHT(i);                                  \
                                                           \
       if (l <= (HEAP).heap_length                         \
-          && SMALER((HEAP).ptr[l], (HEAP).ptr[I]))        \
+          && SMALER((HEAP).ptr[l], (HEAP).ptr[i]))        \
         min = l;                                          \
       else                                                \
-        min = I;                                          \
+        min = i;                                          \
                                                           \
       if (r <= (HEAP).heap_length                         \
           && SMALER((HEAP).ptr[r], (HEAP).ptr[min]))      \
         min = r;                                          \
                                                           \
-      if (min != (I))                                     \
-        HEAP_SWITCH((heap), I, min);                      \
+      if (min != i)                                       \
+        HEAP_SWITCH(HEAP, i, min);                        \
                                                           \
-    } while (min != (I));                                 \
+    } while (min != i);                                   \
   } while (0)
 
 /**
@@ -162,18 +166,18 @@
 #define heap_extract(HEAP, VALUE, BIGGER, SMALER)             \
   do {                                                        \
     if ((HEAP).heap_length < 1)                               \
-      ERR_MSG("Heap underflow");                              \
+      HEAP_ERR_MSG("Heap underflow");                         \
                                                               \
     VALUE = (HEAP).ptr[1];                                    \
     (HEAP).ptr[1] = (HEAP).ptr[(HEAP).heap_length];           \
     (HEAP).heap_length--;                                     \
                                                               \
     if ((HEAP).type == MAXHEAP)                               \
-      MAX_HEAPIFY(HEAP, 1);                                   \
+      MAX_HEAPIFY(HEAP, 1, BIGGER);                           \
     else if ((HEAP).type == MINHEAP)                          \
-      MIN_HEAPIFY(HEAP, 1);                                   \
+      MIN_HEAPIFY(HEAP, 1, SMALER);                           \
     else                                                      \
-      ERR_MSG("unknowen Heap type");                          \
+      HEAP_ERR_MSG("unknowen Heap type");                     \
                                                               \
   } while (0)
 
@@ -194,7 +198,7 @@
       (HEAP).length *= 2;                                                     \
                                                                               \
       if ((HEAP).ptr == NULL)                                                 \
-        ERR_MSG("heap_add faild to alloc more memory");                       \
+        HEAP_ERR_MSG("heap_add faild to alloc more memory");                  \
     }                                                                         \
                                                                               \
     (HEAP).heap_length++;                                                     \
@@ -207,7 +211,7 @@
       while (i > 1 && SMALER((HEAP).ptr[HEAP_PARENT(i)],                      \
                              (HEAP).ptr[i])) {                                \
                                                                               \
-        HEAP_SWITCH(heap, i, HEAP_PARENT(i));                                 \
+        HEAP_SWITCH(HEAP, i, HEAP_PARENT(i));                                 \
         i = HEAP_PARENT(i);                                                   \
       }                                                                       \
                                                                               \
@@ -216,7 +220,7 @@
       while (i > 1 && BIGGER((HEAP).ptr[HEAP_PARENT(i)],                      \
                              (HEAP).ptr[i])) {                                \
                                                                               \
-        HEAP_SWITCH(heap, i, HEAP_PARENT(i));                                 \
+        HEAP_SWITCH(HEAP, i, HEAP_PARENT(i));                                 \
         i = HEAP_PARENT(i);                                                   \
       }                                                                       \
     }                                                                         \
@@ -232,7 +236,7 @@
  * NOTE index will be -1 if the given element was not found
  */                                                                           
 #define heap_search(HEAP, VALUE, INDEX, EQUAL)            \
-  do                                                      \
+  do {                                                    \
     long long i;                                          \
     INDEX = -1;                                           \
                                                           \
@@ -245,13 +249,5 @@
                                                           \
   } while (0)                                             
                                                           
-/**                                                       
- * Undefine satic Macros                                  
- */                                                       
-#undef ERR_MSG                                            
-#undef HEAP_SWITCH                                        
-#undef HEAP_PARENT                                        
-#undef HEAP_LEFT
-#undef HEAP_RIGHT
 
 #endif // __HEAP_H__
