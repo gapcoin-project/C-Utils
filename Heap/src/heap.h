@@ -9,6 +9,8 @@
 #ifndef __HEAP_H__
 #define __HEAP_H__
 
+#include <inttypes.h>
+
 #define MAXHEAP 'M'
 #define MINHEAP 'm'
 
@@ -27,8 +29,8 @@
 #define DEF_HEAP(TYPE, NAME)              \
   typedef struct {                        \
     TYPE *ptr;                            \
-    long length;                          \
-    long heap_length;                     \
+    uint64_t length;                      \
+    uint64_t heap_length;                 \
     char type;                            \
   } NAME
 
@@ -96,30 +98,30 @@
  * who takes two Heap Elements and returns
  * if the first one is bigger than the second one
  */
-#define MAX_HEAPIFY(HEAP, I, BIGGER)                      \
-  do {                                                    \
-    long i, l, r, max;                                    \
-    max = I;                                              \
-                                                          \
-    do {                                                  \
-      i = max;                                            \
-      l = HEAP_LEFT(i);                                   \
-      r = HEAP_RIGHT(i);                                  \
-                                                          \
-      if (l <= (HEAP).heap_length                         \
-          && BIGGER((HEAP).ptr[l], (HEAP).ptr[i]))        \
-        max = l;                                          \
-      else                                                \
-        max = i;                                          \
-                                                          \
-      if (r <= (HEAP).heap_length                         \
-          && BIGGER((HEAP).ptr[r], (HEAP).ptr[max]))      \
-        max = r;                                          \
-                                                          \
-      if (max != i)                                       \
-        HEAP_SWITCH(HEAP, i, max);                        \
-                                                          \
-    } while (max != (i));                                 \
+#define MAX_HEAPIFY(HEAP, I, BIGGER)                                  \
+  do {                                                                \
+    uint64_t h_i, h_l, h_r, h_max;                                    \
+    h_max = I;                                                        \
+                                                                      \
+    do {                                                              \
+      h_i = h_max;                                                    \
+      h_l = HEAP_LEFT(h_i);                                           \
+      h_r = HEAP_RIGHT(h_i);                                          \
+                                                                      \
+      if (h_l <= (HEAP).heap_length                                   \
+          && BIGGER((HEAP).ptr[h_l], (HEAP).ptr[h_i]))                \
+        h_max = h_l;                                                  \
+      else                                                            \
+        h_max = h_i;                                                  \
+                                                                      \
+      if (h_r <= (HEAP).heap_length                                   \
+          && BIGGER((HEAP).ptr[h_r], (HEAP).ptr[h_max]))              \
+        h_max = h_r;                                                  \
+                                                                      \
+      if (h_max != h_i)                                               \
+        HEAP_SWITCH(HEAP, h_i, h_max);                                \
+                                                                      \
+    } while (h_max != (h_i));                                         \
   } while (0)                                             
 
 /**
@@ -128,30 +130,30 @@
  * who takes two Heap Elements and returns
  * if the first one is smaler than the second one
  */
-#define MIN_HEAPIFY(HEAP, I, SMALER)                      \
-  do {                                                    \
-    long i, l, r, min;                                    \
-    min = I;                                              \
-                                                          \
-    do {                                                  \
-      i = min;                                            \
-      l = HEAP_LEFT(i);                                   \
-      r = HEAP_RIGHT(i);                                  \
-                                                          \
-      if (l <= (HEAP).heap_length                         \
-          && SMALER((HEAP).ptr[l], (HEAP).ptr[i]))        \
-        min = l;                                          \
-      else                                                \
-        min = i;                                          \
-                                                          \
-      if (r <= (HEAP).heap_length                         \
-          && SMALER((HEAP).ptr[r], (HEAP).ptr[min]))      \
-        min = r;                                          \
-                                                          \
-      if (min != i)                                       \
-        HEAP_SWITCH(HEAP, i, min);                        \
-                                                          \
-    } while (min != i);                                   \
+#define MIN_HEAPIFY(HEAP, I, SMALER)                                  \
+  do {                                                                \
+    uint64_t h_i, h_l, h_r, h_min;                                    \
+    h_min = I;                                                        \
+                                                                      \
+    do {                                                              \
+      h_i = h_min;                                                    \
+      h_l = HEAP_LEFT(h_i);                                           \
+      h_r = HEAP_RIGHT(h_i);                                          \
+                                                                      \
+      if (h_l <= (HEAP).heap_length                                   \
+          && SMALER((HEAP).ptr[h_l], (HEAP).ptr[h_i]))                \
+        h_min = h_l;                                                  \
+      else                                                            \
+        h_min = h_i;                                                  \
+                                                                      \
+      if (h_r <= (HEAP).heap_length                                   \
+          && SMALER((HEAP).ptr[h_r], (HEAP).ptr[h_min]))              \
+        h_min = h_r;                                                  \
+                                                                      \
+      if (h_min != h_i)                                               \
+        HEAP_SWITCH(HEAP, h_i, h_min);                                \
+                                                                      \
+    } while (h_min != h_i);                                           \
   } while (0)
 
 /**
@@ -205,24 +207,24 @@
     (HEAP).heap_length++;                                                     \
     (HEAP).ptr[(HEAP).heap_length] = VALUE;                                   \
                                                                               \
-    long i = (HEAP).heap_length;                                              \
+    uint64_t h_i = (HEAP).heap_length;                                        \
                                                                               \
     if ((HEAP).type == MAXHEAP) {                                             \
                                                                               \
-      while (i > 1 && SMALER((HEAP).ptr[HEAP_PARENT(i)],                      \
-                             (HEAP).ptr[i])) {                                \
+      while (h_i > 1 && SMALER((HEAP).ptr[HEAP_PARENT(h_i)],                  \
+                             (HEAP).ptr[h_i])) {                              \
                                                                               \
-        HEAP_SWITCH(HEAP, i, HEAP_PARENT(i));                                 \
-        i = HEAP_PARENT(i);                                                   \
+        HEAP_SWITCH(HEAP, h_i, HEAP_PARENT(h_i));                             \
+        h_i = HEAP_PARENT(h_i);                                               \
       }                                                                       \
                                                                               \
     } else if ((HEAP).type == MINHEAP) {                                      \
                                                                               \
-      while (i > 1 && BIGGER((HEAP).ptr[HEAP_PARENT(i)],                      \
-                             (HEAP).ptr[i])) {                                \
+      while (h_i > 1 && BIGGER((HEAP).ptr[HEAP_PARENT(h_i)],                  \
+                             (HEAP).ptr[h_i])) {                              \
                                                                               \
-        HEAP_SWITCH(HEAP, i, HEAP_PARENT(i));                                 \
-        i = HEAP_PARENT(i);                                                   \
+        HEAP_SWITCH(HEAP, h_i, HEAP_PARENT(h_i));                             \
+        h_i = HEAP_PARENT(h_i);                                               \
       }                                                                       \
     }                                                                         \
   } while (0)                                                                 
@@ -236,18 +238,18 @@
  *
  * NOTE index will be -1 if the given element was not found
  */                                                                           
-#define heap_search(HEAP, VALUE, INDEX, EQUAL)            \
-  do {                                                    \
-    long long i;                                          \
-    INDEX = -1;                                           \
-                                                          \
-    for (i = 0; i < (HEAP).heap_length; i++) {            \
-      if (EQUAL((HEAP).ptr[i], VALUE)) {                  \
-        INDEX = i;                                        \
-        break;                                            \
-      }                                                   \
-    }                                                     \
-                                                          \
+#define heap_search(HEAP, VALUE, INDEX, EQUAL)                  \
+  do {                                                          \
+    uint64_t h_i;                                               \
+    INDEX = -1;                                                 \
+                                                                \
+    for (h_i = 0; h_i < (HEAP).heap_length; h_i++) {            \
+      if (EQUAL((HEAP).ptr[h_i], VALUE)) {                      \
+        INDEX = h_i;                                            \
+        break;                                                  \
+      }                                                         \
+    }                                                           \
+                                                                \
   } while (0)                                             
                                                           
 
