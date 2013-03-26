@@ -82,35 +82,45 @@ void quicksort(CHIEFSORT_TYPE *ary, int length) {
 /**
  * Just Insertionsort
  */
-void insertionsort(CHIEFSORT_TYPE *ary, int length) {
+void insertionsort(void *ary, 
+                   uint64_t length, 
+                   uint32_t base, 
+                   (char*) smaler(void *, void *)) {
   
-  int i, j;
-  CHIEFSORT_TYPE temp;
+  uint64_t i, j;
+  void  *temp = malloc(base);
 
   for (i = 1; i < length; i++) {
-    temp = ary[i];
+    memcpy(tmp, ary + i * base, base);
     j = i - 1;
 
-    while (temp < ary[j] && j >= 0) {
-      ary[j + 1] = ary[j];
+    while (smaler(temp, ary + (j * base)) && j >= 0) {
+      memcpy(ary + (j + 1) * base, ary + j * base, base);
       j = j - 1;
     }   
     
-    ary[j + 1] = temp;
+    memcpy(ary + (j + 1) * base, tmp, base);
   }
 
 }
 
 /**
- * Improofed variant of QuickSort which uses insertionsort at an specific min array size
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size
  */
-void chiefsort(CHIEFSORT_TYPE *ary, int length, int min) {
+void quickinsersort(void *ary, 
+                    uint64_t length, 
+                    uint16_t min, 
+                    uint32_t base, 
+                    (char *) smaler(void *, void *),
+                    (char *) bigger(void *, void *),
+                    (char *) equal(void *, void *)) {
 
-  CHIEFSORT_TYPE piv;
-  CHIEFSORT_TYPE temp;
-  IntAry stack;
-  int l, r, left, right;
-  ARY_INIT(int, stack, (int) 5 * (log2((double) length) / 3)); 
+  void *piv  = malloc(base);
+  void *temp = malloc(base);
+  SortUInt64Ary stack;
+  uint64_t l, r, left, right;
+  ARY_INIT(uint64_t, stack, (uint64_t) 5 * (log2((double) length) / 3)); 
 
   left  = 0;
   right = length - 1;
@@ -118,7 +128,7 @@ void chiefsort(CHIEFSORT_TYPE *ary, int length, int min) {
   while (1) {
 
     if (right - left < min) {
-      insertionsort(ary + left, (right - left) + 1);
+      insertionsort(ary + left * base, (right - left) + 1, base, smaler);
       left = right;
     }
 
@@ -126,35 +136,36 @@ void chiefsort(CHIEFSORT_TYPE *ary, int length, int min) {
 
       l = left;
       r = right;
+      memcpy(piv, ary + ((rand() % (r - l)) + l) * base, base);
       piv = ary[(rand() % (r - l)) + l];
 
       while (l < r) {
         
-        while (CHIEFSORT_BIGGER(ary[r], piv))
+        while (bigger(ary + r * base, piv))
           r--; 
 
-        while (CHIEFSORT_SMALER(ary[l], piv)) 
+        while (smaler(ary + l * base, piv)) 
           l++; 
 
-        if (CHIEFSORT_EQL(ary[l], ary[r])) {
+        if (equal(ary + l * base, ary + r * base)) {
           r--;
 
         // switch left an right
         } else if (l < r) {
-          temp = ary[l];
-          ary[l] = ary[r];
-          ary[r] = temp;
+          memcpy(temp, ary + l * base);
+          memcpy(ary + l * base, ary + r * base);
+          memcpy(ary + r * base, temp);
         }
 
       }
 
-      ARY_PUSH(int, stack, right)  // statt push neuer thread mit qicksort von ary + right + 1
+      ARY_PUSH(stack, right);
       right = (left > l - 1) ? left : l - 1;
 
     } else {
       if (stack.length > 0) {
         left = right + 1;
-        ARY_PULL(stack, right)
+        ARY_PULL(stack, right);
       } else break;
     }
 

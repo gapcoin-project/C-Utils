@@ -2,10 +2,16 @@
  * Simple implemenation of an Iterativ quick sort algorithm witch
  * fall back on a given min size to insertion sort
  */
+#ifndef __SORT_H__
+#define __SORT_H__
+
 #include <math.h>
 #include <pthread.h>
 #include <inttypes.h>
 #include "../../Dynamic-Array/src/dynamic-array.h"
+
+#define PTR_AT_BASE(PTR, BASE, INDEX) ((PTR) + (BASE) * (INDEX)
+
 
 /**
  * Stack for non recursive Quicksort
@@ -112,6 +118,69 @@ DEFINE_ARRAY(uint64_t, SortUInt64Ary)
   } while (0)                                                                 
                                                                               
 
+/**
+ * Just QuickSort, without recursion
+ *
+ * This Macro needs the ARY element TYPE also a 
+ * BIGGER, SMALER and EQL function which compares two ARY elements
+ */
+#define QUICKSORT(TYPE, ARY, LEN, BIGGER, SMALER, EQL)                        \
+  do {                                                                        \
+                                                                              \
+    TYPE qs_piv;                                                              \
+    TYPE qs_temp;                                                             \
+    SortUInt64Ary qs_stack;                                                   \
+    uint64_t qs_l, qs_r, qs_left, qs_right;                                   \
+    ARY_INIT(uint64_t,                                                        \
+             qs_stack,                                                        \
+             (uint64_t) 5 * (log2((double) (LEN)) / 3));                      \
+                                                                              \
+    qs_left  = 0;                                                             \
+    qs_right = (LEN) - 1;                                                     \
+                                                                              \
+    while (1) {                                                               \
+                                                                              \
+      if (qs_left < qs_right) {                                               \
+                                                                              \
+        qs_l = qs_left;                                                       \
+        qs_r = qs_right;                                                      \
+        qs_piv = ARY[(rand() % (qs_r - qs_l)) + qs_l];                        \
+                                                                              \
+        while (qs_l < qs_r) {                                                 \
+                                                                              \
+          while (BIGGER(ARY[qs_r], qs_piv))                                   \
+            qs_r--;                                                           \
+                                                                              \
+          while (SMALER(ARY[qs_l], qs_piv))                                   \
+            qs_l++;                                                           \
+                                                                              \
+          if (EQL(ARY[l], ARY[r])) {                                          \
+            qs_r--;                                                           \
+                                                                              \
+          /* switch left an right */                                          \
+          } else if (qs_l < qs_r) {                                           \
+            qs_temp = ARY[qs_l];                                              \
+            ARY[qs_l] = ARY[qs_r];                                            \
+            ARY[qs_r] = qs_temp;                                              \
+          }                                                                   \
+                                                                              \
+        }                                                                     \
+                                                                              \
+        ARY_PUSH(uint64_t, qs_stack, qs_right);                               \
+        qs_right = (qs_left > qs_l - 1) ? qs_left : qs_l - 1;                 \
+                                                                              \
+      } else {                                                                \
+        if (qs_stack.length > 0) {                                            \
+          qs_left = qs_right + 1;                                             \
+          ARY_PULL(qs_stack, qs_right);                                       \
+        } else break;                                                         \
+      }                                                                       \
+                                                                              \
+    }                                                                         \
+                                                                              \
+  } while (0)                                                                 
+                                                                              
+
 
 /**
  * Struct for handling paralell sorting
@@ -130,3 +199,4 @@ void chiefsort(CHIEFSORT_TYPE *ary, int length, int min);
 void insertionsort(CHIEFSORT_TYPE *ary, int length);
 void quicksort(CHIEFSORT_TYPE *ary, int length);
 void paralellsort(CHIEFSORT_TYPE *ary, int length, int min_insertionsort, int threads);
+#endif // __SORT_H__
