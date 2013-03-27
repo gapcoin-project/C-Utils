@@ -41,11 +41,11 @@ int timeval_additon(struct timeval *result,
  * Returns 1 if the Division is negative, otherwise 0.
  * Saves the Division of t1 by divisor in result
  */
-int timeval_additon(struct timeval *result, 
-                    int divisor, 
-                    struct timeval *t1) {
+int timeval_division(struct timeval *result, 
+                    struct timeval *t1,
+                    int divisor) {
 
-    long int diff =   (t2->tv_usec + 1000000 * t2->tv_sec) / divisor
+    long int diff =   (t1->tv_usec + 1000000 * t1->tv_sec) / divisor;
 
     result->tv_sec = diff / 1000000;
     result->tv_usec = diff % 1000000;
