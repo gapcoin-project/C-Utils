@@ -7,120 +7,90 @@
 
 
 /**
- * Starts an paralell chiefsort
+ * Just Insertionsort, min element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * smaler is function pointer to an smaler function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
  */
-void paralellsort(CHIEFSORT_TYPE *ary, int length, int min_insertionsort, int threads) {
-
-  if (threads > 1) {
-    ChiefSortParalell para;
-    para.ary = ary;
-    para.length = length;
-    para.threads = threads;
-    para.min_insertionsort = min_insertionsort;
- 
-    paralellchiefsort((void *) &para);
-  } else
-    chiefsort(ary, length, min_insertionsort);
-}
-
-/**
- * Just Quicksort
- */
-void quicksort(CHIEFSORT_TYPE *ary, int length) {
-
-  CHIEFSORT_TYPE piv;
-  CHIEFSORT_TYPE temp;
-  IntAry stack;
-  int l, r, left, right;
-  ARY_INIT(int, stack, (int) 5 * (log2((double) length) / 3)); 
-
-  left  = 0;
-  right = length - 1;
-
-  while (1) {
-
-    if (left < right) {
-
-      l = left;
-      r = right;
-      piv = ary[(rand() % (r - l)) + l];
-
-      while (l < r) {
-        
-        while (CHIEFSORT_BIGGER(ary[r], piv))
-          r--; 
-
-        while (CHIEFSORT_SMALER(ary[l], piv)) 
-          l++; 
-
-        if (CHIEFSORT_EQL(ary[l], ary[r])) {
-          r--;
-
-        // switch left an right
-        } else if (l < r) {
-          temp = ary[l];
-          ary[l] = ary[r];
-          ary[r] = temp;
-        }
-
-      }
-
-      ARY_PUSH(int, stack, right)  // statt push neuer thread mit qicksort von ary + right + 1
-      right = (left > l - 1) ? left : l - 1;
-
-    } else {
-      if (stack.length > 0) {
-        left = right + 1;
-        ARY_PULL(stack, right)
-      } else break;
-    }
-
-  }
-
-}
-
-/**
- * Just Insertionsort
- */
-void insertionsort(void *ary, 
-                   uint64_t length, 
-                   uint32_t base, 
-                   (char*) smaler(void *, void *)) {
+void insertionsort_min(void *ary, 
+                       int64_t length, 
+                       int32_t base, 
+                       char (*smaler)(void *, void *)) {
   
-  uint64_t i, j;
+  int64_t i, j;
   void  *temp = malloc(base);
 
   for (i = 1; i < length; i++) {
-    memcpy(tmp, ary + i * base, base);
+    memcpy(temp, ary + i * base, base);
     j = i - 1;
 
-    while (smaler(temp, ary + (j * base)) && j >= 0) {
+    while (j >= 0 && smaler(temp, ary + (j * base))) {
       memcpy(ary + (j + 1) * base, ary + j * base, base);
       j = j - 1;
     }   
     
-    memcpy(ary + (j + 1) * base, tmp, base);
+    memcpy(ary + (j + 1) * base, temp, base);
   }
+}
 
+/**
+ * Just Insertionsort, max element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * bigger is function pointer to an bigger function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ */
+void insertionsort_max(void *ary, 
+                       int64_t length, 
+                       int32_t base, 
+                       char (*bigger)(void *, void *)) {
+  
+  int64_t i, j;
+  void  *temp = malloc(base);
+
+  for (i = 1; i < length; i++) {
+    memcpy(temp, ary + i * base, base);
+    j = i - 1;
+
+    while (j >= 0 && bigger(temp, ary + (j * base))) {
+      memcpy(ary + (j + 1) * base, ary + j * base, base);
+      j = j - 1;
+    }   
+    
+    memcpy(ary + (j + 1) * base, temp, base);
+  }
 }
 
 /**
  * Improofed variant of QuickSort which uses insertionsort 
- * at an specific min array size
+ * at an specific min array size, sorting min element first
+ *
+ * ary is a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * smaler, bigger, equal is function pointer
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ * 
  */
-void quickinsersort(void *ary, 
-                    uint64_t length, 
-                    uint16_t min, 
-                    uint32_t base, 
-                    (char *) smaler(void *, void *),
-                    (char *) bigger(void *, void *),
-                    (char *) equal(void *, void *)) {
+void quickinsersort_min(void *ary, 
+                        int64_t length, 
+                        int16_t min, 
+                        int32_t base, 
+                        char (*smaler)(void *, void *),
+                        char (*bigger)(void *, void *),
+                        char (*equal)(void *, void *)) {
 
   void *piv  = malloc(base);
   void *temp = malloc(base);
-  SortUInt64Ary stack;
-  uint64_t l, r, left, right;
-  ARY_INIT(uint64_t, stack, (uint64_t) 5 * (log2((double) length) / 3)); 
+  SortInt64Ary stack;
+  int64_t l, r, left, right;
+  ARY_INIT(int64_t, stack, (int64_t) 5 * (log2((double) length) / 3)); 
 
   left  = 0;
   right = length - 1;
@@ -128,7 +98,7 @@ void quickinsersort(void *ary,
   while (1) {
 
     if (right - left < min) {
-      insertionsort(ary + left * base, (right - left) + 1, base, smaler);
+      insertionsort_min(ary + left * base, (right - left) + 1, base, smaler);
       left = right;
     }
 
@@ -137,7 +107,6 @@ void quickinsersort(void *ary,
       l = left;
       r = right;
       memcpy(piv, ary + ((rand() % (r - l)) + l) * base, base);
-      piv = ary[(rand() % (r - l)) + l];
 
       while (l < r) {
         
@@ -152,9 +121,9 @@ void quickinsersort(void *ary,
 
         // switch left an right
         } else if (l < r) {
-          memcpy(temp, ary + l * base);
-          memcpy(ary + l * base, ary + r * base);
-          memcpy(ary + r * base, temp);
+          memcpy(temp, ary + l * base, base);
+          memcpy(ary + l * base, ary + r * base, base);
+          memcpy(ary + r * base, temp, base);
         }
 
       }
@@ -173,129 +142,31 @@ void quickinsersort(void *ary,
 
 }
 
-
 /**
- * Improofed variant of QuickSort which uses insertionsort at an specific min array size
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size, sorting max element first
+ *
+ * ary is a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * smaler, bigger, equal is function pointer
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
  * 
- * it creates threas if possible when stating to clac an new part
  */
-void *paralellchiefsort(void *arg) {
+void quickinsersort_max(void *ary, 
+                        int64_t length, 
+                        int16_t min, 
+                        int32_t base, 
+                        char (*smaler)(void *, void *),
+                        char (*bigger)(void *, void *),
+                        char (*equal)(void *, void *)) {
 
-  ChiefSortParalell *para = (ChiefSortParalell *) arg;
-  int length              = para->length;
-  int min                 = para->min_insertionsort;
-  CHIEFSORT_TYPE *ary     = para->ary;
-  CHIEFSORT_TYPE piv;
-  CHIEFSORT_TYPE temp;
-  int l, r, left, right, error;
-  pthread_t thread[2];
-
-  left  = 0;
-  right = length - 1;
-
-
-  if (right - left < min) {
-    insertionsort(para->ary + left, (right - left) + 1);
-    return NULL;
-  }
-
-  // progress quicksort patern
-  l = left;
-  r = right;
-  piv = ary[(rand() % (r - l)) + l];
-
-  while (l < r) {
-    
-    while (CHIEFSORT_BIGGER(ary[r], piv))
-      r--; 
-
-    while (CHIEFSORT_SMALER(ary[l], piv)) 
-      l++; 
-
-    if (CHIEFSORT_EQL(ary[l], ary[r])) {
-      r--;
-
-    // switch left an right
-    } else if (l < r) {
-      temp = ary[l];
-      ary[l] = ary[r];
-      ary[r] = temp;
-    }
-
-  }
-
-  // creat new threads for each patern if necessary
-  ChiefSortParalell new_para1;
-  new_para1.min_insertionsort = min;
-
-  // onely one pattern (worst case)
-  if (l == left || r == right) {
-    new_para1.length = length - 1;
-    new_para1.threads = para->threads;
-
-    if (l == left)
-      new_para1.ary = ary + 1;
-    else
-      new_para1.ary = ary;
-    
-    paralellchiefsort(&new_para1);
-
-
-  // create new threads for each patren if wanted
-  } else {
-
-    ChiefSortParalell new_para2;
-    new_para2.min_insertionsort = min;
-    new_para2.threads = new_para1.threads = para->threads / 2;
-    new_para1.length = (r - left) + 1;
-    new_para1.ary = ary + left;
-    new_para2.length = right - l;
-    new_para2.ary = ary + l + 1;
-
-    if (para->threads % 2 == 1)
-      new_para2.threads++;
-
-    if (new_para1.threads > 1)
-      error = pthread_create(thread, NULL, &paralellchiefsort, (void *) &new_para1);
-    else 
-      error = pthread_create(thread, NULL, &serialchiefsort, (void *) &new_para1);
-
-    if (new_para2.threads > 1)
-      error += pthread_create(thread + 1, NULL, &paralellchiefsort, (void *) &new_para2);
-    else 
-      error += pthread_create(thread + 1, NULL, &serialchiefsort, (void *) &new_para2);
-    
-    if (error != 0) {
-      printf("[ERROR in paralellchiefsort couldn't create new thread!\n");
-      exit(1);
-    }
-    
-    pthread_join(thread[0], NULL);
-    pthread_join(thread[1], NULL);
-
-  }
-
-
-  return NULL;
-}
-
-/**
- * Improofed variant of QuickSort which uses insertionsort at an specific min array size
- * 
- * serial version for a thread
- */
-void *serialchiefsort(void *arg) {
-
-  ChiefSortParalell *para = (ChiefSortParalell *) arg;
-  int length              = para->length;
-  int min                 = para->min_insertionsort;
-  CHIEFSORT_TYPE *ary     = para->ary;
-
-  CHIEFSORT_TYPE piv;
-  CHIEFSORT_TYPE temp;
-  IntAry stack;
-  int l, r, left, right;
-  ARY_INIT(int, stack, (int) 5 * (log2((double) para->length) / 3)); 
+  void *piv  = malloc(base);
+  void *temp = malloc(base);
+  SortInt64Ary stack;
+  int64_t l, r, left, right;
+  ARY_INIT(int64_t, stack, (int64_t) 5 * (log2((double) length) / 3)); 
 
   left  = 0;
   right = length - 1;
@@ -303,7 +174,7 @@ void *serialchiefsort(void *arg) {
   while (1) {
 
     if (right - left < min) {
-      insertionsort(para->ary + left, (right - left) + 1);
+      insertionsort_max(ary + left * base, (right - left) + 1, base, bigger);
       left = right;
     }
 
@@ -311,41 +182,41 @@ void *serialchiefsort(void *arg) {
 
       l = left;
       r = right;
-      piv = ary[(rand() % (r - l)) + l];
+      memcpy(piv, ary + ((rand() % (r - l)) + l) * base, base);
 
       while (l < r) {
         
-        while (CHIEFSORT_BIGGER(ary[r], piv))
+        while (smaler(ary + r * base, piv))
           r--; 
 
-        while (CHIEFSORT_SMALER(ary[l], piv)) 
+        while (bigger(ary + l * base, piv)) 
           l++; 
 
-        if (CHIEFSORT_EQL(ary[l], ary[r])) {
+        if (equal(ary + l * base, ary + r * base)) {
           r--;
 
         // switch left an right
         } else if (l < r) {
-          temp = ary[l];
-          ary[l] = ary[r];
-          ary[r] = temp;
+          memcpy(temp, ary + l * base, base);
+          memcpy(ary + l * base, ary + r * base, base);
+          memcpy(ary + r * base, temp, base);
         }
 
       }
 
-      ARY_PUSH(int, stack, right) 
+      ARY_PUSH(stack, right);
       right = (left > l - 1) ? left : l - 1;
 
     } else {
       if (stack.length > 0) {
         left = right + 1;
-        ARY_PULL(stack, right)
+        ARY_PULL(stack, right);
       } else break;
     }
 
   }
 
-  return NULL;
 }
+
 
 #endif //end of CHIEFSORT
