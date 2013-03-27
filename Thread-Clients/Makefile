@@ -5,13 +5,14 @@ DBFLAGS	= -g -D DEBUG
 CFLAGS	= -Wall -Wextra -Werror -c $(OTFLAGS) $(DBFLAGS)
 LDFLAGS	= 
 BIN   	= ./bin
+SRC			= ./src
 
 #
 # +----------------+
 # | Thread Clients |
 # +----------------+
 #
-THREAD_CLIENTS_SRC = ./Thread-Clients/src/thread-clients.c
+THREAD_CLIENTS_SRC = $(SRC)/thread-clients.c
 THREAD_CLIENTS_OBJ = $(BIN)/thread-clients.o
 
 
