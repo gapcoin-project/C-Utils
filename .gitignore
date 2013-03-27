@@ -1,0 +1,6 @@
+*/bin/*
+*.swp
+a.out
+*.swo
+*.gch
+*callgrind.out*
