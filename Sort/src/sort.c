@@ -195,7 +195,7 @@ void quickinsersort_max(void *ary,
           l++; 
 
         if (equal(ary + l * base, ary + r * base)) {
-          r--;    // TODO try break;
+          r--; 
 
         // switch left an right
         } else if (l < r) {
@@ -276,7 +276,7 @@ void *t_insertionsort_max(void *ptr) {
   int64_t i, j;
   void  *temp = malloc(args->base);
 
-  for (i = 1; i < length; i++) {
+  for (i = 1; i < args->length; i++) {
     memcpy(temp, args->ary + i * args->base, args->base);
     j = i - 1;
 
@@ -304,11 +304,6 @@ void *t_insertionsort_max(void *ptr) {
  */
 void *t_quickinsersort_max(void *ptr) {
 
-  if (args.length < args->min) {
-    insertionsort_max(ptr);
-    return NULL;
-  }
-
   QISTA_t args = *((QISTA_t *) ptr);
 
   void *piv  = malloc(args.base);
@@ -332,7 +327,7 @@ void *t_quickinsersort_max(void *ptr) {
 
     if (args.equal(args.ary + l * args.base, 
                    args.ary + r * args.base)) {
-      break;
+      r--; 
 
     // switch left an right
     } else if (l < r) {
@@ -356,7 +351,7 @@ void *t_quickinsersort_max(void *ptr) {
     tc_add_func(t_quickinsersort_max, ptr);
 
   // left side
-  args->length = l;
+  args.length = l;
   if (args.length < args.min)
     tc_add_func(t_insertionsort_max, &args);
   else if (args.length <= 0)
@@ -374,11 +369,6 @@ void *t_quickinsersort_max(void *ptr) {
  * Threadabel unsing Thread-Clients (initialize bevor using this)
  */
 void *t_quickinsersort_min(void *ptr) {
-
-  if (args.length < args->min) {
-    insertionsort_max(ptr);
-    return NULL;
-  }
 
   QISTA_t args = *((QISTA_t *) ptr);
 
@@ -403,7 +393,7 @@ void *t_quickinsersort_min(void *ptr) {
 
     if (args.equal(args.ary + l * args.base, 
                    args.ary + r * args.base)) {
-      break;
+      r--; 
 
     // switch left an right
     } else if (l < r) {
@@ -427,7 +417,7 @@ void *t_quickinsersort_min(void *ptr) {
     tc_add_func(t_quickinsersort_min, ptr);
 
   // left side
-  args->length = l;
+  args.length = l;
   if (args.length < args.min)
     tc_add_func(t_insertionsort_min, &args);
   else if (args.length <= 0)
