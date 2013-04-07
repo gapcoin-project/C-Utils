@@ -17,6 +17,21 @@
 DEFINE_ARRAY(int64_t, SortInt64Ary);
 
 /**
+ * Struct for threadable sorting algorithms
+ */
+typedef struct {
+  void    *ary;        /* void pointer to the array to sort */
+  int64_t min;         /* the min array length to switch to insertionsort */
+  int64_t base;        /* the size of an array element */
+  int64_t length;      /* the array length */
+  char (*smaler)(void *, void *);  /* compare functions */
+  char (*bigger)(void *, void *);
+  char (*equal)(void *, void *);
+} QuickInsertSortThreadArgs;
+
+#define QISTA_t QuickInsertSortThreadArgs
+
+/**
  * Just Insertionsort
  *
  * this macro needs the TYPE of the Array Elements
@@ -300,4 +315,8 @@ void quickinsersort_max(void *ary,
                         char (*smaler)(void *, void *),
                         char (*bigger)(void *, void *),
                         char (*equal)(void *, void *));
+void *t_insertionsort_min(void *ptr);
+void *t_insertionsort_max(void *ptr); 
+void *t_quickinsersort_max(void *ptr);
+void *t_quickinsersort_min(void *ptr);
 #endif // __SORT_H__

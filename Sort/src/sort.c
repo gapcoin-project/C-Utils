@@ -72,6 +72,7 @@ void insertionsort_max(void *ary,
  *
  * ary is a void pointer to an array
  * length is the number of elements in that array
+ * min the array length to switch to insertionsort
  * base is the size of an array element
  * smaler, bigger, equal is function pointer
  * that compares two array elements the start address of
@@ -148,6 +149,7 @@ void quickinsersort_min(void *ary,
  *
  * ary is a void pointer to an array
  * length is the number of elements in that array
+ * min the array length to switch to insertionsort
  * base is the size of an array element
  * smaler, bigger, equal is function pointer
  * that compares two array elements the start address of
@@ -193,7 +195,7 @@ void quickinsersort_max(void *ary,
           l++; 
 
         if (equal(ary + l * base, ary + r * base)) {
-          r--;
+          r--;    // TODO try break;
 
         // switch left an right
         } else if (l < r) {
@@ -218,5 +220,223 @@ void quickinsersort_max(void *ary,
 
 }
 
+/**
+ * Just Insertionsort, min element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * smaler is function pointer to an smaler function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ *
+ * threadable version
+ */
+void *t_insertionsort_min(void *ptr) {
+
+  QISTA_t *args = (QISTA_t *) ptr;
+  
+  int64_t i, j;
+  void  *temp = malloc(args->base);
+
+  for (i = 1; i < args->length; i++) {
+    memcpy(temp, args->ary + i * args->base, args->base);
+    j = i - 1;
+
+    while (j >= 0 && args->smaler(temp, args->ary + (j * args->base))) {
+      memcpy(args->ary + (j + 1) * args->base, 
+             args->ary + j * args->base, 
+             args->base);
+
+      j = j - 1;
+    }   
+    
+    memcpy(args->ary + (j + 1) * args->base, 
+           temp, 
+           args->base);
+  }
+
+  return NULL;
+}
+
+/**
+ * Just Insertionsort, max element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * bigger is function pointer to an bigger function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ *
+ * threadable version
+ */
+void *t_insertionsort_max(void *ptr) { 
+  
+  QISTA_t *args = (QISTA_t *) ptr;
+
+  int64_t i, j;
+  void  *temp = malloc(args->base);
+
+  for (i = 1; i < length; i++) {
+    memcpy(temp, args->ary + i * args->base, args->base);
+    j = i - 1;
+
+    while (j >= 0 && args->bigger(temp, args->ary + (j * args->base))) {
+      memcpy(args->ary + (j + 1) * args->base, 
+             args->ary + j * args->base, 
+             args->base);
+
+      j = j - 1;
+    }   
+    
+    memcpy(args->ary + (j + 1) * args->base, 
+           temp, 
+           args->base);
+  }
+
+  return NULL;
+}
+
+
+/**
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size, sorting max element first
+ * Threadabel unsing Thread-Clients (initialize bevor using this)
+ */
+void *t_quickinsersort_max(void *ptr) {
+
+  if (args.length < args->min) {
+    insertionsort_max(ptr);
+    return NULL;
+  }
+
+  QISTA_t args = *((QISTA_t *) ptr);
+
+  void *piv  = malloc(args.base);
+  void *temp = malloc(args.base);
+  int64_t l, r;
+
+
+  l = 0;
+  r = args.length - 1;
+  memcpy(piv, 
+         args.ary + ((rand() % (r - l)) + l) * args.base, 
+         args.base);
+
+  while (l < r) {
+    
+    while (args.smaler(args.ary + r * args.base, piv))
+      r--; 
+
+    while (args.bigger(args.ary + l * args.base, piv)) 
+      l++; 
+
+    if (args.equal(args.ary + l * args.base, 
+                   args.ary + r * args.base)) {
+      break;
+
+    // switch left an right
+    } else if (l < r) {
+      memcpy(temp, args.ary + l * args.base, args.base);
+      memcpy(args.ary + l * args.base, 
+             args.ary + r * args.base, 
+             args.base);
+      memcpy(args.ary + r * args.base, temp, args.base);
+    }
+
+  }
+
+  // right side
+  ((QISTA_t *) ptr)->ary += (r + 1) * args.base;
+  ((QISTA_t *) ptr)->length -= (r + 1);
+  if (((QISTA_t *) ptr)->length < ((QISTA_t *) ptr)->min)
+    tc_add_func(t_insertionsort_max, ptr);
+  else if (((QISTA_t *) ptr)->length <= 0)
+    return NULL;
+  else
+    tc_add_func(t_quickinsersort_max, ptr);
+
+  // left side
+  args->length = l;
+  if (args.length < args.min)
+    tc_add_func(t_insertionsort_max, &args);
+  else if (args.length <= 0)
+    return NULL;
+  else
+    tc_add_func(t_quickinsersort_max, &args);
+
+
+  return NULL;
+}
+
+/**
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size, sorting min element first
+ * Threadabel unsing Thread-Clients (initialize bevor using this)
+ */
+void *t_quickinsersort_min(void *ptr) {
+
+  if (args.length < args->min) {
+    insertionsort_max(ptr);
+    return NULL;
+  }
+
+  QISTA_t args = *((QISTA_t *) ptr);
+
+  void *piv  = malloc(args.base);
+  void *temp = malloc(args.base);
+  int64_t l, r;
+
+
+  l = 0;
+  r = args.length - 1;
+  memcpy(piv, 
+         args.ary + ((rand() % (r - l)) + l) * args.base, 
+         args.base);
+
+  while (l < r) {
+    
+    while (args.bigger(args.ary + r * args.base, piv))
+      r--; 
+
+    while (args.smaler(args.ary + l * args.base, piv)) 
+      l++; 
+
+    if (args.equal(args.ary + l * args.base, 
+                   args.ary + r * args.base)) {
+      break;
+
+    // switch left an right
+    } else if (l < r) {
+      memcpy(temp, args.ary + l * args.base, args.base);
+      memcpy(args.ary + l * args.base, 
+             args.ary + r * args.base, 
+             args.base);
+      memcpy(args.ary + r * args.base, temp, args.base);
+    }
+
+  }
+
+  // right side
+  ((QISTA_t *) ptr)->ary += (r + 1) * args.base;
+  ((QISTA_t *) ptr)->length -= (r + 1);
+  if (((QISTA_t *) ptr)->length < ((QISTA_t *) ptr)->min)
+    tc_add_func(t_insertionsort_min, ptr);
+  else if (((QISTA_t *) ptr)->length <= 0)
+    return NULL;
+  else
+    tc_add_func(t_quickinsersort_min, ptr);
+
+  // left side
+  args->length = l;
+  if (args.length < args.min)
+    tc_add_func(t_insertionsort_min, &args);
+  else if (args.length <= 0)
+    return NULL;
+  else
+    tc_add_func(t_quickinsersort_min, &args);
+
+
+  return NULL;
+}
 
 #endif //end of CHIEFSORT
