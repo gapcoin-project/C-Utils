@@ -344,20 +344,24 @@ void *t_quickinsersort_max(void *ptr) {
   ((QISTA_t *) ptr)->ary += (r + 1) * args.base;
   ((QISTA_t *) ptr)->length -= (r + 1);
   if (((QISTA_t *) ptr)->length < ((QISTA_t *) ptr)->min)
-    tc_add_func(t_insertionsort_max, ptr);
+    t_insertionsort_max(ptr);
+    //tc_add_func(t_insertionsort_max, ptr);
   else if (((QISTA_t *) ptr)->length <= 0)
     return NULL;
   else
-    tc_add_func(t_quickinsersort_max, ptr);
+    t_quickinsersort_max(ptr);
+    //tc_add_func(t_quickinsersort_max, ptr);
 
   // left side
   args.length = l;
   if (args.length < args.min)
-    tc_add_func(t_insertionsort_max, &args);
+    t_insertionsort_max(&args);
+    //tc_add_func(t_insertionsort_max, &args);
   else if (args.length <= 0)
     return NULL;
   else
-    tc_add_func(t_quickinsersort_max, &args);
+    t_quickinsersort_max(&args);
+    //tc_add_func(t_quickinsersort_max, &args);
 
 
   return NULL;

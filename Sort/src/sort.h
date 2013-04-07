@@ -10,6 +10,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include "../../Dynamic-Array/src/dynamic-array.h"
+#include "../../Thread-Clients/src/thread-clients.h"
 
 /**
  * Stack for non recursive Quicksort
