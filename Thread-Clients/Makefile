@@ -18,5 +18,6 @@ THREAD_CLIENTS_OBJ = $(BIN)/thread-clients.o
 
 thread-clients: LDFLAGS += -lpthread -lm
 thread-clients: 
+	mkdir -p bin
 	$(CC) $(CFLAGS) $(THREAD_CLIENTS_SRC) -o $(THREAD_CLIENTS_OBJ)
 
