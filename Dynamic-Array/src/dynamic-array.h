@@ -158,7 +158,7 @@ typedef struct {                          \
 
 /**
  * Deletes the element at the given Position from the given Array
- * NOTE the Arry it changes the Order of the given Array!!!
+ * NOTE the Arry it changes the order of the given Array!!!
  */
 #define ARY_DELETE_AT_FAST(ARY, I)                                  \
   do {                                                              \
@@ -174,6 +174,8 @@ typedef struct {                          \
     memmove((ARY).ptr + (I),                                        \
             (ARY).ptr + (I) + 1,                                    \
             (ARY).length - (I) - 1);                                \
+                                                                    \
+    (ARY).length--;                                                 \
   } while (0)
 
 /**
