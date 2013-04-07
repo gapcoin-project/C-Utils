@@ -1,7 +1,7 @@
 VERSION = 1.0.0
 CC			= gcc
 CFLAGS	= -Wall -Wextra -Werror -c -g
-LDFLAGS	= -lm -lpthread
+LDFLAGS	= -lm -lpthread ../Thread-Clients/bin/thread-clients.o
 OTFLAGS = -march=native -O3
 DBFLAGS	= -g -D DEBUG
 BIN   	= ./bin
@@ -18,16 +18,22 @@ SPEED_MACRO_VS_PTR_TEST_SRC = $(SRC)/speed-macro-vs-pointer.c
 SPEED_MACRO_VS_PTR_TEST_OBJ = $(BIN)/speed-macro-vs-pointer.o
 SPEED_MACRO_VS_PTR_TEST_BIN = $(BIN)/speed-macro-vs-pointer
 
-basic-test:
+MERGE_TEST_SRC = ./src/inplace-merge.c
+MERGE_TEST_OBJ = $(BIN)/inplace-merge.o
+MERGE_TEST_BIN = $(BIN)/inplace-merge
+
+
+sort:
+	make -C ../Thread-Clients/
 	mkdir -p bin
 	$(CC) $(CFLAGS) $(OTFLAGS) $(SORT_SRC)	-o $(SORT_OBJ)
+
+basic-test: sort
 	$(CC) $(CFLAGS) $(OTFLAGS) $(BASIC_TEST_SRC)	-o $(BASIC_TEST_OBJ)
 	$(CC) $(LDFLAGS) $(BASIC_TEST_OBJ) $(SORT_OBJ) -o $(BASIC_TEST_BIN)
 
-speed-macro-vs-pointer:
+speed-macro-vs-pointer: sort
 	make -C ../Time-Diff/	
-	mkdir -p bin
-	$(CC) $(CFLAGS) $(OTFLAGS) $(SORT_SRC)	-o $(SORT_OBJ)
 	$(CC) $(CFLAGS) $(OTFLAGS) $(SPEED_MACRO_VS_PTR_TEST_SRC)	\
 				-o $(SPEED_MACRO_VS_PTR_TEST_OBJ)
 	$(CC) $(LDFLAGS) $(SPEED_MACRO_VS_PTR_TEST_OBJ) $(SORT_OBJ) 	\
