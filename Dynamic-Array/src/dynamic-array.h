@@ -142,7 +142,7 @@ typedef struct {                          \
 
 
 /**
- * Deletes al instaces of the given Element from th given Array
+ * Deletes al instaces of the given Element from the given Array
  * NOTE the Arry content type should be the same as th type of 
  * the given element
  */
@@ -154,6 +154,26 @@ typedef struct {                          \
       if (ARY).ptr[adi] != (E) { new_len++; }                       \
     }                                                               \
     (ARY).length = new_len;                                         \
+  } while (0)
+
+/**
+ * Deletes the element at the given Position from the given Array
+ * NOTE the Arry it changes the Order of the given Array!!!
+ */
+#define ARY_DELETE_AT_FAST(ARY, I)                                  \
+  do {                                                              \
+    ARY_AT(ARY, I) = ARY_LAST(ARY);                                 \
+    (ARY).length--;                                                 \
+  } while (0)
+
+/**
+ * Deletes the element at the given Position from the given Array
+ */
+#define ARY_DELETE_AT(ARY, I)                                       \
+  do {                                                              \
+    memmove((ARY).ptr + (I),                                        \
+            (ARY).ptr + (I) + 1,                                    \
+            (ARY).length - (I) - 1);                                \
   } while (0)
 
 /**
