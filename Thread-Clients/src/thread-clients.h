@@ -13,7 +13,7 @@
  *                function given at a time to process
  *    n_clients:  the number of clients (threads) to use
  *    use_return: if you need the return values this sould be 1 (true)
- *                else let it be 0 and, save we save memory
+ *                else let it be 0 and we save memory
  *                NOTE: if you set use_return and dosent pull the
  *                      return values memory will soooon be full
  */
@@ -39,6 +39,14 @@ uint64_t tc_add_func(void *(*func)(void *), void *args);
  *       else the return value mybe not yet avilable
  */
 void *tc_get_return(uint64_t id);
+
+/**
+ * Clears all saved return pointers
+ * NOTE: it doesnt frees anything
+ *
+ * (usefull if you have some NULL pointers)
+ */
+void tc_clear_returns();
 
 /**
  * waiting utill all current work is done

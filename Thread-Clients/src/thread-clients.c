@@ -123,13 +123,27 @@ void *tc_get_return(uint64_t id) {
 
   uint64_t i;
   for (i = 0; i < ARY_LEN(tc_clients.finished); i++) {
-    if (ARY_AT(tc_clients.finished, i).id == id)
-      return ARY_AT(tc_clients.finished, i).args;
+    if (ARY_AT(tc_clients.finished, i).id == id) {
+
+      void *return_val = ARY_AT(tc_clients.finished, i).args;
+      ARY_DELETE_AT_FAST(tc_clients.finished, i);
+
+      return return_val;
+    }
   }
 
   return NULL;
 }
 
+/**
+ * Clears all saved return pointers
+ * NOTE: it doesnt frees anything
+ *
+ * (usefull if you have some NULL pointers)
+ */
+void tc_clear_returns() {
+  ARY_CLEAR(tc_clients.finished);
+}
 
 
 /**
