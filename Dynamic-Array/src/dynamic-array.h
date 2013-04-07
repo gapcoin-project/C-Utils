@@ -215,6 +215,11 @@ typedef struct {                          \
       ARY_SWITCH(ARY, i, j);                \
   } while (0)
 
+/**
+ * Clears an given ARY
+ * Note it doesn't frees anything it just sets the length to zero
+ */
+#define ARY_CLEAR(ARY) (ARY).length = 0
 
 
 
