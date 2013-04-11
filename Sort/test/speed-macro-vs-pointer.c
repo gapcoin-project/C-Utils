@@ -37,9 +37,9 @@ static inline char p_equal(void *a, void *b) {
 
 int main (int argc, char *argv[]) {
 
-  if (argc != 4) {
+  if (argc != 5) {
     printf("%s <array length> <max min quicksort> "
-           "<times>\n", argv[0]);
+           "<times> <threads>\n", argv[0]);
     exit(1);
   }
 
@@ -48,13 +48,16 @@ int main (int argc, char *argv[]) {
   int64_t length = atoi(argv[1]);
   int64_t max_min_q = atoi(argv[2]);
   int64_t n_times = atoi(argv[3]);
-  struct timeval min_r, max_r, mmin_r, mmax_r; // result
-  struct timeval min_t, max_t, mmin_t, mmax_t; // temp
-  struct timeval min_s, max_s, mmin_s, mmax_s; // start
-  struct timeval min_e, max_e, mmin_e, mmax_e; // end
+  int64_t n_threads = atoi(argv[4]);
+  struct timeval min_r, max_r, mmin_r, mmax_r, tmin_r, tmax_r; // result
+  struct timeval min_t, max_t, mmin_t, mmax_t, tmin_t, tmax_t; // temp
+  struct timeval min_s, max_s, mmin_s, mmax_s, tmin_s, tmax_s; // start
+  struct timeval min_e, max_e, mmin_e, mmax_e, tmin_e, tmax_e; // end
 
   min_r.tv_sec  = min_r.tv_usec  = 0;
   max_r.tv_sec  = max_r.tv_usec  = 0;
+  tmin_r.tv_sec = tmin_r.tv_usec = 0;
+  tmax_r.tv_sec = tmax_r.tv_usec = 0;
   mmin_r.tv_sec = mmin_r.tv_usec = 0;
   mmax_r.tv_sec = mmax_r.tv_usec = 0;
 
@@ -64,7 +67,19 @@ int main (int argc, char *argv[]) {
 
   int64_t sorted = 1;
 
+  init_tc((uint32_t) log2((double) length), n_threads, 0);
+  QISTA_t args;
+  args.ary    = (void *) ary1;
+  args.base   = sizeof(int64_t);
+  args.length = length;
+  args.min    = max_min_q;
+  args.bigger = p_bigger;
+  args.smaler = p_smaler;
+  args.equal  = p_equal;
+
   for (k = 0; k < n_times; k++) {
+
+    printf("times %" PRId64 "-6    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -87,6 +102,8 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
+    printf("times %" PRId64 "-5    \n", n_times - k);
+
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
     }
@@ -108,6 +125,25 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
+    printf("times %" PRId64 "-4    \n", n_times - k);
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    gettimeofday(&tmin_s, NULL);
+    paralell_quickinsersort_min(&args);
+    gettimeofday(&tmin_e, NULL);
+    timeval_subtract(&tmin_t, &tmin_e, &tmin_s);
+    timeval_additon(&tmin_r, &tmin_r, &tmin_t);
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] > ary1[i+1])
+        sorted = 0;
+    }
+
+    printf("times %" PRId64 "-3    \n", n_times - k);
+
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
     }
@@ -128,6 +164,8 @@ int main (int argc, char *argv[]) {
       if (ary1[i] < ary1[i+1])
         sorted = 0;
     }
+
+    printf("times %" PRId64 "-2    \n", n_times - k);
     
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -150,10 +188,29 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
+    printf("times %" PRId64 "-1    \n", n_times - k);
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    gettimeofday(&tmax_s, NULL);
+    paralell_quickinsersort_max(&args);
+    gettimeofday(&tmax_e, NULL);
+    timeval_subtract(&tmax_t, &tmax_e, &tmax_s);
+    timeval_additon(&tmax_r, &tmax_r, &tmax_t);
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] < ary1[i+1])
+        sorted = 0;
+    }
+
+    printf("times %" PRId64 "-0    \n", n_times - k);
+
   }
 
   if (sorted == 1)
-    printf("Array sorted!\n");
+    printf("Everything went fine, arrays are sorted :-)\n\n");
   else
     printf("Array NOT sorted!!!\n");
 
@@ -161,6 +218,8 @@ int main (int argc, char *argv[]) {
   timeval_division(&max_r, &max_r, n_times);
   timeval_division(&mmin_r, &mmin_r, n_times);
   timeval_division(&mmax_r, &mmax_r, n_times);
+  timeval_division(&tmin_r, &tmin_r, n_times);
+  timeval_division(&tmax_r, &tmax_r, n_times);
 
   printf("quickinsertsort_min: ");
   PRINT_TIMEVAL(min_r);
@@ -178,7 +237,13 @@ int main (int argc, char *argv[]) {
   PRINT_TIMEVAL(mmax_r);
   printf("\n");
 
-
+  printf("paralell_quickinsersort_min: ");
+  PRINT_TIMEVAL(tmin_r);
+  printf("\n");
+  
+  printf("paralell_quickinsersort_max: ");
+  PRINT_TIMEVAL(tmax_r);
+  printf("\n");
 
 
   return 0;
