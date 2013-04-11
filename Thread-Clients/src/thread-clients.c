@@ -43,6 +43,7 @@ typedef struct {
  uint8_t      use_return; /* wheter to use the return values or not */
  uint64_t     last_id;    /* last func id */
  uint32_t     n_clients;  /* number of thread clients */
+ uint32_t     n_working;  /* number of working threads */
 } TClients;
 
 /* to share values between clients */
@@ -73,6 +74,7 @@ void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
   tc_clients.use_return = use_return;
   tc_clients.last_id    = 1;
   tc_clients.n_clients  = n_clients;
+  tc_clients.n_working  = 0;
 
   /* create client threads */
   uint32_t i;
@@ -105,7 +107,7 @@ uint64_t tc_add_func(void *(*func)(void *), void *args) {
   /* avoid race conditions */
   pthread_mutex_lock(&tc_mutex);
 
-  ARY_ADD(tc_clients.finished, new_func);
+  ARY_ADD(tc_clients.work, new_func);
 
   pthread_mutex_unlock(&tc_mutex);
 
@@ -152,7 +154,7 @@ void tc_clear_returns() {
  */
 void tc_join() {
 
-  while (ARY_LEN(tc_clients.work) > 0)
+  while (tc_clients.n_working || ARY_LEN(tc_clients.work) > 0) 
     sched_yield();
 
 }
@@ -200,11 +202,16 @@ static void *tc_client_func(void *arg) {
     
     if (ARY_LEN(tc_clients->work) > 0) {
       
-      ARY_EXTRACT(tc_clients->work, next_work); /* get next ework */
+      tc_clients->n_working++;
+      ARY_EXTRACT(tc_clients->work, next_work); /* get next work */
       pthread_mutex_unlock(&tc_mutex); /* call work paralell */
 
       /* start working */
       next_work.args = next_work.func(next_work.args);
+
+      pthread_mutex_lock(&tc_mutex);
+      tc_clients->n_working--;
+      pthread_mutex_unlock(&tc_mutex);
 
       /* save return if wanted */
       if (tc_clients->use_return) {
