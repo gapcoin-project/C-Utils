@@ -318,6 +318,6 @@ void quickinsersort_max(void *ary,
                         char (*equal)(void *, void *));
 void *t_insertionsort_min(void *ptr);
 void *t_insertionsort_max(void *ptr); 
-void *t_quickinsersort_max(void *ptr);
-void *t_quickinsersort_min(void *ptr);
+void paralell_quickinsersort_max(void *ptr);
+void paralell_quickinsersort_min(void *ptr);
 #endif // __SORT_H__

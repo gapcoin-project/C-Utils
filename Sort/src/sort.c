@@ -5,6 +5,10 @@
 #define CHIEFSORT
 #include "sort.h"
 
+/* static functions */
+static void *t_quickinsersort_max(void *ptr);
+static void *t_quickinsersort_min(void *ptr);
+
 
 /**
  * Just Insertionsort, min element first
@@ -302,67 +306,76 @@ void *t_insertionsort_max(void *ptr) {
  * at an specific min array size, sorting max element first
  * Threadabel unsing Thread-Clients (initialize bevor using this)
  */
-void *t_quickinsersort_max(void *ptr) {
+void paralell_quickinsersort_max(void *ptr) {
 
-  QISTA_t args = *((QISTA_t *) ptr);
 
-  void *piv  = malloc(args.base);
-  void *temp = malloc(args.base);
+    QISTA_t *args  = malloc(sizeof(QISTA_t));
+    *args          = *((QISTA_t *) ptr);
+
+    tc_add_func(t_quickinsersort_max, (void *) args);
+    tc_join();
+  
+}
+
+static void *t_quickinsersort_max(void *ptr) {
+
+  QISTA_t *args  = malloc(sizeof(QISTA_t));
+  QISTA_t *args2 = malloc(sizeof(QISTA_t));
+  *args = *args2 = *((QISTA_t *) ptr);
+  free(ptr);
+
+  void *piv  = malloc(args->base);
+  void *temp = malloc(args->base);
   int64_t l, r;
 
-
   l = 0;
-  r = args.length - 1;
+  r = args->length - 1;
   memcpy(piv, 
-         args.ary + ((rand() % (r - l)) + l) * args.base, 
-         args.base);
+         args->ary + (rand() % r) * args->base, 
+         args->base);
 
   while (l < r) {
     
-    while (args.smaler(args.ary + r * args.base, piv))
+    while (args->smaler(args->ary + r * args->base, piv))
       r--; 
 
-    while (args.bigger(args.ary + l * args.base, piv)) 
+    while (args->bigger(args->ary + l * args->base, piv)) 
       l++; 
 
-    if (args.equal(args.ary + l * args.base, 
-                   args.ary + r * args.base)) {
+    if (args->equal(args->ary + l * args->base, 
+                   args->ary + r * args->base)) {
       r--; 
 
     // switch left an right
     } else if (l < r) {
-      memcpy(temp, args.ary + l * args.base, args.base);
-      memcpy(args.ary + l * args.base, 
-             args.ary + r * args.base, 
-             args.base);
-      memcpy(args.ary + r * args.base, temp, args.base);
+      memcpy(temp, args->ary + l * args->base, args->base);
+      memcpy(args->ary + l * args->base, 
+             args->ary + r * args->base, 
+             args->base);
+      memcpy(args->ary + r * args->base, temp, args->base);
     }
 
   }
 
+
   // right side
-  ((QISTA_t *) ptr)->ary += (r + 1) * args.base;
-  ((QISTA_t *) ptr)->length -= (r + 1);
-  if (((QISTA_t *) ptr)->length < ((QISTA_t *) ptr)->min)
-    t_insertionsort_max(ptr);
-    //tc_add_func(t_insertionsort_max, ptr);
-  else if (((QISTA_t *) ptr)->length <= 0)
-    return NULL;
+  args2->ary += (r + 1) * args->base;
+  args2->length -= (r + 1);
+  if (args2->length < args2->min)
+    tc_add_func(t_insertionsort_max, args2);
+  else if (args2->length <= 0)
+    free(args2);
   else
-    t_quickinsersort_max(ptr);
-    //tc_add_func(t_quickinsersort_max, ptr);
+    tc_add_func(t_quickinsersort_max, args2);
 
   // left side
-  args.length = l;
-  if (args.length < args.min)
-    t_insertionsort_max(&args);
-    //tc_add_func(t_insertionsort_max, &args);
-  else if (args.length <= 0)
-    return NULL;
+  args->length = l;
+  if (args->length < args->min)
+    tc_add_func(t_insertionsort_max, args);
+  else if (args->length <= 0)
+    free(args);
   else
-    t_quickinsersort_max(&args);
-    //tc_add_func(t_quickinsersort_max, &args);
-
+    tc_add_func(t_quickinsersort_max, args);
 
   return NULL;
 }
@@ -372,63 +385,76 @@ void *t_quickinsersort_max(void *ptr) {
  * at an specific min array size, sorting min element first
  * Threadabel unsing Thread-Clients (initialize bevor using this)
  */
-void *t_quickinsersort_min(void *ptr) {
+void paralell_quickinsersort_min(void *ptr) {
 
-  QISTA_t args = *((QISTA_t *) ptr);
 
-  void *piv  = malloc(args.base);
-  void *temp = malloc(args.base);
+    QISTA_t *args  = malloc(sizeof(QISTA_t));
+    *args          = *((QISTA_t *) ptr);
+
+    tc_add_func(t_quickinsersort_min, (void *) args);
+    tc_join();
+  
+}
+
+static void *t_quickinsersort_min(void *ptr) {
+
+  QISTA_t *args  = malloc(sizeof(QISTA_t));
+  QISTA_t *args2 = malloc(sizeof(QISTA_t));
+  *args = *args2 = *((QISTA_t *) ptr);
+  free(ptr);
+
+  void *piv  = malloc(args->base);
+  void *temp = malloc(args->base);
   int64_t l, r;
 
-
   l = 0;
-  r = args.length - 1;
+  r = args->length - 1;
   memcpy(piv, 
-         args.ary + ((rand() % (r - l)) + l) * args.base, 
-         args.base);
+         args->ary + (rand() % r) * args->base, 
+         args->base);
 
   while (l < r) {
     
-    while (args.bigger(args.ary + r * args.base, piv))
+    while (args->bigger(args->ary + r * args->base, piv))
       r--; 
 
-    while (args.smaler(args.ary + l * args.base, piv)) 
+    while (args->smaler(args->ary + l * args->base, piv)) 
       l++; 
 
-    if (args.equal(args.ary + l * args.base, 
-                   args.ary + r * args.base)) {
+    if (args->equal(args->ary + l * args->base, 
+                   args->ary + r * args->base)) {
       r--; 
 
     // switch left an right
     } else if (l < r) {
-      memcpy(temp, args.ary + l * args.base, args.base);
-      memcpy(args.ary + l * args.base, 
-             args.ary + r * args.base, 
-             args.base);
-      memcpy(args.ary + r * args.base, temp, args.base);
+      memcpy(temp, args->ary + l * args->base, args->base);
+      memcpy(args->ary + l * args->base, 
+             args->ary + r * args->base, 
+             args->base);
+      memcpy(args->ary + r * args->base, temp, args->base);
     }
 
   }
 
+
   // right side
-  ((QISTA_t *) ptr)->ary += (r + 1) * args.base;
-  ((QISTA_t *) ptr)->length -= (r + 1);
-  if (((QISTA_t *) ptr)->length < ((QISTA_t *) ptr)->min)
-    tc_add_func(t_insertionsort_min, ptr);
-  else if (((QISTA_t *) ptr)->length <= 0)
-    return NULL;
+  args2->ary += (r + 1) * args->base;
+  args2->length -= (r + 1);
+  if (args2->length < args2->min)
+    tc_add_func(t_insertionsort_min, args2);
+  else if (args2->length <= 0)
+    free(args2);
   else
-    tc_add_func(t_quickinsersort_min, ptr);
+    tc_add_func(t_quickinsersort_min, args2);
 
   // left side
-  args.length = l;
-  if (args.length < args.min)
-    tc_add_func(t_insertionsort_min, &args);
-  else if (args.length <= 0)
-    return NULL;
+  args->length = l;
+  if (args->length < args->min)
+    tc_add_func(t_insertionsort_min, args);
+  else if (args->length <= 0)
+    free(args);
   else
-    tc_add_func(t_quickinsersort_min, &args);
-
+    tc_add_func(t_quickinsersort_min, args);
 
   return NULL;
 }
