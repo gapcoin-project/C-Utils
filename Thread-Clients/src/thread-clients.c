@@ -187,7 +187,12 @@ void tc_destroy() {
  */
 static void *tc_client_func(void *arg) {
 
-  /* TClients struct containig the work todo */
+  /** 
+   * TClients struct containig the work todo 
+   * is is neccesary to give it as the parameter,
+   * because the function pointer hase no direct access to
+   * the tc_clients static struct which is in this file
+   * */
   TClients *tc_clients = (TClients *) arg;
 
   /* will contain the next function (work) to progress */
