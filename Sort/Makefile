@@ -42,4 +42,10 @@ speed-macro-vs-pointer: sort
 				
 clean:
 	rm $(BIN)/*.o
+	rm ../Time-Diff/bin/*.o
+	rm ../Thread-Clients/bin/*.o
 
+distclean:
+	rm $(BIN)/*
+	rm ../Time-Diff/bin/*
+	rm ../Thread-Clients/bin/*
