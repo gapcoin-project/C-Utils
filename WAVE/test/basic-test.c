@@ -24,7 +24,8 @@ int main(int argc, char *argv[]) {
     data[i] = (char) rand();
 
   int fd = open("test.wav", O_CREAT|O_WRONLY, 0777);
-  wave_write_header(&head, fd);
+  if (wave_write_header(&head, fd) == -1)
+    printf("something went wrong!\n");
   write(fd, data, length);
   close(fd);
 

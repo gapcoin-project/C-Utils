@@ -34,10 +34,10 @@ void init_WAVEHeader(WAVEHeader *head, uint32_t data_size) {
  */
 int wave_write_header(WAVEHeader *head, int fd) {
 
-  if(write(fd, &head->riff,            4) == -1) return -1;
+  if(write(fd, head->riff,             4) == -1) return -1;
   if(write(fd, &head->size,            4) == -1) return -1;
-  if(write(fd, &head->wave,            4) == -1) return -1;
-  if(write(fd, &head->fmt,             4) == -1) return -1;
+  if(write(fd, head->wave,             4) == -1) return -1;
+  if(write(fd, head->fmt,              4) == -1) return -1;
   if(write(fd, &head->fmt_size,        4) == -1) return -1;
   if(write(fd, &head->format,          2) == -1) return -1;
   if(write(fd, &head->channel,         2) == -1) return -1;
@@ -45,7 +45,7 @@ int wave_write_header(WAVEHeader *head, int fd) {
   if(write(fd, &head->bytes_per_sec,   2) == -1) return -1;
   if(write(fd, &head->frame_size,      2) == -1) return -1;
   if(write(fd, &head->bits_per_sample, 2) == -1) return -1;
-  if(write(fd, &head->data,            4) == -1) return -1;
+  if(write(fd, head->data,             4) == -1) return -1;
   if(write(fd, &head->data_length,     4) == -1) return -1;
 
   return 1;
