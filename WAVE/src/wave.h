@@ -20,8 +20,8 @@ typedef struct {
   uint16_t format;             /* format tag */
   #define  WAVE_PCM  0x0001    /* PCM WAVE-Format */
   uint16_t channel;            /* channels 1=mono, 2=stereo*/
-  uint16_t sample_rate;        /* samples per sec */
-  uint16_t bytes_per_sec;      /* sample_rate * frame_size */
+  uint32_t sample_rate;        /* samples per sec */
+  uint32_t bytes_per_sec;      /* sample_rate * frame_size */
   uint16_t frame_size;         /* channels * ((bits/sample + 7) / 8) */
   uint16_t bits_per_sample;    /* bits/sample per channels */
   char     *data;              /* 'data' */
