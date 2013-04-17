@@ -11,11 +11,11 @@
  *
  * NOTE it onely initializes the Header and dos not allocaate the data
  */
-void init_RGB_BMPHeader(BMPHeader *head, u_int32_t width, u_int32_t height) {
+void init_RGB_BMPHeader(BMPHeader *head, uint32_t width, uint32_t height) {
 
   // init Head
-  head->bfType[0]       = (u_int8_t) 'B';
-  head->bfType[1]       = (u_int8_t) 'M';
+  head->bfType[0]       = (uint8_t) 'B';
+  head->bfType[1]       = (uint8_t) 'M';
   head->bfSize          = 54 + (width * height * 3);
   head->bfReserved      = 0;
   head->bfOffByte       = 54;
@@ -38,21 +38,21 @@ void init_RGB_BMPHeader(BMPHeader *head, u_int32_t width, u_int32_t height) {
  */
 int bmp_write_header(BMPHeader *head, int fd) {
 
-  if(write(fd, &head->bfType,          sizeof(u_int16_t)) == -1) return -1;
-  if(write(fd, &head->bfSize,          sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->bfReserved,      sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->bfOffByte,       sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biSize,          sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biWidth,         sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biHeight,        sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biPlanes,        sizeof(u_int16_t)) == -1) return -1;
-  if(write(fd, &head->biBitCount,      sizeof(u_int16_t)) == -1) return -1;
-  if(write(fd, &head->biCompression,   sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biSizeImage,     sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biXPelsPerMeter, sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biYPelsPerMeter, sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biClrUsed,       sizeof(u_int32_t)) == -1) return -1;
-  if(write(fd, &head->biClrImportant,  sizeof(u_int32_t)) == -1) return -1;
+  if(write(fd, &head->bfType,          sizeof(uint16_t)) == -1) return -1;
+  if(write(fd, &head->bfSize,          sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->bfReserved,      sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->bfOffByte,       sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biSize,          sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biWidth,         sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biHeight,        sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biPlanes,        sizeof(uint16_t)) == -1) return -1;
+  if(write(fd, &head->biBitCount,      sizeof(uint16_t)) == -1) return -1;
+  if(write(fd, &head->biCompression,   sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biSizeImage,     sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biXPelsPerMeter, sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biYPelsPerMeter, sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biClrUsed,       sizeof(uint32_t)) == -1) return -1;
+  if(write(fd, &head->biClrImportant,  sizeof(uint32_t)) == -1) return -1;
 
   return 1;
 
