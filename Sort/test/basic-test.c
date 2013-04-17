@@ -119,7 +119,7 @@ int main (int argc, char *argv[]) {
       ary1[i] = rand() % length;
     }
 
-    paralell_quickinsersort_min(&args);
+    parallel_quickinsersort_min(&args);
 
 
     for (i = 0; i < length-1; i++) {
@@ -183,7 +183,7 @@ int main (int argc, char *argv[]) {
       ary1[i] = rand() % length;
     }
 
-    paralell_quickinsersort_max(&args);
+    parallel_quickinsersort_max(&args);
 
 
     for (i = 0; i < length-1; i++) {

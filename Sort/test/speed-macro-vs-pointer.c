@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
     }
 
     gettimeofday(&tmin_s, NULL);
-    paralell_quickinsersort_min(&args);
+    parallel_quickinsersort_min(&args);
     gettimeofday(&tmin_e, NULL);
     timeval_subtract(&tmin_t, &tmin_e, &tmin_s);
     timeval_additon(&tmin_r, &tmin_r, &tmin_t);
@@ -195,7 +195,7 @@ int main (int argc, char *argv[]) {
     }
 
     gettimeofday(&tmax_s, NULL);
-    paralell_quickinsersort_max(&args);
+    parallel_quickinsersort_max(&args);
     gettimeofday(&tmax_e, NULL);
     timeval_subtract(&tmax_t, &tmax_e, &tmax_s);
     timeval_additon(&tmax_r, &tmax_r, &tmax_t);
@@ -237,11 +237,11 @@ int main (int argc, char *argv[]) {
   PRINT_TIMEVAL(mmax_r);
   printf("\n");
 
-  printf("paralell_quickinsersort_min: ");
+  printf("parallel_quickinsersort_min: ");
   PRINT_TIMEVAL(tmin_r);
   printf("\n");
   
-  printf("paralell_quickinsersort_max: ");
+  printf("parallel_quickinsersort_max: ");
   PRINT_TIMEVAL(tmax_r);
   printf("\n");
 
