@@ -306,7 +306,7 @@ void *t_insertionsort_max(void *ptr) {
  * at an specific min array size, sorting max element first
  * Threadabel unsing Thread-Clients (initialize bevor using this)
  */
-void paralell_quickinsersort_max(QISTA_t *ptr) {
+void parallel_quickinsersort_max(QISTA_t *ptr) {
 
 
     QISTA_t *args  = malloc(sizeof(QISTA_t));
@@ -385,7 +385,7 @@ static void *t_quickinsersort_max(void *ptr) {
  * at an specific min array size, sorting min element first
  * Threadabel unsing Thread-Clients (initialize bevor using this)
  */
-void paralell_quickinsersort_min(QISTA_t *ptr) {
+void parallel_quickinsersort_min(QISTA_t *ptr) {
 
 
     QISTA_t *args  = malloc(sizeof(QISTA_t));
