@@ -26,7 +26,7 @@
     printf("[WARNING] %s, in %s: %d!!!\n", (MSG), __FILE__, __LINE__);    \
     printf("[WARNING] %s, in %s: %d!!!\n", (MSG), __FILE__, __LINE__);    \
     printf("[WARNING] %s, in %s: %d!!!\n", (MSG), __FILE__, __LINE__);    \
-  while (0)
+  } while (0)
 #else
 #define WARN_MSG(MSG) (void) (MSG)
 #endif
@@ -40,7 +40,7 @@
   do {                                                                    \
     printf("[ERROR] %s, in %s: %d!!!\n", (MSG), __FILE__, __LINE__);      \
     exit(1);                                                              \
-  while (0)
+  } while (0)
 #else
 #define ERR_MSG(MSG) (void) (MSG)
 #endif
