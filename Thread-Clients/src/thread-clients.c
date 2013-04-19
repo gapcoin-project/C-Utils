@@ -42,14 +42,15 @@ DEF_ARY(TCFunc, TCFuncsAry);
  * Struc holding the thread client and the work array
  */
 typedef struct {
- pthread_t   *clients;    /* the client threads */
- TCFuncsAry   work;       /* the work for the clients */
+ pthread_t    *clients;   /* the client threads                        */
+ TCArgs       *args;      /* client wide args                          */
+ TCFuncsAry   work;       /* the work for the clients                  */
  TCFuncsAry   finished;   /* finished functions and their return value */
- uint8_t      running;    /* while true clients keep running */
- uint8_t      use_return; /* wheter to use the return values or not */
- uint64_t     last_id;    /* last func id */
- uint32_t     n_clients;  /* number of thread clients */
- uint32_t     n_working;  /* number of working threads */
+ uint8_t      running;    /* while true clients keep running           */
+ uint8_t      use_return; /* wheter to use the return values or not    */
+ uint64_t     last_id;    /* last func id                              */
+ uint32_t     n_clients;  /* number of thread clients                  */
+ uint32_t     n_working;  /* number of working threads                 */
 } TClients;
 
 /* to share values between clients */
@@ -59,18 +60,27 @@ static TClients tc_clients;
 static pthread_mutex_t tc_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
+ * Args for the client function
+ * containing an id and an pointer 
+ * to the tc_clients value
+ */
+typedef struct {
+  int id;
+  TClients *tc_clients;
+} TCClientsArgs;
+
+/**
  * Initializes Thread-Clients Lib
  *
  * Parameters:
  *    max_work:   the expected maximum among of
  *                function given at a time to process
  *    n_clients:  the number of clients (threads) to use
- *    use_return: if you need the return values this sould be 1 (true)
- *                else let it be 0 and, save we save memory
- *                NOTE: if you set use_return and dosent pull the
- *                      return values memory will soooon be full
+ *
+ *    Note: at default return values are not stored, if you need them
+ *          set it with tc_use_return(1);
  */
-void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
+void init_tc(uint32_t max_work, uint32_t n_clients) {
 
   if (tc_initialized) {
     DBG_MSG("Thread Clients allready initialized");
@@ -80,22 +90,76 @@ void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
   tc_initialized = 1;
 
   ARY_INIT(TCFunc, tc_clients.work, max_work);
-  if (use_return)
-  ARY_INIT(TCFunc, tc_clients.finished, max_work);
   tc_clients.clients    = malloc(sizeof(pthread_t) * n_clients);
+  tc_clients.args       = malloc(sizeof(TCArgs) * n_clients);
   tc_clients.running    = 1;
-  tc_clients.use_return = use_return;
+  tc_clients.use_return = 0;
   tc_clients.last_id    = 1;
   tc_clients.n_clients  = n_clients;
   tc_clients.n_working  = 0;
 
+
   /* create client threads */
+
   uint32_t i;
-  for (i = 0; i < n_clients; i++)
+  for (i = 0; i < n_clients; i++) {
+    
+    *((int *) &tc_clients.args[i].client_id) = i;
+    tc_clients.args[i].client_args           = NULL;
+    tc_clients.args[i].func_args             = NULL;
+
+    TCClientsArgs *tc_args = malloc(sizeof(TCClientsArgs));
+    tc_args->id             = i;
+    tc_args->tc_clients     = &tc_clients;
+
     pthread_create(tc_clients.clients + i, 
                    NULL, 
                    tc_client_func, 
-                   (void *) &tc_clients);
+                   (void *) tc_args);
+  }
+}
+
+/**
+ * Sets the Opts of the specific client to the given pointer
+ */
+void tc_set_client_opts(uint32_t id, void *opts) {
+  if (id >= tc_clients.n_clients) {
+    WARN_MSG("no Client with the given id");
+    return;
+  }
+
+  tc_clients.args[id].client_args = opts;
+}
+
+/**
+ * Sets al clients Opts to the given void pointer array
+ * first element will be assigned to the first client (id=0)
+ */
+void tc_set_clients_opts(void **opts) {
+
+  uint32_t i;
+  for (i = 0; i < tc_clients.n_clients; i++)
+    tc_clients.args[i].client_args = opts[i];
+
+}
+
+/**
+ * let you control wheter to use the return values or not
+ * WARNING: if you shutdwon using return vallues all
+ *          unsaved return values will be deleted
+ *
+ * give TRUE ore FALSE as parameter
+ *
+ * NOTE: if you set use_return and dosent pull the
+ *       return values memory will soooon be full
+ */
+void tc_use_return(char use_return) {
+
+  if (use_return && !tc_clients.use_return)
+    ARY_INIT(TCFunc, tc_clients.finished, ARY_LEN(tc_clients.work));
+  else
+    ARY_FREE(tc_clients.finished);
+
 }
 
 /**
@@ -206,11 +270,12 @@ static void *tc_client_func(void *arg) {
    * because the function pointer hase no direct access to
    * the tc_clients static struct which is in this file
    * */
-  TClients *tc_clients = (TClients *) arg;
+  TClients *tc_clients = ((TCClientsArgs *) arg)->tc_clients;
+  int client_id        = ((TCClientsArgs *) arg)->id;
+  free(arg);
 
   /* will contain the next function (work) to progress */
   TCFunc next_work;
-
   
   /* working loop (no mutex needed) */
   while (tc_clients->running) {
@@ -224,8 +289,11 @@ static void *tc_client_func(void *arg) {
       ARY_EXTRACT(tc_clients->work, next_work); /* get next work */
       pthread_mutex_unlock(&tc_mutex); /* call work paralell */
 
+      /* set args */
+      tc_clients->args[client_id].func_args = next_work.args;
+
       /* start working */
-      next_work.args = next_work.func(next_work.args);
+      next_work.args = next_work.func(&tc_clients->args[client_id]);
 
       pthread_mutex_lock(&tc_mutex);
       tc_clients->n_working--;
