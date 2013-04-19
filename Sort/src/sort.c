@@ -237,7 +237,7 @@ void quickinsersort_max(void *ary,
  */
 void *t_insertionsort_min(void *ptr) {
 
-  QISTA_t *args = (QISTA_t *) ptr;
+  QISTA_t *args = (QISTA_t *) ((TCArgs *) ptr)->func_args;
   
   int64_t i, j;
   void  *temp = malloc(args->base);
@@ -275,7 +275,7 @@ void *t_insertionsort_min(void *ptr) {
  */
 void *t_insertionsort_max(void *ptr) { 
   
-  QISTA_t *args = (QISTA_t *) ptr;
+  QISTA_t *args = (QISTA_t *) ((TCArgs *) ptr)->func_args;
 
   int64_t i, j;
   void  *temp = malloc(args->base);
@@ -310,7 +310,7 @@ void parallel_quickinsersort_max(QISTA_t *ptr) {
 
 
     QISTA_t *args  = malloc(sizeof(QISTA_t));
-    *args          = *ptr;
+    *args          = *((QISTA_t *) ptr);
 
     tc_add_func(t_quickinsersort_max, (void *) args);
     tc_join();
@@ -321,8 +321,8 @@ static void *t_quickinsersort_max(void *ptr) {
 
   QISTA_t *args  = malloc(sizeof(QISTA_t));
   QISTA_t *args2 = malloc(sizeof(QISTA_t));
-  *args = *args2 = *((QISTA_t *) ptr);
-  free(ptr);
+  *args = *args2 = *((QISTA_t *) ((TCArgs *) ptr)->func_args);
+  free(((TCArgs *) ptr)->func_args);
 
   void *piv  = malloc(args->base);
   void *temp = malloc(args->base);
@@ -389,7 +389,7 @@ void parallel_quickinsersort_min(QISTA_t *ptr) {
 
 
     QISTA_t *args  = malloc(sizeof(QISTA_t));
-    *args          = *ptr;
+    *args          = *((QISTA_t *) ptr);
 
     tc_add_func(t_quickinsersort_min, (void *) args);
     tc_join();
@@ -400,8 +400,8 @@ static void *t_quickinsersort_min(void *ptr) {
 
   QISTA_t *args  = malloc(sizeof(QISTA_t));
   QISTA_t *args2 = malloc(sizeof(QISTA_t));
-  *args = *args2 = *((QISTA_t *) ptr);
-  free(ptr);
+  *args = *args2 = *((QISTA_t *) ((TCArgs *) ptr)->func_args);
+  free(((TCArgs *) ptr)->func_args);
 
   void *piv  = malloc(args->base);
   void *temp = malloc(args->base);
