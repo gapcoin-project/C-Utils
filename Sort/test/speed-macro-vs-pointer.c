@@ -67,7 +67,7 @@ int main (int argc, char *argv[]) {
 
   int64_t sorted = 1;
 
-  init_tc((uint32_t) log2((double) length), n_threads, 0);
+  init_tc((uint32_t) log2((double) length), n_threads);
   QISTA_t args;
   args.ary    = (void *) ary1;
   args.base   = sizeof(int64_t);
