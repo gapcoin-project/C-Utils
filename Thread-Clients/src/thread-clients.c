@@ -7,6 +7,7 @@
 #define __THREAD_CLIENTS__
 
 #include "thread-clients.h"
+#include "../../Debug/src/debug.h"
 
 /**
  * client function which processes work and then 
@@ -15,6 +16,11 @@
  * args will be the TClients struct
  */
 static void *tc_client_func(void *arg);
+
+/**
+ * indicates wether Thread-Clients are initialized or not
+ */
+static char tc_initialized = 0;
 
 /**
  * Struct holding one function and her args
@@ -65,6 +71,13 @@ static pthread_mutex_t tc_mutex = PTHREAD_MUTEX_INITIALIZER;
  *                      return values memory will soooon be full
  */
 void init_tc(uint32_t max_work, uint32_t n_clients, uint8_t use_return) {
+
+  if (tc_initialized) {
+    DBG_MSG("Thread Clients allready initialized");
+    return;
+  }
+
+  tc_initialized = 1;
 
   ARY_INIT(TCFunc, tc_clients.work, max_work);
   if (use_return)
