@@ -314,8 +314,8 @@ void parallel_quickinsersort_max(QISTA_t *ptr) {
     QISTA_t *args  = malloc(sizeof(QISTA_t));
     *args          = *((QISTA_t *) ptr);
 
-    tc_add_func(t_quickinsersort_max, (void *) args);
-    tc_join();
+    tcs_add_func(t_quickinsersort_max, (void *) args);
+    tcs_join();
   
 }
 
@@ -364,20 +364,20 @@ static void *t_quickinsersort_max(TCArgs *ptr) {
   args2->ary += (r + 1) * args->base;
   args2->length -= (r + 1);
   if (args2->length < args2->min)
-    tc_add_func(t_insertionsort_max, args2);
+    tcs_add_func(t_insertionsort_max, args2);
   else if (args2->length <= 0)
     free(args2);
   else
-    tc_add_func(t_quickinsersort_max, args2);
+    tcs_add_func(t_quickinsersort_max, args2);
 
   // left side
   args->length = l;
   if (args->length < args->min)
-    tc_add_func(t_insertionsort_max, args);
+    tcs_add_func(t_insertionsort_max, args);
   else if (args->length <= 0)
     free(args);
   else
-    tc_add_func(t_quickinsersort_max, args);
+    tcs_add_func(t_quickinsersort_max, args);
 
   return NULL;
 }
@@ -393,8 +393,8 @@ void parallel_quickinsersort_min(QISTA_t *ptr) {
     QISTA_t *args  = malloc(sizeof(QISTA_t));
     *args          = *((QISTA_t *) ptr);
 
-    tc_add_func(t_quickinsersort_min, (void *) args);
-    tc_join();
+    tcs_add_func(t_quickinsersort_min, (void *) args);
+    tcs_join();
   
 }
 
@@ -443,20 +443,20 @@ static void *t_quickinsersort_min(TCArgs *ptr) {
   args2->ary += (r + 1) * args->base;
   args2->length -= (r + 1);
   if (args2->length < args2->min)
-    tc_add_func(t_insertionsort_min, args2);
+    tcs_add_func(t_insertionsort_min, args2);
   else if (args2->length <= 0)
     free(args2);
   else
-    tc_add_func(t_quickinsersort_min, args2);
+    tcs_add_func(t_quickinsersort_min, args2);
 
   // left side
   args->length = l;
   if (args->length < args->min)
-    tc_add_func(t_insertionsort_min, args);
+    tcs_add_func(t_insertionsort_min, args);
   else if (args->length <= 0)
     free(args);
   else
-    tc_add_func(t_quickinsersort_min, args);
+    tcs_add_func(t_quickinsersort_min, args);
 
   return NULL;
 }
