@@ -70,7 +70,7 @@ void tc_use_return(char use_return);
  *        struct conatining your given args
  *        WARNING: never try to free this pointer!!!
  */
-uint64_t tc_add_func(void *(*func)(void *), void *args);
+uint64_t tc_add_func(void *(*func)(TCArgs *), void *args);
 
 /**
  * Returns the return value of the function with the given id

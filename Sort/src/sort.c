@@ -6,8 +6,10 @@
 #include "sort.h"
 
 /* static functions */
-static void *t_quickinsersort_max(void *ptr);
-static void *t_quickinsersort_min(void *ptr);
+static void *t_quickinsersort_max(TCArgs *ptr);
+static void *t_quickinsersort_min(TCArgs *ptr);
+static void *pt_quickinsersort_min(void *ptr);
+static void *pt_quickinsersort_max(void *ptr);
 
 
 /**
@@ -235,9 +237,9 @@ void quickinsersort_max(void *ary,
  *
  * threadable version
  */
-void *t_insertionsort_min(void *ptr) {
+void *t_insertionsort_min(TCArgs *ptr) {
 
-  QISTA_t *args = (QISTA_t *) ((TCArgs *) ptr)->func_args;
+  QISTA_t *args = (QISTA_t *) ptr->func_args;
   
   int64_t i, j;
   void  *temp = malloc(args->base);
@@ -273,9 +275,9 @@ void *t_insertionsort_min(void *ptr) {
  *
  * threadable version
  */
-void *t_insertionsort_max(void *ptr) { 
+void *t_insertionsort_max(TCArgs *ptr) { 
   
-  QISTA_t *args = (QISTA_t *) ((TCArgs *) ptr)->func_args;
+  QISTA_t *args = (QISTA_t *) ptr->func_args;
 
   int64_t i, j;
   void  *temp = malloc(args->base);
@@ -317,12 +319,12 @@ void parallel_quickinsersort_max(QISTA_t *ptr) {
   
 }
 
-static void *t_quickinsersort_max(void *ptr) {
+static void *t_quickinsersort_max(TCArgs *ptr) {
 
   QISTA_t *args  = malloc(sizeof(QISTA_t));
   QISTA_t *args2 = malloc(sizeof(QISTA_t));
-  *args = *args2 = *((QISTA_t *) ((TCArgs *) ptr)->func_args);
-  free(((TCArgs *) ptr)->func_args);
+  *args = *args2 = *((QISTA_t *) ptr->func_args);
+  free(ptr->func_args);
 
   void *piv  = malloc(args->base);
   void *temp = malloc(args->base);
@@ -396,12 +398,12 @@ void parallel_quickinsersort_min(QISTA_t *ptr) {
   
 }
 
-static void *t_quickinsersort_min(void *ptr) {
+static void *t_quickinsersort_min(TCArgs *ptr) {
 
   QISTA_t *args  = malloc(sizeof(QISTA_t));
   QISTA_t *args2 = malloc(sizeof(QISTA_t));
-  *args = *args2 = *((QISTA_t *) ((TCArgs *) ptr)->func_args);
-  free(((TCArgs *) ptr)->func_args);
+  *args = *args2 = *((QISTA_t *) ptr->func_args);
+  free(ptr->func_args);
 
   void *piv  = malloc(args->base);
   void *temp = malloc(args->base);
@@ -459,4 +461,258 @@ static void *t_quickinsersort_min(void *ptr) {
   return NULL;
 }
 
+
+
+
+/*********************************************
+ * pthread version of paralle quickinsersort *
+ ********************************************/
+
+/**
+ * Just Insertionsort, min element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * smaler is function pointer to an smaler function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ *
+ * threadable version
+ */
+void *pt_insertionsort_min(void *ptr) {
+
+  QISTA_t *args = (QISTA_t *) ptr;
+  
+  int64_t i, j;
+  void  *temp = malloc(args->base);
+
+  for (i = 1; i < args->length; i++) {
+    memcpy(temp, args->ary + i * args->base, args->base);
+    j = i - 1;
+
+    while (j >= 0 && args->smaler(temp, args->ary + (j * args->base))) {
+      memcpy(args->ary + (j + 1) * args->base, 
+             args->ary + j * args->base, 
+             args->base);
+
+      j = j - 1;
+    }   
+    
+    memcpy(args->ary + (j + 1) * args->base, 
+           temp, 
+           args->base);
+  }
+
+  return NULL;
+}
+
+/**
+ * Just Insertionsort, max element first
+ * takes a void pointer to an array
+ * length is the number of elements in that array
+ * base is the size of an array element
+ * bigger is function pointer to an bigger function
+ * that compares two array elements the start address of
+ * the elements are given as void pointers
+ *
+ * threadable version
+ */
+void *pt_insertionsort_max(void *ptr) { 
+  
+  QISTA_t *args = (QISTA_t *) ptr;
+
+  int64_t i, j;
+  void  *temp = malloc(args->base);
+
+  for (i = 1; i < args->length; i++) {
+    memcpy(temp, args->ary + i * args->base, args->base);
+    j = i - 1;
+
+    while (j >= 0 && args->bigger(temp, args->ary + (j * args->base))) {
+      memcpy(args->ary + (j + 1) * args->base, 
+             args->ary + j * args->base, 
+             args->base);
+
+      j = j - 1;
+    }   
+    
+    memcpy(args->ary + (j + 1) * args->base, 
+           temp, 
+           args->base);
+  }
+
+  return NULL;
+}
+
+/**
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size, sorting max element first
+ * Threadabel unsing pthread syscalls (for speed testing purpoise)
+ */
+void pt_parallel_quickinsersort_max(QISTA_t *ptr) {
+
+
+    QISTA_t *args  = malloc(sizeof(QISTA_t));
+    *args          = *((QISTA_t *) ptr);
+
+    pthread_t thread;
+    pthread_create(&thread, NULL, pt_quickinsersort_max, (void *) args);
+
+  
+    pthread_join(thread, NULL);    
+}
+
+static void *pt_quickinsersort_max(void *ptr) {
+
+  QISTA_t *args  = malloc(sizeof(QISTA_t));
+  QISTA_t *args2 = malloc(sizeof(QISTA_t));
+  *args = *args2 = *((QISTA_t *) ptr);
+  free(ptr);
+
+  void *piv  = malloc(args->base);
+  void *temp = malloc(args->base);
+  int64_t l, r;
+
+  l = 0;
+  r = args->length - 1;
+  memcpy(piv, 
+         args->ary + (rand() % r) * args->base, 
+         args->base);
+
+  while (l < r) {
+    
+    while (args->smaler(args->ary + r * args->base, piv))
+      r--; 
+
+    while (args->bigger(args->ary + l * args->base, piv)) 
+      l++; 
+
+    if (args->equal(args->ary + l * args->base, 
+                   args->ary + r * args->base)) {
+      r--; 
+
+    // switch left an right
+    } else if (l < r) {
+      memcpy(temp, args->ary + l * args->base, args->base);
+      memcpy(args->ary + l * args->base, 
+             args->ary + r * args->base, 
+             args->base);
+      memcpy(args->ary + r * args->base, temp, args->base);
+    }
+
+  }
+
+   pthread_t thread1, thread2;
+
+  // right side
+  args2->ary += (r + 1) * args->base;
+  args2->length -= (r + 1);
+  if (args2->length < args2->min)
+    pthread_create(&thread1, NULL, pt_insertionsort_max, (void *) args2);
+  else if (args2->length <= 0)
+    free(args2);
+  else
+    pthread_create(&thread1, NULL, pt_quickinsersort_max, (void *) args2);
+
+  // left side
+  args->length = l;
+  if (args->length < args->min) {
+    pthread_create(&thread2, NULL, pt_insertionsort_max, (void *) args);          
+  } else if (args->length <= 0)
+    free(args);
+  else
+    pthread_create(&thread2, NULL, pt_quickinsersort_max, (void *) args);
+
+  pthread_join(thread1, NULL);
+  pthread_join(thread2, NULL);
+
+  return NULL;
+}
+
+/**
+ * Improofed variant of QuickSort which uses insertionsort 
+ * at an specific min array size, sorting min element first
+ * Threadabel unsing Thread-Clients (initialize bevor using this)
+ */
+void pt_parallel_quickinsersort_min(QISTA_t *ptr) {
+
+
+    QISTA_t *args  = malloc(sizeof(QISTA_t));
+    *args          = *((QISTA_t *) ptr);
+
+    pthread_t thread;
+    pthread_create(&thread, NULL, pt_quickinsersort_min, (void *) args);
+
+  
+    pthread_join(thread, NULL);    
+  
+}
+
+static void *pt_quickinsersort_min(void *ptr) {
+
+  QISTA_t *args  = malloc(sizeof(QISTA_t));
+  QISTA_t *args2 = malloc(sizeof(QISTA_t));
+  *args = *args2 = *((QISTA_t *) ptr);
+  free(ptr);
+
+  void *piv  = malloc(args->base);
+  void *temp = malloc(args->base);
+  int64_t l, r;
+
+  l = 0;
+  r = args->length - 1;
+  memcpy(piv, 
+         args->ary + (rand() % r) * args->base, 
+         args->base);
+
+  while (l < r) {
+    
+    while (args->bigger(args->ary + r * args->base, piv))
+      r--; 
+
+    while (args->smaler(args->ary + l * args->base, piv)) 
+      l++; 
+
+    if (args->equal(args->ary + l * args->base, 
+                   args->ary + r * args->base)) {
+      r--; 
+
+    // switch left an right
+    } else if (l < r) {
+      memcpy(temp, args->ary + l * args->base, args->base);
+      memcpy(args->ary + l * args->base, 
+             args->ary + r * args->base, 
+             args->base);
+      memcpy(args->ary + r * args->base, temp, args->base);
+    }
+
+  }
+
+
+   pthread_t thread1, thread2;
+
+  // right side
+  args2->ary += (r + 1) * args->base;
+  args2->length -= (r + 1);
+  if (args2->length < args2->min)
+    pthread_create(&thread1, NULL, pt_insertionsort_min, (void *) args2);
+  else if (args2->length <= 0)
+    free(args2);
+  else
+    pthread_create(&thread1, NULL, pt_quickinsersort_min, (void *) args2);
+
+  // left side
+  args->length = l;
+  if (args->length < args->min)
+    pthread_create(&thread2, NULL, pt_insertionsort_min, (void *) args);
+  else if (args->length <= 0)
+    free(args);
+  else
+    pthread_create(&thread2, NULL, pt_quickinsersort_min, (void *) args);
+
+  pthread_join(thread1, NULL);
+  pthread_join(thread2, NULL);
+
+  return NULL;
+}
 #endif //end of CHIEFSORT

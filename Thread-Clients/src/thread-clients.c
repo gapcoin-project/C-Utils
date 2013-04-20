@@ -28,8 +28,8 @@ static char tc_initialized = 0;
  *  and gehts an void pointer (args))
  */
 typedef struct {
-  void *(*func) (void *);
-  void *args;
+  void     *(*func) (TCArgs *);
+  void     *args;
   uint64_t id;
 } TCFunc;
 
@@ -172,7 +172,7 @@ void tc_use_return(char use_return) {
  *    it returns the function id of the inserted function
  *    you will ned this id to get the return value of that function
  */
-uint64_t tc_add_func(void *(*func)(void *), void *args) {
+uint64_t tc_add_func(void *(*func)(TCArgs *), void *args) {
   
   TCFunc new_func;
 

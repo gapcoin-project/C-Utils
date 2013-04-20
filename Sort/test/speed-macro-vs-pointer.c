@@ -49,17 +49,19 @@ int main (int argc, char *argv[]) {
   int64_t max_min_q = atoi(argv[2]);
   int64_t n_times = atoi(argv[3]);
   int64_t n_threads = atoi(argv[4]);
-  struct timeval min_r, max_r, mmin_r, mmax_r, tmin_r, tmax_r; // result
-  struct timeval min_t, max_t, mmin_t, mmax_t, tmin_t, tmax_t; // temp
-  struct timeval min_s, max_s, mmin_s, mmax_s, tmin_s, tmax_s; // start
-  struct timeval min_e, max_e, mmin_e, mmax_e, tmin_e, tmax_e; // end
+  struct timeval min_r, max_r, mmin_r, mmax_r, tmin_r, tmax_r, ptmin_r, ptmax_r; // result
+  struct timeval min_t, max_t, mmin_t, mmax_t, tmin_t, tmax_t, ptmin_t, ptmax_t; // temp
+  struct timeval min_s, max_s, mmin_s, mmax_s, tmin_s, tmax_s, ptmin_s, ptmax_s; // start
+  struct timeval min_e, max_e, mmin_e, mmax_e, tmin_e, tmax_e, ptmin_e, ptmax_e; // end
 
-  min_r.tv_sec  = min_r.tv_usec  = 0;
-  max_r.tv_sec  = max_r.tv_usec  = 0;
-  tmin_r.tv_sec = tmin_r.tv_usec = 0;
-  tmax_r.tv_sec = tmax_r.tv_usec = 0;
-  mmin_r.tv_sec = mmin_r.tv_usec = 0;
-  mmax_r.tv_sec = mmax_r.tv_usec = 0;
+  min_r.tv_sec   = min_r.tv_usec   = 0;
+  max_r.tv_sec   = max_r.tv_usec   = 0;
+  tmin_r.tv_sec  = tmin_r.tv_usec  = 0;
+  tmax_r.tv_sec  = tmax_r.tv_usec  = 0;
+  ptmin_r.tv_sec = ptmin_r.tv_usec = 0;
+  ptmax_r.tv_sec = ptmax_r.tv_usec = 0;
+  mmin_r.tv_sec  = mmin_r.tv_usec  = 0;
+  mmax_r.tv_sec  = mmax_r.tv_usec  = 0;
 
   int64_t *ary1 = malloc(sizeof(int64_t) * length);
 
@@ -79,7 +81,7 @@ int main (int argc, char *argv[]) {
 
   for (k = 0; k < n_times; k++) {
 
-    printf("times %" PRId64 "-6    \n", n_times - k);
+    printf("times %" PRId64 "-8    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -102,7 +104,7 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
-    printf("times %" PRId64 "-5    \n", n_times - k);
+    printf("times %" PRId64 "-7    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -125,7 +127,7 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
-    printf("times %" PRId64 "-4    \n", n_times - k);
+    printf("times %" PRId64 "-6    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -142,7 +144,24 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
-    printf("times %" PRId64 "-3    \n", n_times - k);
+    printf("times %" PRId64 "-5    \n", n_times - k);
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    gettimeofday(&ptmin_s, NULL);
+    pt_parallel_quickinsersort_min(&args);
+    gettimeofday(&ptmin_e, NULL);
+    timeval_subtract(&ptmin_t, &ptmin_e, &ptmin_s);
+    timeval_additon(&ptmin_r, &ptmin_r, &ptmin_t);
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] > ary1[i+1])
+        sorted = 0;
+    }
+
+    printf("times %" PRId64 "-4    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -165,7 +184,7 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
-    printf("times %" PRId64 "-2    \n", n_times - k);
+    printf("times %" PRId64 "-3    \n", n_times - k);
     
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -188,7 +207,7 @@ int main (int argc, char *argv[]) {
         sorted = 0;
     }
 
-    printf("times %" PRId64 "-1    \n", n_times - k);
+    printf("times %" PRId64 "-2    \n", n_times - k);
 
     for (i = 0; i < length; i++) {
       ary1[i] = rand() % length;
@@ -199,6 +218,23 @@ int main (int argc, char *argv[]) {
     gettimeofday(&tmax_e, NULL);
     timeval_subtract(&tmax_t, &tmax_e, &tmax_s);
     timeval_additon(&tmax_r, &tmax_r, &tmax_t);
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] < ary1[i+1])
+        sorted = 0;
+    }
+
+    printf("times %" PRId64 "-1    \n", n_times - k);
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    gettimeofday(&ptmax_s, NULL);
+    pt_parallel_quickinsersort_max(&args);
+    gettimeofday(&ptmax_e, NULL);
+    timeval_subtract(&ptmax_t, &ptmax_e, &ptmax_s);
+    timeval_additon(&ptmax_r, &ptmax_r, &ptmax_t);
 
     for (i = 0; i < length-1; i++) {
       if (ary1[i] < ary1[i+1])
@@ -220,6 +256,8 @@ int main (int argc, char *argv[]) {
   timeval_division(&mmax_r, &mmax_r, n_times);
   timeval_division(&tmin_r, &tmin_r, n_times);
   timeval_division(&tmax_r, &tmax_r, n_times);
+  timeval_division(&ptmin_r, &ptmin_r, n_times);
+  timeval_division(&ptmax_r, &ptmax_r, n_times);
 
   printf("quickinsertsort_min: ");
   PRINT_TIMEVAL(min_r);
@@ -243,6 +281,14 @@ int main (int argc, char *argv[]) {
   
   printf("parallel_quickinsersort_max: ");
   PRINT_TIMEVAL(tmax_r);
+  printf("\n");
+
+  printf("pthread parallel_quickinsersort_min: ");
+  PRINT_TIMEVAL(ptmin_r);
+  printf("\n");
+  
+  printf("pthread parallel_quickinsersort_max: ");
+  PRINT_TIMEVAL(ptmax_r);
   printf("\n");
 
 

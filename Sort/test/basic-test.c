@@ -137,6 +137,24 @@ int main (int argc, char *argv[]) {
       ary1[i] = rand() % length;
     }
 
+    pt_parallel_quickinsersort_min(&args);
+
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] > ary1[i+1]) {
+        sorted = 0;
+        sorted_all = 0;
+      }
+    }
+
+    if (!sorted)
+      printf("[ERROR] pthread_quickinsersort_min FAILED!\n");
+    sorted = 1;
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
     quickinsersort_max(ary1, 
                        length, 
                        max_min_q, 
@@ -195,6 +213,24 @@ int main (int argc, char *argv[]) {
 
     if (!sorted)
       printf("[ERROR] t_quickinsersort_max FAILED!\n");
+    sorted = 1;
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    pt_parallel_quickinsersort_max(&args);
+
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] < ary1[i+1]) {
+        sorted = 0;
+        sorted_all = 0;
+      }
+    }
+
+    if (!sorted)
+      printf("[ERROR] pthread_quickinsersort_max FAILED!\n");
     sorted = 1;
 
   }
