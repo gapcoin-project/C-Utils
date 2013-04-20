@@ -7,17 +7,14 @@
 
 #include "thread-client.h"
 #include "../../Debug/src/debug.h"
-#include <pthread.h>
 
 /* static function */
-static void *tc_client_func(void *arg);
+static void *tc_client_func(void *);
 
 /**
- * creats an new Thread-Client;
+ * inits a given Thread-Client;
  */
-TClient new_thread_client() {
-  
-  TClient *tc = malloc(sizeof(TClient);
+void init_thread_client(TClient *tc) {
   
   tc->running = 1;
   tc->do_work = 0;
@@ -25,8 +22,6 @@ TClient new_thread_client() {
   tc->args    = NULL;
 
   pthread_create(&tc->thread, NULL, tc_client_func, (void *) tc);
-
-  return tc;
 
 }
 
@@ -44,6 +39,8 @@ char tc_add_func(TClient *tc, void *(*func)(void *), void *args) {
   tc->func    = func;
   tc->args    = args;
   tc->do_work = 1;
+
+  return 1;
 
 }
 
@@ -74,7 +71,7 @@ void tc_free(TClient *tc) {
 /**
  * kills running client and frees it
  */
-tc_kill(TClient *tc) {
+void tc_kill(TClient *tc) {
 
   pthread_cancel(tc->thread);
   free(tc);

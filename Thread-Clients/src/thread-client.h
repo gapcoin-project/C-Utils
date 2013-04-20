@@ -4,6 +4,7 @@
  */
 #ifndef __THREAD_CLIENT_H__
 #define __THREAD_CLIENT_H__
+#include <pthread.h>
 
 /**
  * Thread-Client struct containing inforamtion of one thread client
@@ -11,37 +12,37 @@
 typedef struct {
   pthread_t thread;             /* the thread of this client                 */
   char      running;            /* indicates if thread client is running     */
-  char      working;            /* indicates if thread is/should work(ing)   */
+  char      do_work;            /* indicates if thread is/should work(ing)   */
   void      *(*func) (void *);  /* function to process                       */
-  void      *args               /* function parameter                        */
-  void      *ret                /* function return value                     */
+  void      *args;              /* function parameter                        */
+  void      *ret;               /* function return value                     */
 } TClient;
 
 /**
- * creats an new Thread-Client;
+ * inits a given Thread-Client;
  */
-TClient new_thread_client();
+void init_thread_client(TClient *);
 
 /**
  * adds a function to process
  * Note: this onely works if the given client is nor working
  */
-char tc_add_func(TClient *tc, void *(*func)(void *), void *args);
+char tc_add_func(TClient *, void *(*)(void *), void *);
 
 /**
  * Yields the processor until the given client has finished work
  * returns the return value of the processed function
  */
-void *tc_join(TClient *tc);
+void *tc_join(TClient *);
 
 /**
  * waits untill the current work is done an then stops and frees given client
  */
-void tc_free(TClient *tc);
+void tc_free(TClient *);
 
 /**
  * kills running client and frees it
  */
-tc_kill(TClient *tc);
+void tc_kill(TClient *);
 
 #endif /* __THREAD_CLIENT_H__ */
