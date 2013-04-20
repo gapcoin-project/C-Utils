@@ -4,6 +4,8 @@
  */
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
  * prints a debuging Message with file and line
