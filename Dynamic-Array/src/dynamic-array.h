@@ -234,6 +234,15 @@ typedef struct {                          \
   } while (0)
 
 
+/**
+ * returns wether the given array is NOT empty
+ */
+#define ARY_NOT_EMPTY(ARY) ((ARY).length != 0)
+
+/**
+ * returns wether the given array is empty
+ */
+#define ARY_EMPTY(ARY) ((ARY).length == 0)
 
 
 #endif // __DYNAMIC_ARRAY_H__
