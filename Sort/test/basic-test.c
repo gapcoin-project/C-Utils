@@ -4,6 +4,17 @@
 
 #include "../src/sort.h"
 
+/* for qsort from stdlib */
+int comp(const void *a, const void *b) {
+  if (*((int *) a) > *((int *) b))
+    return 1;
+
+  if (*((int *) a) < *((int *) b))
+    return -1;
+
+  return 0;
+}
+
 static inline char bigger(int64_t a, int64_t b) {
   
   return a > b;
@@ -231,6 +242,25 @@ int main (int argc, char *argv[]) {
 
     if (!sorted)
       printf("[ERROR] pthread_quickinsersort_max FAILED!\n");
+    sorted = 1;
+
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
+
+    
+    qsort(ary1, length, sizeof(int64_t), comp);
+
+
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] > ary1[i+1]) {
+        sorted = 0;
+        sorted_all = 0;
+      }
+    }
+
+    if (!sorted)
+      printf("[ERROR] stdlib qsort FAILED!\n");
     sorted = 1;
 
   }
