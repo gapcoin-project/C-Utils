@@ -221,6 +221,18 @@ typedef struct {                          \
  */
 #define ARY_CLEAR(ARY) (ARY).length = 0
 
+/**
+ * Clones an given Array
+ */
+#define ARY_CLONE(DST, SRC)                                                   \
+  do {                                                                        \
+    ARY_GROW(DST, (SRC).length);                                              \
+    memcpy((DST).ptr,                                                         \
+           (SRC).ptr,                                                         \
+           sizeof((DST).ptr[0]) * (DST).length);                              \
+    (DST).length = (SRC).length;                                              \
+  } while (0)
+
 
 
 
