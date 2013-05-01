@@ -222,6 +222,12 @@ typedef struct {                          \
 #define ARY_CLEAR(ARY) (ARY).length = 0
 
 /**
+ * sets all array indexes to zero
+ */
+#define ARY_SET_NULL(ARY)                                                     \
+  memset((ARY).ptr, 0, sizeof((AYR).ptr[0] * (ARY).length)
+
+/**
  * Clones an given Array
  */
 #define ARY_CLONE(DST, SRC)                                                   \
