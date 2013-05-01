@@ -227,9 +227,9 @@ typedef struct {                          \
 #define ARY_CLONE(DST, SRC)                                                   \
   do {                                                                        \
     ARY_GROW(DST, (SRC).length);                                              \
-    memcpy((DST).ptr,                                                         \
+    printf("%p\n", memcpy((DST).ptr,                                                         \
            (SRC).ptr,                                                         \
-           sizeof((DST).ptr[0]) * (DST).length);                              \
+           sizeof((DST).ptr[0]) * (DST).length));                              \
     (DST).length = (SRC).length;                                              \
   } while (0)
 
