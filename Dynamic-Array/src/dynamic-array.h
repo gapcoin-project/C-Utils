@@ -142,7 +142,7 @@ typedef struct {                          \
 
 
 /**
- * Deletes al instaces of the given Element from the given Array
+ * Deletes all instaces of the given Element from the given Array
  * NOTE the Arry content type should be the same as th type of 
  * the given element
  */
@@ -151,7 +151,7 @@ typedef struct {                          \
     uint64_t adi, new_len;                                          \
     for (adi = new_len = 0; adi < (ARY).length; adi++) {            \
       (ARY).ptr[new_len] = (ARY).ptr[adi];                          \
-      if (ARY).ptr[adi] != (E) { new_len++; }                       \
+      if ((ARY).ptr[adi] != (E)) { new_len++; }                     \
     }                                                               \
     (ARY).length = new_len;                                         \
   } while (0)
