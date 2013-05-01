@@ -229,7 +229,7 @@ typedef struct {                          \
     ARY_GROW(DST, (SRC).length);                                              \
     memcpy((DST).ptr,                                                         \
            (SRC).ptr,                                                         \
-           sizeof((DST).ptr[0]) * (DST).length);                              \
+           sizeof((SRC).ptr[0]) * (SRC).length);                              \
     (DST).length = (SRC).length;                                              \
   } while (0)
 
