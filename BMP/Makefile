@@ -18,14 +18,15 @@ TO_BMP_TEST_SRC = $(SRC)/to-bmp.c
 TO_BMP_TEST_OBJ = $(BIN)/to-bmp.o
 TO_BMP_TEST_BIN = $(BIN)/to-bmp
 
-
-Test:
+bmp: 
+	mkdir -p $(BIN)
 	$(CC) $(CFLAGS) $(OTFLAGS) -O2 $(BMP_SRC)	-o $(BMP_OBJ)
+
+Test: bmp
 	$(CC) $(CFLAGS) $(OTFLAGS) -O2 $(TEST_SRC)	-o $(TEST_OBJ)
 	$(CC) $(LDFLAGS) $(TEST_OBJ) $(BMP_OBJ) -o $(TEST_BIN)
 
-To-BMP-Test:
-	$(CC) $(CFLAGS) $(OTFLAGS) -O2 $(BMP_SRC)	-o $(BMP_OBJ)
+To-BMP-Test: bmp
 	$(CC) $(CFLAGS) $(OTFLAGS) -O2 $(TO_BMP_TEST_SRC)	-o $(TO_BMP_TEST_OBJ)
 	$(CC) $(LDFLAGS) $(TO_BMP_TEST_OBJ) $(BMP_OBJ) -o $(TO_BMP_TEST_BIN)
 				
