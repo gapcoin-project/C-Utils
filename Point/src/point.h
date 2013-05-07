@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * Struct of an point in
+ * a two dimensional field
+ */
 typedef struct {
   uint32_t x, y;
 } Point;
