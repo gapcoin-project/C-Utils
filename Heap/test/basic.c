@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   heap_init(long long, max_heap, 1024, MAXHEAP);
   for (i = 0; i < n_elements; i++) {
     if (i % FREQ == 0)
-      printf("\r[%li] adding  \r", n_elements - i);
+      printf("\r[%lli] adding  \r", n_elements - i);
 
     heap_add(min_heap, rand()%100, bigger, smaler);
     heap_add(max_heap, rand()%100, bigger, smaler);
