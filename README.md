@@ -20,6 +20,11 @@ Dynamic Array
 Low level implementation of an Dynamic Array (preprocessor macro based)
 
 
+Debug
+---
+some helpfull debugging stuff
+
+
 Heap
 --- 
 Low level implementation of an Array based Heap, macrobased for the speed
@@ -57,6 +62,11 @@ Severial versions are privided:
   + Macro based (25% faster than void-pointer)
   + Paralell-void-pointer based (only tested with two cores litle bit faster
     than void-pointer but with more corse it will sure be the fastest version)
+
+
+String
+---
+Just a bunch of string manipulation functions
 
 
 Thread Clients
