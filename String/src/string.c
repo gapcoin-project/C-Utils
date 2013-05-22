@@ -4,6 +4,8 @@
 #ifndef __STRING__
 #define __STRING__
 
+#include "string.h"
+
 /**
  * reads a line from a given file descriptor
  * returns line length or -1 by error
