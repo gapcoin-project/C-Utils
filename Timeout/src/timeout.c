@@ -23,8 +23,7 @@ static inline void timer(struct timeval *time, pid_t pid, uint8_t *finished) {
   gettimeofday(&now, NULL);
 
   end = now;
-  end.tv_sec  += time->tv_sec;
-  end.tv_usec += time->tv_usec;
+  timeval_additon(&end, &end, time);
 
   /**
    * as long as diference is not negative and caller process
