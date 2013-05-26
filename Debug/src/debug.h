@@ -47,4 +47,13 @@
 #define ERR_MSG(MSG) (void) (MSG)
 #endif
 
+/**
+ * verbose Messages
+ */
+#ifdef VERBOSE
+#define INFO_MSG(MSG) printf("[II] " MSG)
+#else
+#define INFO_MSG(MSK) (void) (MSG)
+#endif
+
 #endif // __DEBUG_H__
