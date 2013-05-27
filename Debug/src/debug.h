@@ -53,7 +53,7 @@
 #ifdef VERBOSE
 #define INFO_MSG(MSG) printf("[II] " MSG)
 #else
-#define INFO_MSG(MSK) (void) (MSG)
+#define INFO_MSG(MSG) (void) (MSG)
 #endif
 
 #endif // __DEBUG_H__
