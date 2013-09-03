@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
   while (heap_notempty(max_heap)) {
     if (max_heap.heap_length % FREQ2 == 0)
-      printf("\r[%li] testing max_heap  \r", max_heap.heap_length);
+      printf("\r[%" PRIu64 "] testing max_heap  \r", max_heap.heap_length);
 
     if (a < b) {
       printf("\r[DEBUG] max_heap Heap FAILED!\n");
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   while (heap_notempty(min_heap)) {
     if (min_heap.heap_length % FREQ2 == 0)
-      printf("\r[%li] testing max_heap  \r", min_heap.heap_length);
+      printf("\r[%" PRIu64 "] testing max_heap  \r", min_heap.heap_length);
 
     if (a > b) {
       printf("\r[DEBUG] min_heap Heap FAILED!\n");
