@@ -25,6 +25,15 @@ Debug
 some helpfull debugging stuff
 
 
+Hash
+---
+
+Low level implementation of a macro based hash map with double hashing
+and multiplion method as hash functions
+
+currently only inserting is supported
+
+
 Heap
 --- 
 Low level implementation of an Array based Heap, macrobased for the speed
