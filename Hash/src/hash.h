@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 
 /**
  * Simple test if a number is a pime number
@@ -201,5 +202,18 @@ do {                                    \
   HASH_GROW(HASH);                      \
   HASH_ADD_INTERN(HASH, KEY, E);        \
 } while (0)
+
+/**
+ * adds an elemnt to the given hash unsing a string as key
+ */
+#define HASH_ADD_STR(HASH, STR, E)                          \
+  HASH_ADD(HASH, crc32(0, STR, strlen(STR), E))
+
+/**
+ * saves the wanted element in E uses a sting as key
+ */
+#define HASH_GET_STR(HASH, STR, E)                          \
+  HASH_GET(HASH, crc32(0, STR, strlen(STR), E))
+
 
 #endif /* __HASH_H__ */
