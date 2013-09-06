@@ -14,4 +14,9 @@
  */
 int read_line(int fp, char *buffer);
 
+/**
+ * Splits a String by a specific char
+ */
+char **split(const char *str, const char *seperator);
+
 #endif /* __STRING_H__ */
