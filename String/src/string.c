@@ -52,7 +52,7 @@ char **split(char *str, const char *seperator) {
     splited[i] = malloc(sizeof(char) * size + 1);
     strncpy(splited[i], ptr, size);
 
-    ptr = strtok(NULL, delimiter);
+    ptr = strtok(NULL, seperator);
     
     if (i == len - 1) {
       len *= 2;
