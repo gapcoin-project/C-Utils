@@ -5,6 +5,7 @@
 #define __STRING__
 
 #include "string.h"
+#include <stdlib.h>
 
 /**
  * reads a line from a given file descriptor
