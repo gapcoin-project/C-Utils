@@ -37,37 +37,6 @@ int read_line(int fp, char *buffer) {
 /**
  * Splits a String by a specific char
  */
-char **split(const char *str, const char *seperator) {
-  
-  char *ptr = strtok(str, seperator);
-
-  int len = 2;
-  char **splited = malloc(sizeof(char *) * len);
-
-  int i;
-  for (i = 0; ptr != NULL; i++) {
-    
-    int size = strlen(ptr);
-    splited[i] = malloc(sizeof(char) * size + 1);
-    strncpy(splited[i], ptr, size);
-
-    ptr = strtok(NULL, delimiter);
-    
-    if (i == len - 1) {
-      len *= 2;
-      splited = realloc(splited, sizeof(char *) * len);
-    }
-  }
-
-  splited[i] = malloc(sizeof(char) * 2);
-  splited[i][0] = 0;
-
-  return splited;
-}
-
-/**
- * Splits a String by a specific char
- */
 char **split(char *str, const char *seperator) {
   
   char *ptr = strtok(str, seperator);
