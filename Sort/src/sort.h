@@ -25,6 +25,7 @@ typedef struct {
   int64_t min;         /* the min array length to switch to insertionsort */
   int64_t base;        /* the size of an array element */
   int64_t length;      /* the array length */
+  int64_t n_threads;   /* the number of threads */
   char (*smaler)(void *, void *);  /* compare functions */
   char (*bigger)(void *, void *);
   char (*equal)(void *, void *);

@@ -49,7 +49,7 @@ int comp(const void *a, const void *b) {
 int main (int argc, char *argv[]) {
 
   if (argc != 5) {
-    printf("%s <array length> <max min quicksort> "
+    printf("%s <array length> <max min quicksort (20)> "
            "<times> <threads>\n", argv[0]);
     exit(1);
   }
@@ -175,20 +175,20 @@ int main (int argc, char *argv[]) {
 
     printf("times %" PRId64 "-5    \n", n_times - k);
 
-//    for (i = 0; i < length; i++) {
-//      ary1[i] = rand() % length;
-//    }
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
 
     gettimeofday(&ptmin_s, NULL);
-//    pt_parallel_quickinsersort_min(&args);
+    pt_parallel_quickinsersort_min(&args);
     gettimeofday(&ptmin_e, NULL);
     timeval_subtract(&ptmin_t, &ptmin_e, &ptmin_s);
     timeval_additon(&ptmin_r, &ptmin_r, &ptmin_t);
 
-//    for (i = 0; i < length-1; i++) {
-//      if (ary1[i] > ary1[i+1])
-//        sorted = 0;
-//    }
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] > ary1[i+1])
+        sorted = 0;
+    }
 
     printf("times %" PRId64 "-4    \n", n_times - k);
 
@@ -255,20 +255,20 @@ int main (int argc, char *argv[]) {
 
     printf("times %" PRId64 "-1    \n", n_times - k);
 
-//    for (i = 0; i < length; i++) {
-//      ary1[i] = rand() % length;
-//    }
+    for (i = 0; i < length; i++) {
+      ary1[i] = rand() % length;
+    }
 
     gettimeofday(&ptmax_s, NULL);
-//    pt_parallel_quickinsersort_max(&args);
+    pt_parallel_quickinsersort_max(&args);
     gettimeofday(&ptmax_e, NULL);
     timeval_subtract(&ptmax_t, &ptmax_e, &ptmax_s);
     timeval_additon(&ptmax_r, &ptmax_r, &ptmax_t);
 
-//    for (i = 0; i < length-1; i++) {
-//      if (ary1[i] < ary1[i+1])
-//        sorted = 0;
-//    }
+    for (i = 0; i < length-1; i++) {
+      if (ary1[i] < ary1[i+1])
+        sorted = 0;
+    }
 
     printf("times %" PRId64 "-0    \n", n_times - k);
 

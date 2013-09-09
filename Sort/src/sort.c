@@ -411,6 +411,9 @@ static void *t_quickinsersort_min(TCArgs *ptr) {
 
   l = 0;
   r = args->length - 1;
+  
+  if (l >= r) return NULL;
+
   memcpy(piv, 
          args->ary + (rand() % r) * args->base, 
          args->base);
@@ -602,29 +605,56 @@ static void *pt_quickinsersort_max(void *ptr) {
 
   }
 
-   pthread_t thread1, thread2;
+  if (args->n_threads > 1) {
 
-  // right side
-  args2->ary += (r + 1) * args->base;
-  args2->length -= (r + 1);
-  if (args2->length < args2->min)
-    pthread_create(&thread1, NULL, pt_insertionsort_max, (void *) args2);
-  else if (args2->length <= 0)
-    free(args2);
-  else
-    pthread_create(&thread1, NULL, pt_quickinsersort_max, (void *) args2);
+    pthread_t thread1, thread2;
+ 
+    // right side
+    args2->ary       += (r + 1) * args->base;
+    args2->length    -= (r + 1);
+    args2->n_threads /= 2;
+    if (args2->length < args2->min)
+      pthread_create(&thread1, NULL, pt_insertionsort_max, (void *) args2);
+    else if (args2->length <= 0)
+      free(args2);
+    else
+      pthread_create(&thread1, NULL, pt_quickinsersort_max, (void *) args2);
+ 
+    // left side
+    args->length = l;
+    args->n_threads /= 2;
+    if (args->length < args->min) {
+      pthread_create(&thread2, NULL, pt_insertionsort_max, (void *) args);          
+    } else if (args->length <= 0)
+      free(args);
+    else
+      pthread_create(&thread2, NULL, pt_quickinsersort_max, (void *) args);
+ 
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
 
-  // left side
-  args->length = l;
-  if (args->length < args->min) {
-    pthread_create(&thread2, NULL, pt_insertionsort_max, (void *) args);          
-  } else if (args->length <= 0)
-    free(args);
-  else
-    pthread_create(&thread2, NULL, pt_quickinsersort_max, (void *) args);
+  } else {
 
-  pthread_join(thread1, NULL);
-  pthread_join(thread2, NULL);
+    // right side
+    args2->ary       += (r + 1) * args->base;
+    args2->length    -= (r + 1);
+    if (args2->length < args2->min)
+      pt_insertionsort_max((void *) args2);
+    else if (args2->length <= 0)
+      free(args2);
+    else
+      pt_quickinsersort_max((void *) args2);
+ 
+    // left side
+    args->length = l;
+    args->n_threads /= 2;
+    if (args->length < args->min) {
+      pt_insertionsort_max((void *) args);          
+    } else if (args->length <= 0)
+      free(args);
+    else
+      pt_quickinsersort_max((void *) args);
+  }
 
   return NULL;
 }
@@ -661,6 +691,9 @@ static void *pt_quickinsersort_min(void *ptr) {
 
   l = 0;
   r = args->length - 1;
+  
+  if (l >= r) return NULL;
+
   memcpy(piv, 
          args->ary + (rand() % r) * args->base, 
          args->base);
@@ -689,29 +722,55 @@ static void *pt_quickinsersort_min(void *ptr) {
   }
 
 
-   pthread_t thread1, thread2;
+  if (args->n_threads > 1) {
 
-  // right side
-  args2->ary += (r + 1) * args->base;
-  args2->length -= (r + 1);
-  if (args2->length < args2->min)
-    pthread_create(&thread1, NULL, pt_insertionsort_min, (void *) args2);
-  else if (args2->length <= 0)
-    free(args2);
-  else
-    pthread_create(&thread1, NULL, pt_quickinsersort_min, (void *) args2);
+    pthread_t thread1, thread2;
+ 
+    // right side
+    args2->ary       += (r + 1) * args->base;
+    args2->length    -= (r + 1);
+    args2->n_threads /= 2;;
+    if (args2->length < args2->min)
+      pthread_create(&thread1, NULL, pt_insertionsort_min, (void *) args2);
+    else if (args2->length <= 0)
+      free(args2);
+    else
+      pthread_create(&thread1, NULL, pt_quickinsersort_min, (void *) args2);
+ 
+    // left side
+    args->length = l;
+    args->n_threads /= 2;;
+    if (args->length < args->min)
+      pthread_create(&thread2, NULL, pt_insertionsort_min, (void *) args);
+    else if (args->length <= 0)
+      free(args);
+    else
+      pthread_create(&thread2, NULL, pt_quickinsersort_min, (void *) args);
+ 
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
 
-  // left side
-  args->length = l;
-  if (args->length < args->min)
-    pthread_create(&thread2, NULL, pt_insertionsort_min, (void *) args);
-  else if (args->length <= 0)
-    free(args);
-  else
-    pthread_create(&thread2, NULL, pt_quickinsersort_min, (void *) args);
+  } else {
 
-  pthread_join(thread1, NULL);
-  pthread_join(thread2, NULL);
+    // right side
+    args2->ary       += (r + 1) * args->base;
+    args2->length    -= (r + 1);
+    if (args2->length < args2->min)
+      pt_insertionsort_min((void *) args2);
+    else if (args2->length <= 0)
+      free(args2);
+    else
+      pt_quickinsersort_min((void *) args2);
+ 
+    // left side
+    args->length = l;
+    if (args->length < args->min)
+      pt_insertionsort_min((void *) args);
+    else if (args->length <= 0)
+      free(args);
+    else
+     pt_quickinsersort_min((void *) args);
+  }
 
   return NULL;
 }

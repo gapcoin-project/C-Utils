@@ -48,7 +48,7 @@ static inline char p_equal(void *a, void *b) {
 int main (int argc, char *argv[]) {
 
   if (argc != 5) {
-    printf("%s <array length> <max min quicksort> "
+    printf("%s <array length> <max min quicksort (20)> "
            "<times> <threads>\n", argv[0]);
     exit(1);
   }
@@ -70,13 +70,14 @@ int main (int argc, char *argv[]) {
 
   init_tc((uint32_t) log2((double) length), n_threads);
   QISTA_t args;
-  args.ary    = (void *) ary1;
-  args.base   = sizeof(int64_t);
-  args.length = length;
-  args.min    = max_min_q;
-  args.bigger = p_bigger;
-  args.smaler = p_smaler;
-  args.equal  = p_equal;
+  args.ary       = (void *) ary1;
+  args.base      = sizeof(int64_t);
+  args.length    = length;
+  args.min       = max_min_q;
+  args.bigger    = p_bigger;
+  args.smaler    = p_smaler;
+  args.equal     = p_equal;
+  args.n_threads = n_threads;
 
   for (k = 0; k < average; k++) {
 
