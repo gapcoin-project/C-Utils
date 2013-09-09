@@ -66,6 +66,15 @@ char **split(char *str, const char *seperator) {
   return splited;
 }
 
+/**
+ * returns true if str1 starts with str2
+ */
+#define start_with(str1, str2) (strncmp(str2, str1, strlen(str2)) == 0)
 
+/**
+ * returns if str1 ends with str2
+ */
+#define end_with(str1, str2)                                                \
+  (strncmp(str2, str1 + (strlen(str1) - strlen(str2)), strlen(str2)) == 0)
 
 #endif /* __STRING__ */
