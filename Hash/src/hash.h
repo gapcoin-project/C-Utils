@@ -8,7 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../String/src/string.h"
+#include "../../String/src/string.h"
 
 /**
  * Simple test if a number is a pime number
