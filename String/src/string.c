@@ -77,4 +77,39 @@ char **split(char *str, const char *seperator) {
 #define end_with(str1, str2)                                                \
   (strncmp(str2, str1 + (strlen(str1) - strlen(str2)), strlen(str2)) == 0)
 
+static inline uint8_t get_byte(const uint8_t byte, int i) {
+  switch (i) {
+    case 0: return byte & 1;
+    case 1: return (byte & 2) >> 1;
+    case 2: return (byte & 4) >> 2;
+    case 3: return (byte & 8) >> 3;
+    case 4: return (byte & 16) >> 4;
+    case 5: return (byte & 32) >> 5;
+    case 6: return (byte & 64) >> 6;
+    case 7: return (byte & 128) >> 7;
+  }
+
+  return -1;
+}
+
+
+/**
+ * CRC32 implementation
+ */
+inline uint32_t crc32(const char *str, uint32_t len) {
+  
+  uint32_t shift = 0x0;
+  uint32_t crc  = 0x04C11DB7;
+  
+  uint32_t i;
+  for (i = 0; i < len * 8; i++) {
+    if (((shift & (1 << 31)) >> 31) != get_byte((uint8_t) str[i / 8], i % 8))
+      shift = (shift << 1) ^ crc;
+    else
+      shift <<= 1;
+  }
+  
+  return shift;
+}
+
 #endif /* __STRING__ */
