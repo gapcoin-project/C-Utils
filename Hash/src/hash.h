@@ -1,5 +1,9 @@
 /**
  *  a simple hash map implementation, macro based
+ *
+ *  TODO make keys % -2
+ *       make key conflicks overriding
+ *       impl delete with -2
  */
 #ifndef __HASH_H__
 #define __HASH_H__
@@ -110,15 +114,21 @@ do {                      \
   ((DOUBLE) - ((int32_t) (DOUBLE)))
 
 /**
+ * map key to (0..(uint32_t) -2) because -1 and -2 are reserved
+ */
+#define HKEY(KEY) ((KEY) % (uint32_t) -2)
+
+/**
  * The has function, it calculates the actual slot out of a given key,
  * and index (number of already taken slots)
  * NOTE: key has to be an integer
  */
 #define HASH_I(HASH, KEY, I)                                                  \
- ((((uint32_t) ((HASH).len * DOUBLE_DEC(((KEY) * (HASH).h1)))) +              \
+ ((((uint32_t) ((HASH).len * DOUBLE_DEC(((HKEY(KEY)) * (HASH).h1)))) +        \
    ((uint32_t) (1 + (((HASH).len -1) *                                        \
-                     DOUBLE_DEC(((KEY) * (HASH).h2)))) * (I))) %              \
+                     DOUBLE_DEC(((HKEY(KEY)) * (HASH).h2)))) * (I))) %        \
   (HASH).len)
+
 
 /**
  * stores the element with the given key form the given hash
@@ -130,7 +140,7 @@ do {                                                                         \
                                                                              \
   for (__hash_i__ = 0;                                                       \
       __hash_i__ < (HASH).len &&                                             \
-      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (KEY)) &&                \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY))) &&          \
       ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1);          \
       __hash_i__++);                                                         \
                                                                              \
@@ -150,11 +160,12 @@ do {                                                                         \
                                                                              \
   for (__hash_i__ = 0;                                                       \
       __hash_i__ < (HASH).len &&                                             \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY))) &&          \
       ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1);          \
       __hash_i__++);                                                         \
                                                                              \
   (HASH).ptr[HASH_I(HASH, KEY, __hash_i__)] = E;                             \
-  (HASH).kys[HASH_I(HASH, KEY, __hash_i__)] = KEY;                           \
+  (HASH).kys[HASH_I(HASH, KEY, __hash_i__)] = HKEY(KEY);                     \
   (HASH).n_elements++;                                                       \
                                                                              \
 } while (0)                                                                 
@@ -202,6 +213,28 @@ do {                                    \
   HASH_GROW(HASH);                      \
   HASH_ADD_INTERN(HASH, KEY, E);        \
 } while (0)
+
+/**
+ * Removes an element from the given hash
+ */
+#define HASH_RM(HASH, KEY)                                                   \
+do {                                                                         \
+                                                                             \
+  uint32_t __hash_i__;                                                       \
+                                                                             \
+  for (__hash_i__ = 0;                                                       \
+      __hash_i__ < (HASH).len &&                                             \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY))) &&          \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1);          \
+      __hash_i__++);                                                         \
+                                                                             \
+  if ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] == (HKEY(KEY))) {            \
+    (HASH).kys[HASH_I(HASH, KEY, __hash_i__)] = (uint32_t) -2;               \
+    (HASH).n_elements--;                                                     \
+  }                                                                          \
+                                                                             \
+} while (0)
+
 
 /**
  * adds an elemnt to the given hash unsing a string as key
