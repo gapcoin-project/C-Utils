@@ -5,7 +5,42 @@
 #ifndef __BLOCKING_HASH_H__
 #define __BLOCKING_HASH_H__
 
-#include<sys/mman.h>
+#include <inttypes.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <semaphore.h>
+#include "../../String/src/string.h"
+
+/**
+ * Simple test if a number is a pime number
+ * (i know it is very slow but works god til ~ 2^30)
+ */
+static inline char is_prime(uint32_t n) {
+
+  if (n < 2) return 0;
+  if (n < 4) return 1;
+  if (n % 2 == 0) return 0;
+
+  uint32_t i;
+  uint32_t limit = sqrt(n) + 1;
+  for (i = 3; i < limit; i+= 2)
+    if (n % i == 0) return 0;
+
+  return 1;
+}
+
+/**
+ * Calculates and returns the next bigger pimnumber
+ */
+static inline uint32_t next_prime(uint32_t n) {
+  
+  while (is_prime(n) == 0)
+    n++;
+
+  return n;
+}
 
 /**
  * define a new bloking hash
@@ -17,7 +52,7 @@ struct NAME {                                         \
   uint32_t *kys;                                      \
   const uint32_t len;                                 \
   uint32_t *n_e;                                      \
-  sem_t    lock;                                      \
+  sem_t    *lock;                                     \
   /* the has constant for                             \
    * the hastfunctions */                             \
   const double h1;                                    \
@@ -30,9 +65,7 @@ struct NAME {                                         \
  */
 #define BHASH_CHECK_SHM(HASH)                                       \
 do {                                                                \
-  if ((HASH).ptr == (void *) -1 ||                                  \
-      (HASH).kys == (void *) -1 ||                                  \
-      (HASH).n_e == (void *) -1) {                                  \
+  if ((HASH).ptr == (void *) -1) {                                  \
                                                                     \
     perror("bhash: failed to create mmap shared memory");           \
     exit(EXIT_FAILURE);                                             \
@@ -41,29 +74,17 @@ do {                                                                \
 /**
  * initialize an blocking hash
  */
-#define BBHASH_INIT(HASH, LEN)                                              \
+#define BHASH_INIT(HASH, LEN)                                              \
 do {                                                                        \
                                                                             \
   *(uint32_t *) &(HASH).len = next_prime(LEN);                              \
                                                                             \
   /* create shared memory for ptr, kys, len */                              \
   (HASH).ptr = mmap(NULL,                                                   \
-                    sizeof((HASH).tmp_e) * (HASH).len,                      \
-                    PROT_READ|PROT_WRITE,                                   \
-                    MAP_SHARED|MAP_ANONYMOUS,                               \
-                    -1,                                                     \
-                    0);                                                     \
-                                                                            \
-                                                                            \
-  (HASH).kys = mmap(NULL,                                                   \
-                    sizeof(uint32_t) * (HASH).len,                          \
-                    PROT_READ|PROT_WRITE,                                   \
-                    MAP_SHARED|MAP_ANONYMOUS,                               \
-                    -1,                                                     \
-                    0);                                                     \
-                                                                            \
-  (HASH).n_e = mmap(NULL,                                                   \
-                    sizeof(uint32_t),                                       \
+                    sizeof((HASH).tmp_e) * (HASH).len +                     \
+                    sizeof(uint32_t) * (HASH).len     +                     \
+                    sizeof(uint32_t)                  +                     \
+                    sizeof(sem_t),                                          \
                     PROT_READ|PROT_WRITE,                                   \
                     MAP_SHARED|MAP_ANONYMOUS,                               \
                     -1,                                                     \
@@ -71,10 +92,15 @@ do {                                                                        \
                                                                             \
   BHASH_CHECK_SHM(HASH);                                                    \
                                                                             \
+  (HASH).kys  = (uint32_t *) ((HASH).ptr + (HASH).len);                     \
+  (HASH).n_e  = (HASH).kys + (HASH).len;                                    \
+  (HASH).lock = (sem_t *) ((HASH).n_e + 1);                                 \
+                                                                            \
+                                                                            \
   *(HASH).n_e = 0;                                                          \
                                                                             \
   /* init semaphore */                                                      \
-  sem_init(&(HASH).lock, 1, 1);                                             \
+  sem_init((HASH).lock, 1, 1);                                              \
                                                                             \
   /* -1 and -2 are not allowed values */                                    \
   memset((HASH).kys, (uint32_t) -1, sizeof(uint32_t) * (HASH).len);         \
@@ -90,12 +116,11 @@ do {                                                                        \
  * should only be called if no othre process or therad 
  * have access to the given hash
  */
-#define BHASH_FREE(HASH)                                        \
-do {                                                            \
-  munmap((HASH).ptr, (sizeof((HASH).tmp_e) * (HASH).len);       \
-  munmap((HASH).kys, (sizeof(uint32_t)     * (HASH).len);       \
-  munmap((HASH).n_e, (sizeof(uint32_t));                        \
-} while (0)
+#define BHASH_FREE(HASH)                                      \
+munmap((HASH).ptr, (sizeof((HASH).tmp_e) * (HASH).len +       \
+                    sizeof(uint32_t) * (HASH).len     +       \
+                    sizeof(uint32_t)                  +       \
+                    sizeof(sem_t)) 
 
 /**
  * Returns the decimal part of an double
@@ -126,7 +151,7 @@ do {                                                            \
  */
 #define BHASH_GET(HASH, KEY, E)                                              \
 do {                                                                         \
-  sem_wait(&(HASH).lock);                                                    \
+  sem_wait((HASH).lock);                                                     \
   uint32_t __hash_i__;                                                       \
                                                                              \
   for (__hash_i__ = 0;                                                       \
@@ -138,7 +163,7 @@ do {                                                                         \
   if ((HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1)           \
     E = (HASH).ptr[BHASH_I(HASH, KEY, __hash_i__)];                          \
                                                                              \
-  sem_post(&(HASH).lock);                                                    \
+  sem_post((HASH).lock);                                                     \
                                                                              \
 } while (0)
 
@@ -149,7 +174,7 @@ do {                                                                         \
 #define BHASH_ADD(HASH, KEY, E)                                              \
 do {                                                                         \
                                                                              \
-  sem_wait(&(HASH).lock);                                                    \
+  sem_wait((HASH).lock);                                                     \
   uint32_t __hash_i__;                                                       \
                                                                              \
   for (__hash_i__ = 0;                                                       \
@@ -159,13 +184,15 @@ do {                                                                         \
       ((HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -2);         \
       __hash_i__++);                                                         \
                                                                              \
-  if (__hash_i__ != (HASH).len) {                                            \
+  if (__hash_i__ != (HASH).len &&                                            \
+      ((HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] != (BHKEY(KEY)))) {        \
+                                                                             \
     (HASH).ptr[BHASH_I(HASH, KEY, __hash_i__)] = E;                          \
     (HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] = BHKEY(KEY);                 \
-    *(HASH).n_e++;                                                           \
+    (*(HASH).n_e)++;                                                         \
   }                                                                          \
                                                                              \
-  sem_post(&(HASH).lock);                                                    \
+  sem_post((HASH).lock);                                                     \
                                                                              \
 } while (0)                                                                 
                                                                             
@@ -176,7 +203,7 @@ do {                                                                         \
 #define BHASH_RM(HASH, KEY)                                                  \
 do {                                                                         \
                                                                              \
-  sem_wait(&(HASH).lock);                                                    \
+  sem_wait((HASH).lock);                                                     \
   uint32_t __hash_i__;                                                       \
                                                                              \
   for (__hash_i__ = 0;                                                       \
@@ -187,10 +214,10 @@ do {                                                                         \
                                                                              \
   if ((HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] == (BHKEY(KEY))) {          \
     (HASH).kys[BHASH_I(HASH, KEY, __hash_i__)] = (uint32_t) -2;              \
-    *(HASH).n_e--;                                                           \
+    (*(HASH).n_e)--;                                                         \
   }                                                                          \
                                                                              \
-  sem_post(&(HASH).lock);                                                    \
+  sem_post((HASH).lock);                                                     \
                                                                              \
 } while (0)
 

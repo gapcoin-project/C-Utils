@@ -160,13 +160,18 @@ do {                                                                         \
                                                                              \
   for (__hash_i__ = 0;                                                       \
       __hash_i__ < (HASH).len &&                                             \
-      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY))) &&          \
-      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1);          \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY)))   &&        \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -1) &&        \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (uint32_t) -2);          \
       __hash_i__++);                                                         \
                                                                              \
-  (HASH).ptr[HASH_I(HASH, KEY, __hash_i__)] = E;                             \
-  (HASH).kys[HASH_I(HASH, KEY, __hash_i__)] = HKEY(KEY);                     \
-  (HASH).n_elements++;                                                       \
+  if (__hash_i__ != (HASH).len &&                                            \
+      ((HASH).kys[HASH_I(HASH, KEY, __hash_i__)] != (HKEY(KEY)))) {          \
+                                                                             \
+    (HASH).ptr[HASH_I(HASH, KEY, __hash_i__)] = E;                           \
+    (HASH).kys[HASH_I(HASH, KEY, __hash_i__)] = HKEY(KEY);                   \
+    (HASH).n_elements++;                                                     \
+  }                                                                          \
                                                                              \
 } while (0)                                                                 
                                                                             
