@@ -60,8 +60,7 @@ char **split(char *str, const char *seperator) {
     }
   }
 
-  splited[i] = malloc(sizeof(char) * 2);
-  splited[i][0] = 0;
+  splited[i] = NULL;
 
   return splited;
 }
