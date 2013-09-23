@@ -51,6 +51,7 @@ char **split(char *str, const char *seperator) {
     int size = strlen(ptr);
     splited[i] = malloc(sizeof(char) * size + 1);
     strncpy(splited[i], ptr, size);
+    splited[i][size] = '\0';
 
     ptr = strtok(NULL, seperator);
     
