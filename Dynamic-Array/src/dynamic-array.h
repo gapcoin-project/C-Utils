@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * Generates an Long 64 Bit random number
@@ -249,6 +250,20 @@ typedef struct {                          \
  * returns wether the given array is empty
  */
 #define ARY_EMPTY(ARY) ((ARY).length == 0)
+
+/**
+ * insert an element at the given position in the array
+ */
+#define ARY_INSERT(ARY, I, E)                                                 \
+do {                                                                          \
+  if (ARY_LEN(ARY) >= (I))                                                    \
+    ARY_ADD(ARY, E);                                                          \
+  else {                                                                      \
+    ARY_GROW(ARY, ARY_LEN(ARY));                                              \
+    memmove((ARY).ptr + (I) + 1, (ARY).ptr + (I), ARY_LEN(ARY) - (I));        \
+    (ARY).ptr[I] = E;                                                         \
+  }                                                                           \
+} while (0)
 
 
 #endif // __DYNAMIC_ARRAY_H__
