@@ -118,7 +118,7 @@ inline uint32_t crc32(const char *str, uint32_t len) {
 inline char *str_clone(const char *str) {
 
   char *clone;
-  size_t i, len = strlen(str);
+  size_t len = strlen(str);
 
   clone = malloc(len + 1);
   memcpy(clone, str, len + 1);
