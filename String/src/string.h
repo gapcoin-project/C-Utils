@@ -25,4 +25,9 @@ char **split(char *str, const char *seperator);
  */
 inline uint32_t crc32(const char *str, uint32_t len);
 
+/**
+ * clone a string
+ */
+inline char *str_clone(const char *str);
+
 #endif /* __STRING_H__ */

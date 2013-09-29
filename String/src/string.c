@@ -112,4 +112,19 @@ inline uint32_t crc32(const char *str, uint32_t len) {
   return shift;
 }
 
+/**
+ * clone a string
+ */
+inline char *str_clone(const char *str) {
+
+  char *clone;
+  size_t i, len = strlen(str);
+
+  clone = malloc(len + 1);
+  memcpy(clone, str, len + 1);
+
+  return clone;
+}
+
+
 #endif /* __STRING__ */
