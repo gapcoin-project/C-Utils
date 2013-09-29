@@ -1,6 +1,7 @@
 #include "../src/blocking-hash.h"
 #include <stdio.h>
 
+
 DEF_BHASH(uint32_t, IntHash);
 
 int main(int argc, char *argv[]) {
