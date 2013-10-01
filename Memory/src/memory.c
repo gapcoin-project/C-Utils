@@ -6,6 +6,7 @@
 
 #include "memory.h"
 #include <unistd.h>
+#include <stdio.h>
 
 /**
  * Returns the Total Memory of the underlying System
