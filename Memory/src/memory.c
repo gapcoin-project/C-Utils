@@ -26,7 +26,7 @@ char* readable_fs(long double size, char *buf) {
   const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
 
   while (size >= 1000.0) {
-      comma = size % 1024;
+      size /= 1024.0;
       i++;
   }
 
