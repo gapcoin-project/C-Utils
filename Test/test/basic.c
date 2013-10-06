@@ -1,6 +1,6 @@
 #include "../src/test.h"
 
-TEST(basic_test, "Basic Test") {
+TEST(basic_test) {
 
   (void) args;
   
@@ -10,7 +10,7 @@ TEST(basic_test, "Basic Test") {
   return NULL;
 }
 
-TEST(kill_test, "Kill Test") {
+TEST(kill_test) {
 
   (void) args;
 

@@ -168,7 +168,7 @@ void after_all(void *args)
 /**
  * macro for adding a test case
  */
-#define TEST(NAME, DESCRITION)                                              \
+#define TEST(NAME)                                                          \
 /* declaration */                                                           \
 void *NAME(void *args);                                                     \
                                                                             \
@@ -180,7 +180,7 @@ void __attribute__ ((constructor(102))) add_test_##NAME() {                 \
   Test test;                                                                \
   test.func   = NAME;                                                       \
   test.failed = 0;                                                          \
-  test.test_name = DESCRITION;                                              \
+  test.test_name = #NAME;                                                   \
   ARY_INIT(struct sigaction, test.signals, 10);                             \
                                                                             \
   ARY_ADD(tunit.tests, test);                                               \
