@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/time.h>
 
 /**
  * prints a stacktrace for the current stack
@@ -34,8 +35,12 @@ DEF_ARY(struct sigaction, SIGAry);
 typedef struct {
   void   *(*func) (void *); /* the test function */
   char   failed;            /* indecates if this test failed */
+  char   error;             /* indecates if this test failed do to an error */
   const  char *test_name;   /* the name of the test */
   SIGAry signals;           /* the old siganl handlers of this */
+  struct timeval start;
+  struct timeval end;
+  struct timeval time;
 } Test;
 
 /**
@@ -93,6 +98,9 @@ typedef struct {
   char  log;
   int   log_fd;
   uint64_t i;      /* index of the current progressing test */
+  struct timeval start;
+  struct timeval end;
+  struct timeval time;
 } TestUnit;
 
 /**
@@ -178,8 +186,8 @@ void *NAME(void *args);                                                     \
 void __attribute__ ((constructor(102))) add_test_##NAME() {                 \
                                                                             \
   Test test;                                                                \
+  memset(&test, 0, sizeof(Test));                                           \
   test.func   = NAME;                                                       \
-  test.failed = 0;                                                          \
   test.test_name = #NAME;                                                   \
   ARY_INIT(struct sigaction, test.signals, 10);                             \
                                                                             \
@@ -215,6 +223,9 @@ if (CONDITION) {                                                            \
   TEST_MSG("[EE] in %s: ", ARY_AT(tunit.tests, tunit.i).test_name);         \
   TEST_MSG(__VA_ARGS__);                                                    \
   show_backtrace();                                                         \
+                                                                            \
+  /* let test fail */                                                       \
+  ARY_AT(tunit.tests, tunit.i).failed = 1;                                  \
                                                                             \
   /* return the args given by bevor */                                      \
   return args;                                                              \

@@ -8,8 +8,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include "../../String/src/string.h"
+#include "../../Time-Diff/src/time-diff.h"
 
 /**
  * init tunit first;
@@ -53,8 +55,9 @@ static Signal signals[] = {
  */
 void test_signal_handler(int signum) {
 
-  /* let test fail */
+  /* let test fail with error */
   ARY_AT(tunit.tests, tunit.i).failed = 1;
+  ARY_AT(tunit.tests, tunit.i).error  = 1;
   
   /* find the caled signal */
   Signal sig = { -1, NULL, NULL };
@@ -67,7 +70,7 @@ void test_signal_handler(int signum) {
     }
   }
   
-  TEST_MSG("recieved signal %s: %s in", sig.name, sig.description);
+  TEST_MSG("[EE] recieved signal %s: %s in\n", sig.name, sig.description);
   show_backtrace();
 
   /* call old signal handler */
@@ -214,9 +217,9 @@ static inline void info_messages(int argc, char *argv[]) {
 }
 
 /**
- * Main function which runs the tests
+ * initializes the Test Framework
  */
-int main(int argc, char *argv[]) {
+static inline void init(int argc, char *argv[]) {
 
   /* save file name */
   tunit.fname = argv[0];
@@ -244,6 +247,143 @@ int main(int argc, char *argv[]) {
 
   info_messages(argc, argv);
 
+}
+
+/**
+ * runns the current test
+ * and exits (the child prozess)
+ */
+static inline void run_test(Test *test) {
+
+  void *bevor_res = NULL;
+  void *test_res  = NULL;
+  
+  /* run bevor with resiult of bevor_all */
+  if (tunit.bevor != NULL)
+    bevor_res = tunit.bevor(tunit.bevor_all_res);
+  
+  /* install signal handler */
+  install_signal_hanlders(test);
+
+  /* run test */
+  test_res = test->func((tunit.bevor ? bevor_res : tunit.bevor_all_res));
+
+  /* do clean up */
+  if (tunit.after != NULL)
+    tunit.after(test_res);
+
+  /* exit test environment */
+  exit(EXIT_SUCCESS);
+}
+
+/**
+ * waits for the child prozess with the given pid
+ * to execute te current test
+ */
+static inline void wait_for(pid_t pid) {
+      
+  int child_status;
+  waitpid(pid, &child_status, 0);
+  
+  /* if not exited normaly */
+  if (!WIFEXITED(child_status)) {
+
+    /* le the test fail */
+    ARY_AT(tunit.tests, tunit.i).failed = 1;
+    
+    /* if test was KILLED */
+    if (WIFSIGNALED(child_status) && WTERMSIG(child_status) == SIGKILL) {
+      TEST_MSG("[EE] test %s got killed\n", 
+               ARY_AT(tunit.tests, tunit.i).test_name);
+
+    } else if (!WIFSIGNALED(child_status)) {
+      TEST_MSG("[II] test %s exited with unknowen reason\n", 
+               ARY_AT(tunit.tests, tunit.i).test_name);
+    }
+  }
+}
+
+/**
+ * prints and or logs information about the current finished test
+ */
+static inline void do_test_info(Test *test) {
+  
+  char *exit_status = test->failed ? "with failur" : "succesfull";
+
+  long double seconds = (long double) test->time.tv_sec + 
+                        (long double) test->time.tv_usec / 1000000.0L;
+
+  TEST_MSG("[II] Test %s needed %.3LF seconds, exited %s",
+           test->test_name,
+           seconds,
+           exit_status);
+
+  TEST_MSG("\n\n");
+}
+
+/**
+ * prints a summery after all test ar runed
+ */
+static inline void do_test_summary(char *name) {
+  
+  unsigned int n_failurs, n_errors, i;
+
+  for (i = 0, n_failurs = 0, n_errors = 0; i < ARY_LEN(tunit.tests); i++) {
+
+    if (ARY_AT(tunit.tests, i).failed)
+      n_failurs++;
+
+    if (ARY_AT(tunit.tests, i).error)
+      n_errors++;
+
+  }
+
+  TEST_MSG("[II] Test Framework %s finished %" PRIu64 " tests\n",
+           name,
+           ARY_LEN(tunit.tests));
+
+  TEST_MSG("[II] Succes: %" PRIu64 "\n", ARY_LEN(tunit.tests) - n_failurs);
+  TEST_MSG("[II] Failed: %u\n", n_failurs);
+  TEST_MSG("[II] Errors: %u\n", n_errors);
+
+}
+
+/**
+ * copys the Test array into a shared memory segement
+ */
+static inline void make_test_shared() {
+  
+  
+  void *ptr = mmap(NULL,                                             
+                   ARY_LEN(tunit.tests) * sizeof(Test),
+                   PROT_READ|PROT_WRITE,                             
+                   MAP_SHARED|MAP_ANONYMOUS,                         
+                   -1,                                               
+                   0);                                               
+
+  if (ptr == MAP_FAILED) {
+    perror("failed to create shared memory for the test!");
+    exit(EXIT_FAILURE);
+  }
+
+  memcpy(ptr, tunit.tests.ptr, ARY_LEN(tunit.tests) * sizeof(Test));
+  free(tunit.tests.ptr);
+
+  tunit.tests.ptr = ptr;
+}
+
+/**
+ * Main function which runs the tests
+ */
+int main(int argc, char *argv[]) {
+
+  init(argc, argv);
+
+  /* stop time */
+  gettimeofday(&tunit.start, NULL);
+
+  make_test_shared();
+
   /* run bevor_all function */
   if (tunit.bevor_all != NULL)
     tunit.bevor_all_res = tunit.bevor_all();
@@ -251,63 +391,43 @@ int main(int argc, char *argv[]) {
   /* runn all tests */
   for (tunit.i = 0; tunit.i < ARY_LEN(tunit.tests); tunit.i++) {
 
+    Test *test = &ARY_AT(tunit.tests, tunit.i);
+
+    TEST_MSG("[II] starting test: %s\n", test->test_name); 
+    gettimeofday(&test->start, NULL);
+
     /* run test in new process */
     pid_t pid = fork();
 
     /* child */
     if (pid == 0) {
 
-      void *bevor_res = NULL;
-      void *test_res  = NULL;
-
-      Test *test = &ARY_AT(tunit.tests, tunit.i);
-      
-      /* run bevor with resiult of bevor_all */
-      if (tunit.bevor != NULL)
-        bevor_res = tunit.bevor(tunit.bevor_all_res);
-      
-      /* install signal handler */
-      install_signal_hanlders(test);
-
-      /* run test */
-      test_res = test->func((tunit.bevor ? bevor_res : tunit.bevor_all_res));
-
-      /* do clean up */
-      if (tunit.after != NULL)
-        tunit.after(test_res);
-
-      /* exit test environment */
-      exit(EXIT_SUCCESS);
+      run_test(test);
 
     } else if (pid < 0) {
       perror("Failed to creat child prozess");
       exit(EXIT_FAILURE);
+
+    /* parrent */
     } else {
-      
-      int child_status;
-      waitpid(pid, &child_status, 0);
-      
-      /* if not exited normaly */
-      if (!WIFEXITED(child_status)) {
-
-        /* le the test fail */
-        ARY_AT(tunit.tests, tunit.i).failed = 1;
-        
-        /* if test was KILLED */
-        if (WIFSIGNALED(child_status) && WTERMSIG(child_status) == SIGKILL) {
-          TEST_MSG("[EE] test %s got killed\n", 
-                   ARY_AT(tunit.tests, tunit.i).test_name);
-
-        } else {
-          TEST_MSG("[II] test %s exited with unknowen reason\n", 
-                   ARY_AT(tunit.tests, tunit.i).test_name);
-        }
-      }
+      wait_for(pid);
     }
+
+    gettimeofday(&test->end, NULL);
+    timeval_subtract(&test->time, &test->end, &test->start);
+
+    /* print info about the finished test */
+    do_test_info(test);
   }
   
   if (tunit.after_all != NULL)
     tunit.after_all(tunit.bevor_all_res);
+
+  gettimeofday(&tunit.end, NULL);
+  timeval_subtract(&tunit.time, &tunit.end, &tunit.start);
+
+  /* print summery */
+  do_test_summary(argv[0]);
 
   return 0;
 }
