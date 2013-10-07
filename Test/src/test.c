@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <execinfo.h>
 #include "../../String/src/string.h"
 #include "../../Time-Diff/src/time-diff.h"
 
@@ -70,12 +71,18 @@ void test_signal_handler(int signum) {
     }
   }
   
-  TEST_MSG("[EE] recieved signal %s: %s in\n", sig.name, sig.description);
+  TEST_MSG("[EE] recieved signal %s: %s\n", sig.name, sig.description);
   show_backtrace();
 
-  /* call old signal handler */
-  ARY_AT(ARY_AT(tunit.tests, tunit.i).signals, i).sa_handler(signum);
+  void (*old_handler) (int);
+  old_handler = ARY_AT(ARY_AT(tunit.tests, tunit.i).signals, i).sa_handler;
 
+  if (old_handler == SIG_DFL)
+    exit(EXIT_FAILURE);
+
+  /* call old signal handler */
+  if (old_handler != SIG_IGN)
+    old_handler(signum);
 }
 
 /**
@@ -148,13 +155,67 @@ static inline char *get_arg(int argc,
 }
 
 /**
+ * get normal backtrace
+ */
+static inline void get_backtrace() {
+
+  void *buffer[100];
+  int n = backtrace(buffer, 100);
+
+  char **strings = backtrace_symbols(buffer, n);
+
+  int i;
+  for (i = 0; i < n; i++)
+    if (n < 10)
+      TEST_MSG("#%d %s\n", i, strings[i]);
+    else if (i < 10)
+      TEST_MSG("#%d  %s\n", i, strings[i]);
+    else
+      TEST_MSG("#%d %s\n", i, strings[i]);
+
+  free(strings);
+}
+
+/**
+ * get gdb backtrace
+ */
+static inline void get_gdb_backtrace() {
+
+  char buffer[1024];
+
+  char name_buf[512];
+  name_buf[readlink("/proc/self/exe", name_buf, 511)]=0;
+
+  sprintf(buffer, 
+          "gdb --batch -n -ex thread -ex bt %s %d 2>/dev/null|grep \"#\"",
+          name_buf, 
+          getpid());
+  
+  FILE *trace = popen(buffer, "r");
+
+  if (trace <= (FILE *) 0)
+    return get_backtrace();
+
+  int i;
+
+  int size = fread(buffer, 1, 1020, trace);
+
+  for (i = 0; size > 0 && i < 100; i++) {
+
+    TEST_MSG("%s", buffer);
+    size = fread(buffer, 1, 1020, trace);
+  }
+  fclose(trace);
+}
+
+/**
  * prints a stacktrace for the current stack
  */
 void show_backtrace() {
   if (tunit.debug) {
-    TEST_MSG("DEBUG STACKTRACE\n");
+    get_backtrace();
   } else {
-    TEST_MSG("NON DEBUG STACKTRACE\n");
+    get_gdb_backtrace();
   }
 }
 
@@ -164,29 +225,14 @@ void show_backtrace() {
 char can_use_gdb() {
   
   /* check if gdb is installed */
-  char *path = getenv("PATH");
+  char path[] = "/usr/bin/gdb";
 
-  if (path == NULL)
-    return 0;
-
-  const char **dirs = (const char **) split(path, ":");
-  
-  int i = 0;
-  char buffer[256];
-  char found = 0;
-  for (i = 0; dirs[i] != NULL && !found; i++) {
-    
-    sprintf(buffer, "%s/gdb", dirs[i]);
-
-    if (!access(buffer, F_OK))
-      found = 1;
-  }
-
-  if (!found)
+  if (access(path, F_OK))
     return 0;
 
   /* check if permittion to ptrace is granded */
   int fd = open("/proc/sys/kernel/yama/ptrace_scope", O_RDONLY);
+  char buffer[2];
 
   if (fd == -1)
     return 0;
