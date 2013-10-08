@@ -6,6 +6,7 @@
 
 #include "string.h"
 #include <stdlib.h>
+#include <sys/socket.h>
 
 /**
  * reads a line from a given file descriptor
@@ -150,25 +151,25 @@ inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
 
   for (;;) {
     
-    for (i = 0; i < size && i + k < len; i++) {
+    for (i = 0; i < size && i + k < (ssize_t) len; i++) {
       buffer[i + k] = recv_buff[i];
  
       if (recv_buff[i] == '\n') {
         size -= i + 1;
 
         if (size > 0)
-          memove(recv_buff, recv_buff + i + 1, size);
+          memmove(recv_buff, recv_buff + i + 1, size);
 
         return i + 1;
       }
     }
     
-    if (i + k >= len) {
+    if (i + k >= (ssize_t) len) {
     
         size -= i;
 
         if (size > 0)
-          memove(recv_buff, recv_buff + i, size);
+          memmove(recv_buff, recv_buff + i, size);
     
       return i;
     }
