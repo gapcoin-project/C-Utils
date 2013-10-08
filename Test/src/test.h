@@ -289,8 +289,8 @@ do {                                                          \
  */
 #define ASSERT_FALSE(CONDITION, ...)                                        \
 if (CONDITION) {                                                            \
-  TEST_MSG3("[EE] in %s: ", ARY_AT(tunit.tests, tunit.i).test_name);        \
-  TEST_MSG3(__VA_ARGS__);                                                   \
+  TEST_MSG3("[EE] in %s:", ARY_AT(tunit.tests, tunit.i).test_name);         \
+  TEST_MSG3(" " __VA_ARGS__);                                               \
   show_backtrace();                                                         \
                                                                             \
   /* let test fail */                                                       \
