@@ -162,6 +162,7 @@ inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
         if (size > 0)
           memmove(recv_buff, recv_buff + i + 1, size);
 
+        buffer[i + k + 1] = '\0';
         return i + k + 1;
       }
     }
@@ -173,6 +174,7 @@ inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
         if (size > 0)
           memmove(recv_buff, recv_buff + i, size);
     
+      buffer[i + k] = '\0';
       return i + k;
     }
 
