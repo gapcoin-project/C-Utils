@@ -30,4 +30,14 @@ inline uint32_t crc32(const char *str, uint32_t len);
  */
 inline char *str_clone(const char *str);
 
+/**
+ * clone a string
+ */
+inline char *strn_clone(const char *str, size_t n);
+
+/**
+ * receve one line from a socket fd
+ */
+inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
+
 #endif /* __STRING_H__ */

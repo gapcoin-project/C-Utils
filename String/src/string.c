@@ -126,5 +126,59 @@ inline char *str_clone(const char *str) {
   return clone;
 }
 
+/**
+ * clone a string
+ */
+inline char *strn_clone(const char *str, size_t n) {
+
+  char *clone;
+
+  clone = malloc(n);
+  memcpy(clone, str, n);
+
+  return clone;
+}
+
+/**
+ * receve one line from a socket fd
+ */
+inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
+  
+  static char recv_buff[512];
+  static ssize_t size = 0;
+  ssize_t i, k = 0;
+
+  for (;;) {
+    
+    for (i = 0; i < size && i + k < len; i++) {
+      buffer[i + k] = recv_buff[i];
+ 
+      if (recv_buff[i] == '\n') {
+        size -= i + 1;
+
+        if (size > 0)
+          memove(recv_buff, recv_buff + i + 1, size);
+
+        return i + 1;
+      }
+    }
+    
+    if (i + k >= len) {
+    
+        size -= i;
+
+        if (size > 0)
+          memove(recv_buff, recv_buff + i, size);
+    
+      return i;
+    }
+
+    size = recv(sock_fd, recv_buff, 512, flags);
+    if (size == -1) return -1;
+
+    k = i;
+  }
+}
+
 
 #endif /* __STRING__ */
