@@ -41,7 +41,8 @@ int read_line(int fp, char *buffer) {
  */
 char **split(char *str, const char *seperator) {
   
-  char *ptr = strtok(str, seperator);
+  char *copy = str_clone(str);
+  char *ptr = strtok(copy, seperator);
 
   int len = 2;
   char **splited = malloc(sizeof(char *) * len);
@@ -63,6 +64,7 @@ char **split(char *str, const char *seperator) {
   }
 
   splited[i] = NULL;
+  free(copy);
 
   return splited;
 }
