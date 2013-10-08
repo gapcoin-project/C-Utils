@@ -113,7 +113,7 @@ static TestUnit tunit;
  */
 #define BEVOR_ALL()                                                         \
 /* declaration */                                                           \
-void *bevor_all(void *args);                                                \
+void *bevor_all(void);                                                      \
                                                                             \
 /* add the function to the test unit */                                     \
 void __attribute__((constructor(102))) add_bevor_all() {                    \
@@ -121,7 +121,7 @@ void __attribute__((constructor(102))) add_bevor_all() {                    \
 }                                                                           \
                                                                             \
 /* start of the function implementation */                                  \
-void *bevor_all(void *args)
+void *bevor_all(void)
 
 
 /**
@@ -145,7 +145,7 @@ void *bevor(void *args)
  */ 
 #define AFTER()                                                             \
 /* declaration */                                                           \
-void *after(void *args);                                                    \
+void after(void *args);                                                     \
                                                                             \
 /* add the function to the test unit */                                     \
 void __attribute__((constructor(102))) add_after() {                        \
@@ -153,7 +153,7 @@ void __attribute__((constructor(102))) add_after() {                        \
 }                                                                           \
                                                                             \
 /* start of the function implementation */                                  \
-void *after(void *args)
+void after(void *args)
 
 
 /**
@@ -202,7 +202,7 @@ void *NAME(void *args)
  * print or log a message
  * useable like printf
  */
-#define TEST_MSG(...)                                         \
+#define TEST_MSG1(...)                                        \
 do {                                                          \
                                                               \
   if (tunit.verbose)                                          \
@@ -214,14 +214,75 @@ do {                                                          \
 } while (0)
 
 /**
+ * print or log a message
+ * useable like printf
+ */
+#define TEST_MSG2(...)                                        \
+do {                                                          \
+                                                              \
+  if (tunit.verbose > 1)                                      \
+    dprintf(STDOUT_FILENO, __VA_ARGS__);                      \
+                                                              \
+  if (tunit.log)                                              \
+    dprintf(tunit.log_fd, __VA_ARGS__);                       \
+                                                              \
+} while (0)
+
+/**
+ * print or log a message
+ * useable like printf
+ */
+#define TEST_MSG3(...)                                        \
+do {                                                          \
+                                                              \
+  if (tunit.verbose > 2)                                      \
+    dprintf(STDOUT_FILENO, __VA_ARGS__);                      \
+                                                              \
+  if (tunit.log)                                              \
+    dprintf(tunit.log_fd, __VA_ARGS__);                       \
+                                                              \
+} while (0)
+
+/**
+ * print or log a message
+ * useable like printf
+ */
+#define TEST_MSG4(...)                                        \
+do {                                                          \
+                                                              \
+  if (tunit.verbose > 3)                                      \
+    dprintf(STDOUT_FILENO, __VA_ARGS__);                      \
+                                                              \
+  if (tunit.log)                                              \
+    dprintf(tunit.log_fd, __VA_ARGS__);                       \
+                                                              \
+} while (0)
+
+/**
+ * print or log a message
+ * useable like printf
+ */
+#define TEST_MSG5(...)                                        \
+do {                                                          \
+                                                              \
+  if (tunit.verbose > 4)                                      \
+    dprintf(STDOUT_FILENO, __VA_ARGS__);                      \
+                                                              \
+  if (tunit.log)                                              \
+    dprintf(tunit.log_fd, __VA_ARGS__);                       \
+                                                              \
+} while (0)
+
+
+/**
  * assert that the condition is false 
  * if its true it logs or prints a stacktrace and 
  * if given formated message
  */
 #define ASSERT_FALSE(CONDITION, ...)                                        \
 if (CONDITION) {                                                            \
-  TEST_MSG("[EE] in %s: ", ARY_AT(tunit.tests, tunit.i).test_name);         \
-  TEST_MSG(__VA_ARGS__);                                                    \
+  TEST_MSG3("[EE] in %s: ", ARY_AT(tunit.tests, tunit.i).test_name);        \
+  TEST_MSG3(__VA_ARGS__);                                                   \
   show_backtrace();                                                         \
                                                                             \
   /* let test fail */                                                       \

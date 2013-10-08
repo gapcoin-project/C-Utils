@@ -23,6 +23,10 @@ void __attribute__ ((constructor(101))) init_tunit() {
   ARY_INIT(Test, tunit.tests, 8);
 }
 
+/**
+ * Macro to acces the current running test
+ */
+#define CUR_TEST ARY_AT(tunit.tests, tunit.i)
 
 /**
  * structur to hold infomation about an signal
@@ -57,8 +61,8 @@ static Signal signals[] = {
 void test_signal_handler(int signum) {
 
   /* let test fail with error */
-  ARY_AT(tunit.tests, tunit.i).failed = 1;
-  ARY_AT(tunit.tests, tunit.i).error  = 1;
+  CUR_TEST.failed = 1;
+  CUR_TEST.error  = 1;
   
   /* find the caled signal */
   Signal sig = { -1, NULL, NULL };
@@ -71,17 +75,23 @@ void test_signal_handler(int signum) {
     }
   }
   
-  TEST_MSG("[EE] recieved signal %s: %s\n", sig.name, sig.description);
+  TEST_MSG2("[EE] %s recieved signal %s: %s\n", 
+            CUR_TEST.test_name, 
+            sig.name, 
+            sig.description);
+
   show_backtrace();
 
   void (*old_handler) (int);
-  old_handler = ARY_AT(ARY_AT(tunit.tests, tunit.i).signals, i).sa_handler;
+  old_handler = ARY_AT(CUR_TEST.signals, i).sa_handler;
 
-  if (old_handler == SIG_DFL)
-    exit(EXIT_FAILURE);
+  /* reset signal hanler to default */
+  if (old_handler == SIG_DFL) {
+    signal(signum, SIG_DFL);
+    raise(signum);
 
   /* call old signal handler */
-  if (old_handler != SIG_IGN)
+  } else if (old_handler != SIG_IGN)
     old_handler(signum);
 }
 
@@ -111,7 +121,13 @@ static inline void print_usage(char *name) {
   printf("  -h  --help\t\tprint these message\n"
          "  -q  --quiet\t\tbe quiet\n"
          "  -l  --log [FILE]\tlog qutput to FILE\n"
-         "  -d  --debug\t\tif you want to debug this application\n");
+         "  -d  --debug\t\tif you want to debug this application\n"
+         "  -v  --verbose [1,2,3,4,5] set the verbose level\n"
+         "        1: only summary\n"
+         "        2: 1 + errors\n"
+         "        3: 2 + failurs\n"
+         "        4: 3 + one-line test info (default)\n"
+         "        5: 4 + extendet test info\n");
 }
 
 /**
@@ -165,13 +181,25 @@ static inline void get_backtrace() {
   char **strings = backtrace_symbols(buffer, n);
 
   int i;
-  for (i = 0; i < n; i++)
-    if (n < 10)
-      TEST_MSG("#%d %s\n", i, strings[i]);
-    else if (i < 10)
-      TEST_MSG("#%d  %s\n", i, strings[i]);
-    else
-      TEST_MSG("#%d %s\n", i, strings[i]);
+
+  if (CUR_TEST.error) {
+    for (i = 0; i < n; i++)
+      if (n < 10)
+        TEST_MSG2("#%d %s\n", i, strings[i]);
+      else if (i < 10)
+        TEST_MSG2("#%d  %s\n", i, strings[i]);
+      else
+        TEST_MSG2("#%d %s\n", i, strings[i]);
+
+  } else {
+    for (i = 0; i < n; i++)
+      if (n < 10)
+        TEST_MSG3("#%d %s\n", i, strings[i]);
+      else if (i < 10)
+        TEST_MSG3("#%d  %s\n", i, strings[i]);
+      else
+        TEST_MSG3("#%d %s\n", i, strings[i]);
+  }
 
   free(strings);
 }
@@ -196,13 +224,28 @@ static inline void get_gdb_backtrace() {
   if (trace <= (FILE *) 0)
     return get_backtrace();
 
-  int i;
+  int i, k;
+  char abort = 0;
 
   int size = fread(buffer, 1, 1020, trace);
 
-  for (i = 0; size > 0 && i < 100; i++) {
+  for (i = 0; size > 0 && i < 100 && !abort; i++) {
 
-    TEST_MSG("%s", buffer);
+    for (k = 1; k < size; k++) {
+      if (buffer[k - 1] == '\n' && buffer[k] != '#') {
+        abort = 1;
+        break;
+      }
+    }
+
+    if (CUR_TEST.error && tunit.verbose > 1)
+      write(STDOUT_FILENO, buffer, k);
+    else if (tunit.verbose > 2)
+      write(STDOUT_FILENO, buffer, k);
+
+    if (tunit.log)
+      write(tunit.log_fd, buffer, k);
+
     size = fread(buffer, 1, 1020, trace);
   }
   fclose(trace);
@@ -250,16 +293,16 @@ char can_use_gdb() {
  */
 static inline void info_messages(int argc, char *argv[]) {
   
-  TEST_MSG("[II] Test Framework started with %" PRIu64" test\n", 
+  TEST_MSG5("[II] Test Framework started with %" PRIu64" test\n", 
            ARY_LEN(tunit.tests));
 
   if (tunit.debug)
-    TEST_MSG("[II] running in Debug mode\n");
+    TEST_MSG5("[II] running in Debug mode\n");
 
   if (tunit.log)
-    TEST_MSG("[II] logging to %s\n", get_arg(argc, argv, "-l", "--log"));
+    TEST_MSG5("[II] logging to %s\n", get_arg(argc, argv, "-l", "--log"));
 
-  TEST_MSG("\n");
+  TEST_MSG5("\n");
 }
 
 /**
@@ -270,15 +313,21 @@ static inline void init(int argc, char *argv[]) {
   /* save file name */
   tunit.fname = argv[0];
 
+  /* standart verbose level */
+  tunit.verbose = 4;
+
   if (has_arg(argc, argv, "-h", "--help")) {
     print_usage(argv[0]);
     exit(EXIT_SUCCESS);
   }
 
-  tunit.verbose = !has_arg(argc, argv, "-q", "--quiet");
-  tunit.debug   =  has_arg(argc, argv, "-d", "--debug");
-  tunit.log     =  has_arg(argc, argv, "-l", "--log");
+  if (has_arg(argc, argv, "-v", "--verbose"))
+    tunit.verbose = atoi(get_arg(argc, argv, "-v", "--verbose"));
   
+  tunit.verbose = has_arg(argc, argv, "-q", "--quiet") ? 0 : tunit.verbose;
+  tunit.debug   = has_arg(argc, argv, "-d", "--debug");
+  tunit.log     = has_arg(argc, argv, "-l", "--log");
+
   if (tunit.log)
     tunit.log_fd = open(get_arg(argc, argv, "-l", "--log"), O_CREAT|O_WRONLY, 00777);
 
@@ -292,7 +341,6 @@ static inline void init(int argc, char *argv[]) {
     tunit.debug = 1;
 
   info_messages(argc, argv);
-
 }
 
 /**
@@ -335,16 +383,16 @@ static inline void wait_for(pid_t pid) {
   if (!WIFEXITED(child_status)) {
 
     /* le the test fail */
-    ARY_AT(tunit.tests, tunit.i).failed = 1;
+    CUR_TEST.failed = 1;
     
     /* if test was KILLED */
     if (WIFSIGNALED(child_status) && WTERMSIG(child_status) == SIGKILL) {
-      TEST_MSG("[EE] test %s got killed\n", 
-               ARY_AT(tunit.tests, tunit.i).test_name);
+      TEST_MSG2("[EE] test %s got killed\n", 
+               CUR_TEST.test_name);
 
     } else if (!WIFSIGNALED(child_status)) {
-      TEST_MSG("[II] test %s exited with unknowen reason\n", 
-               ARY_AT(tunit.tests, tunit.i).test_name);
+      TEST_MSG2("[II] test %s exited with unknowen reason\n", 
+               CUR_TEST.test_name);
     }
   }
 }
@@ -359,12 +407,12 @@ static inline void do_test_info(Test *test) {
   long double seconds = (long double) test->time.tv_sec + 
                         (long double) test->time.tv_usec / 1000000.0L;
 
-  TEST_MSG("[II] Test %s needed %.3LF seconds, exited %s",
+  TEST_MSG5("[II] Test %s needed %.3LF seconds, exited %s",
            test->test_name,
            seconds,
            exit_status);
 
-  TEST_MSG("\n\n");
+  TEST_MSG5("\n\n");
 }
 
 /**
@@ -384,13 +432,20 @@ static inline void do_test_summary(char *name) {
 
   }
 
-  TEST_MSG("[II] Test Framework %s finished %" PRIu64 " tests\n",
+  if (n_errors)
+    TEST_MSG2("\n");
+  else if (n_failurs)
+    TEST_MSG3("\n");
+  else
+    TEST_MSG4("\n");
+
+  TEST_MSG1("[II] Test Framework %s finished %" PRIu64 " tests\n",
            name,
            ARY_LEN(tunit.tests));
 
-  TEST_MSG("[II] Succes: %" PRIu64 "\n", ARY_LEN(tunit.tests) - n_failurs);
-  TEST_MSG("[II] Failed: %u\n", n_failurs);
-  TEST_MSG("[II] Errors: %u\n", n_errors);
+  TEST_MSG1("[II] Succes: %" PRIu64 "\n", ARY_LEN(tunit.tests) - n_failurs);
+  TEST_MSG1("[II] Failed: %u\n", n_failurs);
+  TEST_MSG1("[II] Errors: %u\n", n_errors);
 
 }
 
@@ -437,9 +492,9 @@ int main(int argc, char *argv[]) {
   /* runn all tests */
   for (tunit.i = 0; tunit.i < ARY_LEN(tunit.tests); tunit.i++) {
 
-    Test *test = &ARY_AT(tunit.tests, tunit.i);
+    Test *test = &CUR_TEST;
 
-    TEST_MSG("[II] starting test: %s\n", test->test_name); 
+    TEST_MSG4("[II] starting test: %s\n", test->test_name); 
     gettimeofday(&test->start, NULL);
 
     /* run test in new process */
