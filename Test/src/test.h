@@ -333,6 +333,11 @@ void __attribute__ ((constructor(101))) init_tunit() {
 #define CUR_TEST ARY_AT(tunit.tests, tunit.i)
 
 /**
+ * returns if the current test failed
+ */
+#define CUR_TEST_FAILED CUR_TEST.failed
+
+/**
  * structur to hold infomation about an signal
  */
 typedef struct {
