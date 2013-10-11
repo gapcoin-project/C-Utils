@@ -313,6 +313,105 @@ if (CONDITION) {                                                            \
  */
 #define ASSERT_FAIL(...) ASSERT_FALSE(1, __VA_ARGS__)
 
+/**
+ * if a test depends on the previous execution of other tests
+ * Note the named test will be reexecuted
+ */
+#define DEPENDS_ON1(TEST)                                         \
+  after(TEST(tunit.bevor ? tunit.bevor(tunit.bevor_all_res) :     \
+                           tunit.bevor_all_res))
+
+#define DEPENDS_ON2(T1, T2)   \
+do {                          \
+  DEPENDS_ON1(T1);            \
+  DEPENDS_ON1(T2);            \
+} while (0)
+
+#define DEPENDS_ON3(T1, T2, T3)   \
+do {                              \
+  DEPENDS_ON1(T1);                \
+  DEPENDS_ON1(T2);                \
+  DEPENDS_ON1(T3);                \
+} while (0)
+
+#define DEPENDS_ON4(T1, T2, T3, T4)   \
+do {                                  \
+  DEPENDS_ON1(T1);                    \
+  DEPENDS_ON1(T2);                    \
+  DEPENDS_ON1(T3);                    \
+  DEPENDS_ON1(T4);                    \
+} while (0)
+
+#define DEPENDS_ON5(T1, T2, T3, T4, T5)   \
+do {                                      \
+  DEPENDS_ON1(T1);                        \
+  DEPENDS_ON1(T2);                        \
+  DEPENDS_ON1(T3);                        \
+  DEPENDS_ON1(T4);                        \
+  DEPENDS_ON1(T5);                        \
+} while (0)
+
+#define DEPENDS_ON6(T1, T2, T3, T4, T5, T6)   \
+do {                                          \
+  DEPENDS_ON1(T1);                            \
+  DEPENDS_ON1(T2);                            \
+  DEPENDS_ON1(T3);                            \
+  DEPENDS_ON1(T4);                            \
+  DEPENDS_ON1(T5);                            \
+  DEPENDS_ON1(T6);                            \
+} while (0)
+
+#define DEPENDS_ON7(T1, T2, T3, T4, T5, T6, T7)   \
+do {                                              \
+  DEPENDS_ON1(T1);                                \
+  DEPENDS_ON1(T2);                                \
+  DEPENDS_ON1(T3);                                \
+  DEPENDS_ON1(T4);                                \
+  DEPENDS_ON1(T5);                                \
+  DEPENDS_ON1(T6);                                \
+  DEPENDS_ON1(T7);                                \
+} while (0)
+
+#define DEPENDS_ON8(T1, T2, T3, T4, T5, T6, T7, T8)   \
+do {                                                  \
+  DEPENDS_ON1(T1);                                    \
+  DEPENDS_ON1(T2);                                    \
+  DEPENDS_ON1(T3);                                    \
+  DEPENDS_ON1(T4);                                    \
+  DEPENDS_ON1(T5);                                    \
+  DEPENDS_ON1(T6);                                    \
+  DEPENDS_ON1(T7);                                    \
+  DEPENDS_ON1(T8);                                    \
+} while (0)
+
+#define DEPENDS_ON9(T1, T2, T3, T4, T5, T6, T7, T8, T9)   \
+do {                                                      \
+  DEPENDS_ON1(T1);                                        \
+  DEPENDS_ON1(T2);                                        \
+  DEPENDS_ON1(T3);                                        \
+  DEPENDS_ON1(T4);                                        \
+  DEPENDS_ON1(T5);                                        \
+  DEPENDS_ON1(T6);                                        \
+  DEPENDS_ON1(T7);                                        \
+  DEPENDS_ON1(T8);                                        \
+  DEPENDS_ON1(T9);                                        \
+} while (0)
+
+/**
+ * A short trick to define a variable args macro
+ */
+#define DEPENDS_ONX(X, T1, T2, T3, T4, T5, T6, T7, T8, T9, FUNC, ...) FUNC
+#define DEPENDS_ON(, ##__VA_ARGS__,             \
+                     DEPENDS_ON1(__VA_ARGS__),  \
+                     DEPENDS_ON2(__VA_ARGS__),  \
+                     DEPENDS_ON3(__VA_ARGS__),  \
+                     DEPENDS_ON4(__VA_ARGS__),  \
+                     DEPENDS_ON5(__VA_ARGS__),  \
+                     DEPENDS_ON6(__VA_ARGS__),  \
+                     DEPENDS_ON7(__VA_ARGS__),  \
+                     DEPENDS_ON8(__VA_ARGS__),  \
+                     DEPENDS_ON9(__VA_ARGS__))
+
 /*********************************************************************
  * include main and source                                           *
  * (we have to do this to use the same static tunit with in test.c   *
