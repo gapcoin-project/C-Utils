@@ -40,4 +40,9 @@ inline char *strn_clone(const char *str, size_t n);
  */
 inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
 
+/**
+ * returns wheretre the given string matches the given regex
+ */
+char matches(const char *regex_str, const char *str);
+
 #endif /* __STRING_H__ */

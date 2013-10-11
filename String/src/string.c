@@ -7,6 +7,8 @@
 #include "string.h"
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <regex.h>
 
 /**
  * reads a line from a given file descriptor
@@ -183,6 +185,24 @@ inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
 
     k += i;
   }
+}
+
+/**
+ * returns wheretre the given string matches the given regex
+ */
+char matches(const char *regex_str, const char *str) {
+  
+  regex_t regex;
+
+  int ret = regcomp(&regex, regex_str, REG_NOSUB);
+
+  if (!ret)
+    return ret;
+
+  if (regexec(&regex, str, 0, NULL, 0))
+    return -1;
+  else
+    return 1;
 }
 
 
