@@ -45,4 +45,29 @@ inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
  */
 char str_matches(const char *regex_str, const char *str);
 
+/**
+ * converts an byte array to base64
+ * Note tere should be more memory avilabel in the given array
+ * cause there will my be added filling bytes
+ */
+inline char *to_b64(uint8_t *bytes, const uint64_t len);
+
+/**
+ * returns the length of an base64 encoded string
+ * (no new line chars are allowed)
+ */
+inline size_t b64_len(const char *b64);
+
+/**
+ * decodes an b64 encoded string
+ * (no new line chars are allowed)
+ */
+#define b64_to_byte1(b64) b64_to_byte(b64, b64_len(b64))
+#define b64_to_byte2(b64, len) b64_to_byte(b64, len)
+#define b64_to_bytex(x, b1, b2, func, ...) func
+#define b64_to_byte(...) b64_to_bytex(, ##__VA_ARGS__,                \
+                                        b64_to_byte2(__VA_ARGS__),    \
+                                        b64_to_byte1(__VA_ARGS__))
+inline uint8_t *b64_to_byte(const char *b64, const uint64_t len);
+
 #endif /* __STRING_H__ */
