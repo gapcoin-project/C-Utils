@@ -401,16 +401,17 @@ do {                                                      \
  * A short trick to define a variable args macro
  */
 #define DEPENDS_ONX(X, T1, T2, T3, T4, T5, T6, T7, T8, T9, FUNC, ...) FUNC
-#define DEPENDS_ON(, ##__VA_ARGS__,             \
-                     DEPENDS_ON1(__VA_ARGS__),  \
-                     DEPENDS_ON2(__VA_ARGS__),  \
-                     DEPENDS_ON3(__VA_ARGS__),  \
-                     DEPENDS_ON4(__VA_ARGS__),  \
-                     DEPENDS_ON5(__VA_ARGS__),  \
-                     DEPENDS_ON6(__VA_ARGS__),  \
-                     DEPENDS_ON7(__VA_ARGS__),  \
-                     DEPENDS_ON8(__VA_ARGS__),  \
-                     DEPENDS_ON9(__VA_ARGS__))
+#define DEPENDS_ON(...)                          \
+        DEPENDS_ONX(, ##__VA_ARGS__,             \
+                      DEPENDS_ON9(__VA_ARGS__),  \
+                      DEPENDS_ON8(__VA_ARGS__),  \
+                      DEPENDS_ON7(__VA_ARGS__),  \
+                      DEPENDS_ON6(__VA_ARGS__),  \
+                      DEPENDS_ON5(__VA_ARGS__),  \
+                      DEPENDS_ON4(__VA_ARGS__),  \
+                      DEPENDS_ON3(__VA_ARGS__),  \
+                      DEPENDS_ON2(__VA_ARGS__),  \
+                      DEPENDS_ON1(__VA_ARGS__))
 
 /*********************************************************************
  * include main and source                                           *
