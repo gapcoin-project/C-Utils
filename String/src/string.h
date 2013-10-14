@@ -68,7 +68,7 @@ inline size_t b64_dec_len(const char *b64);
  * calculates the size an base64 encoded string will have
  */
 #define b64_enc_len(len)                                                \
-  ((len + ((3 - (len % 3)) % 3)) / 3) * 4 + ((3 - (len % 3)) % 3)
+  (((len + ((3 - (len % 3)) % 3)) / 3) * 4 + ((3 - (len % 3)) % 3))
 
 /**
  * decodes an b64 encoded string
