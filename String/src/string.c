@@ -346,9 +346,9 @@ inline char is_b64(const unsigned char *str) {
     -1, -1, -1, -1, -1, -1, -1, };
 
   size_t i;
-  size_t len = strlen(str);
+  size_t len = strlen((const char *) str);
   for (i = 0; i < len; i++) {
-    if (code[str[i]] == -1)
+    if (code[str[i]] == (uint8_t) -1)
       break;
 
   if (i != len) {
