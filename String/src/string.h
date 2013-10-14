@@ -83,4 +83,10 @@ inline size_t b64_dec_len(const char *b64);
 inline uint8_t *b64_to_byte(const char *b64, 
                             uint8_t *bytes);
 
+/**
+ * return s if the given string is base64 encoded
+ * (no new line chars are allowed)
+ */ 
+inline char is_b64(const unsigned char *str);
+
 #endif /* __STRING_H__ */
