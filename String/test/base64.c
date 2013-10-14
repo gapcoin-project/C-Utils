@@ -34,6 +34,8 @@ TEST(test_base64) {
     to_b64(bytes, len, b64);
     b64_to_byte(b64, decode);
 
+    ASSERT_TRUE(is_b64((const unsigned char *) b64));
+
     for (i = 0; i < len; i++) {
       if (bytes[i] != decode[i]) {
 
