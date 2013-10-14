@@ -347,7 +347,7 @@ inline char is_b64(const unsigned char *str) {
 
   size_t i;
   size_t len = strlen((const char *) str);
-  for (i = 0; i < len; i++) {
+  for (i = 0; i < len; i++) 
     if (code[str[i]] == (uint8_t) -1)
       break;
 
@@ -355,7 +355,7 @@ inline char is_b64(const unsigned char *str) {
     if (i == len - 1 && str[i] == '=')
       return 1;
     else if (i == len - 2 && str[i] == '=' && str[i + 1] == '=')
-      return 1
+      return 1;
     else 
       return 0;
   }
