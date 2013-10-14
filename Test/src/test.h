@@ -317,9 +317,16 @@ if (CONDITION) {                                                            \
  * if a test depends on the previous execution of other tests
  * Note the named test will be reexecuted
  */
-#define DEPENDS_ON1(TEST)                                         \
-  after(TEST(tunit.bevor ? tunit.bevor(tunit.bevor_all_res) :     \
-                           tunit.bevor_all_res))
+#define DEPENDS_ON1(TEST)                                                 \
+do {                                                                      \
+  if (tunit.after != NULL) {                                              \
+    tunit.after(TEST(tunit.bevor ? tunit.bevor(tunit.bevor_all_res) :     \
+                                   tunit.bevor_all_res));                 \
+  } else {                                                                \
+    TEST(tunit.bevor ? tunit.bevor(tunit.bevor_all_res) :                 \
+                       tunit.bevor_all_res);                              \
+  }                                                                       \
+} while (0)
 
 #define DEPENDS_ON2(T1, T2)   \
 do {                          \
