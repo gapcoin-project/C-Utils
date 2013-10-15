@@ -37,8 +37,7 @@ typedef struct {                        \
  */
 #define LONG_ARY_INIT(TYPE, ARY, MAX_LEN)                               \
   do {                                                                  \
-    (ARY).max_rows = (uint64_t) sqrt((long double) MAX_LEN) + 1;        \
-    (ARY).col_len = (ARY).max_rows;                                     \
+    (ARY).col_len = (ARY).max_rows = (uint64_t) sqrt(MAX_LEN) + 1;      \
     (ARY).ptr = (TYPE **) malloc(sizeof(TYPE *) * (ARY).col_len);       \
     (ARY).ptr[0] = (TYPE *) malloc(sizeof(TYPE) * (ARY).col_len);       \
     (ARY).length = 0;                                                   \
