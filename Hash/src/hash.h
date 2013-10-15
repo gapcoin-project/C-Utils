@@ -25,7 +25,7 @@ static inline char is_prime(uint32_t n) {
   if (n % 2 == 0) return 0;
 
   uint32_t i;
-  uint32_t limit = sqrt(n) + 1;
+  uint32_t limit = (uint32_t) sqrt((double) n) + 1;
   for (i = 3; i < limit; i+= 2)
     if (n % i == 0) return 0;
 
