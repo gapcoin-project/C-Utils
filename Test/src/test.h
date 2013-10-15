@@ -314,6 +314,14 @@ if (CONDITION) {                                                            \
 #define ASSERT_FAIL(...) ASSERT_FALSE(1, __VA_ARGS__)
 
 /**
+ * if a test depends on the return aguments of an other test
+ * (it re runs and returns the arguments form the given test)
+ */
+#define DEPENDS_ON_ARGS(TEST)                               \
+  TEST(tunit.bevor ? tunit.bevor(tunit.bevor_all_res) :     \
+                                 tunit.bevor_all_res)
+
+/**
  * if a test depends on the previous execution of other tests
  * Note the named test will be reexecuted
  */
