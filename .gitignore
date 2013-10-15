@@ -1,7 +1,15 @@
-*/bin/*
+*bin/*
+*arm-bin/*
 *.swp
+*.swn
 a.out
 *.swo
 *.gch
 *callgrind.out*
 *.bmp
+*.o
+*.swl
+*.swm
+*.out
+TODO
+*.rb
