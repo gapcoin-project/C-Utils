@@ -37,7 +37,7 @@ void *with_timeout_do(struct timeval *time,
                       size_t shm_size, void *args) {
 
   /* timer value */                                     
-  struct itimerval __timer_val__ = { { 0,  0 }, *time }; 
+  struct itimerval timer = { { 0,  0 }, *time }; 
                                                        
   /** 
    * create and map shared memory into own addresspace 
@@ -67,7 +67,7 @@ void *with_timeout_do(struct timeval *time,
     signal(SIGALRM, SIG_DFL);                        
                                                     
     /* start timer */                              
-    setitimer(ITIMER_REAL, &__timer_val__, NULL);  
+    setitimer(ITIMER_REAL, &timer, NULL);  
  
     func(buffer + 1, args);
     *finished = 1;
