@@ -4,14 +4,26 @@
 #ifndef __TIMEOUT_H__
 #define __TIMEOUT_H__
 
-#include <sys/time.h>
-#include <unistd.h>
+#include <sys/shm.h>
+#include <sys/shm.h>
+#include <errno.h>
 #include <signal.h>
-#include <linux/sched.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <inttypes.h>
+#include <sched.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * Process an function wih an agressive Timout
- * the given funktion pointer will pe brocessed in
+ * th given funktion pointer will pe brocessed in
  * a seperate process so if it will be canceld 
  * by timout the kernle frees unfreed memory
  *
