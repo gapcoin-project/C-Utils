@@ -14,44 +14,8 @@
   } while(0)
 
 /**
- * Timer function
- * which cancels the process with pid after time
- */
-static inline void timer(struct timeval *time, pid_t pid, uint8_t *finished) {
-
-  struct timeval now, end, res;
-  gettimeofday(&now, NULL);
-
-  end = now;
-  timeval_additon(&end, &end, time);
-
-  /**
-   * as long as diference is not negative and caller process
-   * is running yield
-   */
-  while (!timeval_subtract(&res, &end, &now) &&
-         *finished != 1) {
-
-         sched_yield();
-         gettimeofday(&now, NULL);
-  }
-  
-  /** if process isn't finisehd kill it */
-  if (*finished != 1) {
-    int ret = kill(pid, SIGTERM);
-
-    if (ret == -1)
-      perror("failed to kill timouted process");
-  }
-  
-  /* wait for process to be finised */
-	waitpid(pid, NULL, 0);
-
-}
-
-/**
  * Process an function wih an agressive Timout
- * th given funktion pointer will pe brocessed in
+ * the given funktion pointer will pe brocessed in
  * a seperate process so if it will be canceld 
  * by timout the kernle frees unfreed memory
  *
@@ -72,7 +36,9 @@ void *with_timeout_do(struct timeval *time,
                       void (*func)(void *, void *),
                       size_t shm_size, void *args) {
 
-
+  /* timer value */                                     
+  struct itimerval __timer_val__ = { { 0,  0 }, *time }; 
+                                                       
   /** 
    * create and map shared memory into own addresspace 
    */
@@ -97,14 +63,20 @@ void *with_timeout_do(struct timeval *time,
   /* new process */
 	if ( pid == 0 ) {
 
+    /* reset timer siganl handler */                  
+    signal(SIGALRM, SIG_DFL);                        
+                                                    
+    /* start timer */                              
+    setitimer(ITIMER_REAL, &__timer_val__, NULL);  
+ 
     func(buffer + 1, args);
     *finished = 1;
     exit(1);
 	
   /* old process */
-  } else if ( pid > 0 )
-    timer(time, pid, finished);
-	else if ( pid == -1 )
+  } else if (pid > 0)
+    waitpid(pid, NULL, 0);
+	else if (pid == -1)
 		perror("fork failed");
 
   
