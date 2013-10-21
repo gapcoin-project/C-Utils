@@ -82,7 +82,7 @@ char **split(char *str, const char *seperator) {
 #define end_with(str1, str2)                                                \
   (strncmp(str2, str1 + (strlen(str1) - strlen(str2)), strlen(str2)) == 0)
 
-static inline uint8_t get_byte(const uint8_t byte, int i) {
+static uint8_t get_byte(const uint8_t byte, int i) {
   switch (i) {
     case 0: return byte & 1;
     case 1: return (byte & 2) >> 1;
@@ -101,7 +101,7 @@ static inline uint8_t get_byte(const uint8_t byte, int i) {
 /**
  * CRC32 implementation
  */
-inline uint32_t crc32(const char *str, uint32_t len) {
+uint32_t crc32(const char *str, uint32_t len) {
   
   uint32_t shift = 0x0;
   uint32_t crc  = 0x04C11DB7;
@@ -120,7 +120,7 @@ inline uint32_t crc32(const char *str, uint32_t len) {
 /**
  * clone a string
  */
-inline char *str_clone(const char *str) {
+char *str_clone(const char *str) {
 
   char *clone;
   size_t len = strlen(str);
@@ -134,7 +134,7 @@ inline char *str_clone(const char *str) {
 /**
  * clone a string
  */
-inline char *strn_clone(const char *str, size_t n) {
+char *strn_clone(const char *str, size_t n) {
 
   char *clone;
 
@@ -147,7 +147,7 @@ inline char *strn_clone(const char *str, size_t n) {
 /**
  * receve one line from a socket fd
  */
-inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
+ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
   
   static char recv_buff[512];
   static ssize_t size = 0;
@@ -210,7 +210,7 @@ char str_matches(const char *regex_str, const char *str) {
  * Note tere should be more memory avilabel in the given array
  * cause there will my be added filling bytes
  */
-inline char *to_b64(uint8_t *bytes, uint64_t len, char *b64) {
+char *to_b64(uint8_t *bytes, uint64_t len, char *b64) {
   
   static const char code[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
@@ -250,7 +250,7 @@ inline char *to_b64(uint8_t *bytes, uint64_t len, char *b64) {
  * returns the decode length of an base64 encoded string
  * (no new line chars are allowed)
  */
-inline size_t b64_dec_len(const char *b64) {
+size_t b64_dec_len(const char *b64) {
   
   size_t n_fill = 0;
   size_t len    = strlen(b64);
@@ -269,7 +269,7 @@ inline size_t b64_dec_len(const char *b64) {
  * decodes an b64 encoded string
  * (no new line chars are allowed)
  */
-inline uint8_t *b64_to_byte(const char *b64, 
+uint8_t *b64_to_byte(const char *b64, 
                             uint8_t *bytes) {
   
   /**
@@ -324,7 +324,7 @@ inline uint8_t *b64_to_byte(const char *b64,
  * return s if the given string is base64 encoded
  * (no new line chars are allowed)
  */ 
-inline char is_b64(const unsigned char *str) {
+char is_b64(const unsigned char *str) {
 
   /**
    * Array which orders the base 64 elements to ist code

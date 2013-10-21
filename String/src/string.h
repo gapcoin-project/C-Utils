@@ -23,22 +23,22 @@ char **split(char *str, const char *seperator);
 /**
  * CRC32 implementation
  */
-inline uint32_t crc32(const char *str, uint32_t len);
+uint32_t crc32(const char *str, uint32_t len);
 
 /**
  * clone a string
  */
-inline char *str_clone(const char *str);
+char *str_clone(const char *str);
 
 /**
  * clone a string
  */
-inline char *strn_clone(const char *str, size_t n);
+char *strn_clone(const char *str, size_t n);
 
 /**
  * receve one line from a socket fd
  */
-inline ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
+ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
 
 /**
  * returns wheretre the given string matches the given regex
@@ -56,13 +56,13 @@ char str_matches(const char *regex_str, const char *str);
 #define to_b64(...) to_b64x(, ##__VA_ARGS__,           \
                               to_b642(__VA_ARGS__),    \
                               to_b641(__VA_ARGS__))
-inline char *to_b64(uint8_t *bytes, uint64_t len, char *b64);
+char *to_b64(uint8_t *bytes, uint64_t len, char *b64);
 
 /**
  * returns the decode length of an base64 encoded string
  * (no new line chars are allowed)
  */
-inline size_t b64_dec_len(const char *b64);
+size_t b64_dec_len(const char *b64);
 
 /**
  * calculates the size an base64 encoded string will have
@@ -80,13 +80,18 @@ inline size_t b64_dec_len(const char *b64);
 #define b64_to_byte(...) b64_to_bytex(, ##__VA_ARGS__,                \
                                         b64_to_byte2(__VA_ARGS__),    \
                                         b64_to_byte1(__VA_ARGS__))
-inline uint8_t *b64_to_byte(const char *b64, 
+uint8_t *b64_to_byte(const char *b64, 
                             uint8_t *bytes);
 
 /**
  * return s if the given string is base64 encoded
  * (no new line chars are allowed)
  */ 
-inline char is_b64(const unsigned char *str);
+char is_b64(const unsigned char *str);
+
+/**
+ * removes the last character of an string
+ */
+#define str_chop(str) str[strlen(str) - 1] = '\0'
 
 #endif /* __STRING_H__ */
