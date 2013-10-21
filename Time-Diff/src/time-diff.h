@@ -14,29 +14,29 @@
  * Return 1 if the difference is negative, otherwise 0.  
  * Saves the Difference of t1 and t2 in result
  */
-int timeval_subtract(struct timeval *result, 
-                     struct timeval *t2, 
-                     struct timeval *t1);
+inline int timeval_subtract(struct timeval *result, 
+                            struct timeval *t2, 
+                            struct timeval *t1);
 
 /**
  * Return 1 if the addition is negative, otherwise 0.  
  * Saves the Addition of t1 and t2 in result
  */
-int timeval_additon(struct timeval *result, 
-                    struct timeval *t2, 
-                    struct timeval *t1);
+inline int timeval_additon(struct timeval *result, 
+                           struct timeval *t2, 
+                           struct timeval *t1);
 
 /**
  * Returns 1 if the Division is negative, otherwise 0.
  * Saves the Division of t1 by divisor in result
  */
-int timeval_division(struct timeval *result, 
-                    struct timeval *t1,
-                    int divisor);
+inline int timeval_division(struct timeval *result, 
+                            struct timeval *t1,
+                            int divisor);
 
 /**
  * Prints a Timevall struct
  */
-void timeval_print(struct timeval *tv);
+inline void timeval_print(struct timeval *tv);
 
 #endif // __TIME_DIFF_H__

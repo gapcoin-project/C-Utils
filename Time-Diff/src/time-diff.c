@@ -7,15 +7,15 @@
  * Return 1 if the difference is negative, otherwise 0.  
  * Saves the Difference of t1 and t2 in result
  */
-int timeval_subtract(struct timeval *result, 
-                     struct timeval *t2, 
-                     struct timeval *t1) {
+inline int timeval_subtract(struct timeval *result, 
+                            struct timeval *t2, 
+                            struct timeval *t1) {
 
-    long int diff =   (t2->tv_usec + 1000000 * t2->tv_sec) 
-                    - (t1->tv_usec + 1000000 * t1->tv_sec);
+    int64_t diff = (t2->tv_usec + 1000000L * t2->tv_sec) -
+                   (t1->tv_usec + 1000000L * t1->tv_sec);
 
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
+    result->tv_sec  = diff / 1000000L;
+    result->tv_usec = diff % 1000000L;
 
     return (diff < 0);
 }
@@ -24,15 +24,15 @@ int timeval_subtract(struct timeval *result,
  * Return 1 if the addition is negative, otherwise 0.  
  * Saves the Addition of t1 and t2 in result
  */
-int timeval_additon(struct timeval *result, 
-                    struct timeval *t2, 
-                    struct timeval *t1) {
+inline int timeval_additon(struct timeval *result, 
+                           struct timeval *t2, 
+                           struct timeval *t1) {
 
-    long int diff =   (t2->tv_usec + 1000000 * t2->tv_sec) 
-                    + (t1->tv_usec + 1000000 * t1->tv_sec);
+    int64_t diff =  (t2->tv_usec + 1000000L * t2->tv_sec) +
+                    (t1->tv_usec + 1000000L * t1->tv_sec);
 
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
+    result->tv_sec  = diff / 1000000L;
+    result->tv_usec = diff % 1000000L;
 
     return (diff < 0);
 }
@@ -41,14 +41,14 @@ int timeval_additon(struct timeval *result,
  * Returns 1 if the Division is negative, otherwise 0.
  * Saves the Division of t1 by divisor in result
  */
-int timeval_division(struct timeval *result, 
-                    struct timeval *t1,
-                    int divisor) {
+inline int timeval_division(struct timeval *result, 
+                            struct timeval *t1,
+                            int divisor) {
 
-    long int diff =   (t1->tv_usec + 1000000 * t1->tv_sec) / divisor;
+    int64_t diff = (t1->tv_usec + 1000000L * t1->tv_sec) / divisor;
 
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
+    result->tv_sec  = diff / 1000000L;
+    result->tv_usec = diff % 1000000L;
 
     return (diff < 0);
 }
@@ -56,7 +56,7 @@ int timeval_division(struct timeval *result,
 /**
  * Prints a Timevall struct
  */
-void timeval_print(struct timeval *tv) {
+inline void timeval_print(struct timeval *tv) {
 
     char buffer[30];
     time_t curtime;
