@@ -475,7 +475,6 @@ static Signal signals[] = {
   { SIGFPE,  "SIGFPE",  "Floating point exception" },
   { SIGSEGV, "SIGSEGV", "Invalid memory reference" },
   { SIGPIPE, "SIGPIPE", "Broken pipe: write to pipe with no readers" },
-  { SIGALRM, "SIGALRM", "Timer signal from alarm(2)" },
   { SIGTERM, "SIGTERM", "Termination signal" },
 };
 
@@ -699,16 +698,37 @@ char can_use_gdb() {
     return 0;
 
   /* check if permittion to ptrace is granded */
-  int fd = open("/proc/sys/kernel/yama/ptrace_scope", O_RDONLY);
+  char ptrace_scope[] = "/proc/sys/kernel/yama/ptrace_scope";
+
+  int fd = open(ptrace_scope, O_RDONLY);
   char buffer[2];
 
   if (fd == -1)
     return 0;
 
   int size = read(fd, buffer, 1);
+  close(fd);
 
-  if (size != 1 || buffer[0] != '0')
+  if (size != 1)
     return 0;
+
+  /* try to set ptrace_scope to 1 */
+  if (buffer[0] != '0') {
+    if (access(ptrace_scope, W_OK))
+      return 0;
+    
+    fd = open(ptrace_scope, O_WRONLY);
+
+    if (fd == -1)
+      return 0;
+
+    if (write(fd, "1\n", 2) != 2) {
+      close(fd);
+      return 0;
+    }
+
+    close(fd);
+  }
     
   return 1;
 }
