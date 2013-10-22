@@ -146,6 +146,7 @@ char *strn_clone(const char *str, size_t n) {
 
 /**
  * receve one line from a socket fd
+ * (not includeing the new line char)
  */
 ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
   
@@ -164,8 +165,8 @@ ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
         if (size > 0)
           memmove(recv_buff, recv_buff + i + 1, size);
 
-        buffer[i + k + 1] = '\0';
-        return i + k + 1;
+        buffer[i + k] = '\0';
+        return i + k;
       }
     }
     
@@ -176,8 +177,8 @@ ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
         if (size > 0)
           memmove(recv_buff, recv_buff + i, size);
     
-      buffer[i + k] = '\0';
-      return i + k;
+      buffer[i + k - 1] = '\0';
+      return i + k - 1;
     }
 
     size = recv(sock_fd, recv_buff, 512, flags);
