@@ -14,6 +14,58 @@
   } while(0)
 
 /**
+ * static value thet indecates if an seteted timout was reatched
+ */
+static char soft_timout_reatched = 0;
+
+/**
+ * signal handler seting soft_timout_reatched
+ * on SIGALRM
+ */
+static void soft_timout_sighandler(int sigum) {
+  if (sigum == SIGALRM)
+    soft_timout_reatched = 1;
+}
+
+/**
+ * returns wether a setted timout was reatched
+ */
+char soft_timouted() { return soft_timout_reatched; }
+
+/**
+ * soft timout using an sigalarm handler 
+ * and a static value
+ * negativ timout let the timout never expire
+ */
+void set_soft_timout(int64_t usec) {
+  
+  static char not_init = 1;
+
+  /* init siganal handler at the first call */
+  if (not_init) {
+
+    static struct sigaction new_action;
+    memset(&new_action, 0, sizeof(struct sigaction));
+ 
+    new_action.sa_handler = soft_timout_sighandler;
+    sigaction(SIGALRM, &new_action, NULL);
+
+    not_init = 0;
+  }
+
+  /* reset timout indecator */
+  soft_timout_reatched = 0;
+
+  /* never expire if negative timout given */
+  if (usec < 0) return;
+  
+  struct itimerval timout = { { 0, 0}, { usec / 1000000, usec % 1000000 } };
+
+  setitimer(ITIMER_REAL, &timout, NULL);  
+}
+
+
+/**
  * Process an function wih an agressive Timout
  * the given funktion pointer will pe brocessed in
  * a seperate process so if it will be canceld 
