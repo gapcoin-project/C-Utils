@@ -24,14 +24,14 @@
 /**
  * returns wether a setted soft timout was reatched
  */
-char soft_timouted() { return soft_timout_reatched; }
+char soft_timouted();
 
 /**
  * sets a soft timout using an sigalarm handler 
  * and a static value
  * negativ timout let the timout never expire
  */
-void set_soft_timout(int64_t usec) {
+void set_soft_timout(int64_t usec);
 
 /**
  * Process an function wih an agressive Timout

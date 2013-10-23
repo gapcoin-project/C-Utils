@@ -14,7 +14,7 @@
   } while(0)
 
 /**
- * static value thet indecates if an seteted timout was reatched
+ * static value that indecates if an seteted timout was reatched
  */
 static char soft_timout_reatched = 0;
 
