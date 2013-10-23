@@ -522,7 +522,7 @@ void test_signal_handler(int signum) {
 /**
  * install teh signal handlers for a given test
  */
-static inline void install_signal_hanlders(Test *test) {
+static void install_signal_hanlders(Test *test) {
   
   unsigned int i;
   struct sigaction new_action, old_action;
@@ -557,10 +557,10 @@ static inline void print_usage(char *name) {
 /**
  * Returns if the given args conatinig the given arg
  */
-static inline char has_arg(int argc, 
-                           char *argv[], 
-                           const char *short_arg, 
-                           const char *long_arg) {
+static char has_arg(int argc, 
+                    char *argv[], 
+                    const char *short_arg, 
+                    const char *long_arg) {
 
   int i;
   for (i = 1; i < argc; i++) {
@@ -577,10 +577,10 @@ static inline char has_arg(int argc,
 /**
  * Returns the given argument arg
  */
-static inline char *get_arg(int argc, 
-                            char *argv[], 
-                            const char *short_arg, 
-                            const char *long_arg) {
+static char *get_arg(int argc, 
+                     char *argv[], 
+                     const char *short_arg, 
+                     const char *long_arg) {
 
   int i;
   for (i = 1; i < argc - 1; i++) {
@@ -597,7 +597,7 @@ static inline char *get_arg(int argc,
 /**
  * get normal backtrace
  */
-static inline void get_backtrace() {
+static void get_backtrace() {
 
   void *buffer[100];
   int n = backtrace(buffer, 100);
@@ -631,7 +631,7 @@ static inline void get_backtrace() {
 /**
  * get gdb backtrace
  */
-static inline void get_gdb_backtrace() {
+static void get_gdb_backtrace() {
 
   char buffer[1024];
 
