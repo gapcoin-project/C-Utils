@@ -28,13 +28,13 @@ static inline void rbt_insert_case2(RBTree *tree, RBTNode *n);
 static void rbt_insert_case1(RBTree *tree, RBTNode *n);
 static void rbt_rotate_left(RBTree *tree, RBTNode *n);
 static void rbt_rotate_right(RBTree *tree, RBTNode *n);
-static inline RBTNode *rbt_search(RBTree *tree, rbtree_key_t key);
+static inline RBTNode *rbt_search(RBTree *tree, uint64_t key);
 
 /**
  * Initializes an given Red-Back-Tree with given
  * max number of a given RBTNode
  */
-void init_rbtree(RBTree *tree, rbtree_key_t max_nodes) {
+void init_rbtree(RBTree *tree, uint64_t max_nodes) {
 
   tree->root        = NULL;                         
   LARY_INIT(RBTNode, tree->nodes, max_nodes);
@@ -45,7 +45,7 @@ void init_rbtree(RBTree *tree, rbtree_key_t max_nodes) {
  * Searches for a given key and Returns RBT_TRUE or RBT_FALSE
  * if the given RBTree contains the key or not
  */
-uint8_t rbtree_contains(RBTree *tree, rbtree_key_t key) {
+uint8_t rbtree_contains(RBTree *tree, uint64_t key) {
   RBTNode *cur = tree->root;
 
   while (cur != NULL) {
@@ -65,7 +65,7 @@ uint8_t rbtree_contains(RBTree *tree, rbtree_key_t key) {
  * Searches for a given key and Returns the RBTNode
  * containing that key, or NULL if there is no such key
  */
-static inline RBTNode *rbt_search(RBTree *tree, rbtree_key_t key) {
+static inline RBTNode *rbt_search(RBTree *tree, uint64_t key) {
   RBTNode *cur = tree->root;
 
   while (cur != NULL) {
@@ -162,9 +162,9 @@ static void rbt_rotate_left(RBTree *tree, RBTNode *n) {
  * Adds a given key to the given RBTree
  */
 #ifndef RBT_KEY_VALUE
-void rbtree_add(RBTree *tree, rbtree_key_t key) {
+void rbtree_add(RBTree *tree, uint64_t key) {
 #else
-void rbtree_add(RBTree *tree, rbtree_key_t key, rbtree_value_t value) {
+void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 #endif
 
   // reserving memory for next element
@@ -221,11 +221,9 @@ void rbtree_add(RBTree *tree, rbtree_key_t key, rbtree_value_t value) {
  * returns RBT_TRUE on success, else RBT_FALSE
  */
 #ifndef RBT_KEY_VALUE
-uint8_t rbtree_add_if_possible(RBTree *tree, rbtree_key_t key) {
+uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
 #else
-uint8_t rbtree_add_if_possible(RBTree *tree, 
-                               rbtree_key_t key, 
-                               rbtree_value_t value) {
+uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
 #endif
 
   // reserving memory for next element
@@ -351,7 +349,7 @@ static inline void rbt_insert_case5(RBTree *tree, RBTNode *n) {
  *
  * returns RBT_TRUE or RBT_FALSE if the key could be removed
  */
-uint8_t rbtree_remove(RBTree *tree, rbtree_key_t key) {
+uint8_t rbtree_remove(RBTree *tree, uint64_t key) {
   RBTNode *n = rbt_search(tree, key);
 
   if (n == NULL) {
@@ -645,7 +643,7 @@ void rbtree_clone(RBTree *dst, RBTree *src) {
 /**
  * Returns the Maximum key in the given RBTree
  */
-rbtree_key_t rbtree_max(RBTree *tree) {
+uint64_t rbtree_max(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
@@ -660,7 +658,7 @@ rbtree_key_t rbtree_max(RBTree *tree) {
 /**
  * Returns the Minimum key in the given RBTree
  */
-rbtree_key_t rbtree_min(RBTree *tree) {
+uint64_t rbtree_min(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
