@@ -1,20 +1,40 @@
 /**
  * These File contains an implementaion of an Red Black Tree
- *
  * and its operation fuctions
  *
- * Note this is a smal implementation with onley uint64_t keys
- * in each node, bute someone could later easyly add void pointer maybee
+ * set RBT_KEY_VALUE debugflag if you want a key value mapping
  */
 #ifndef __RED_BLACK_TREE__
 #define __RED_BLACK_TREE__
 #include "red-black-tree.h"
 
 /**
+ * static functions
+ */
+static inline void rbt_delete_case6(RBTree *tree, RBTNode *n);
+static inline void rbt_delete_case5(RBTree *tree, RBTNode *n);
+static inline void rbt_delete_case4(RBTree *tree, RBTNode *n);
+static inline void rbt_delete_case3(RBTree *tree, RBTNode *n);
+static inline void rbt_delete_case2(RBTree *tree, RBTNode *n);
+static inline void rbt_delete_case1_nil_node(RBTree *tree, RBTNode *n);
+static void rbt_delete_case1(RBTree *tree, RBTNode *n);
+static inline void rbt_free_node(RBTree *tree, RBTNode *n);
+static inline void rbt_repleace(RBTree *tree, RBTNode *dst, RBTNode *src);
+static inline void rbt_delete_one_child(RBTree *tree, RBTNode *n);
+static inline void rbt_insert_case5(RBTree *tree, RBTNode *n);
+static inline void rbt_insert_case4(RBTree *tree, RBTNode *n);
+static inline void rbt_insert_case3(RBTree *tree, RBTNode *n);
+static inline void rbt_insert_case2(RBTree *tree, RBTNode *n);
+static void rbt_insert_case1(RBTree *tree, RBTNode *n);
+static void rbt_rotate_left(RBTree *tree, RBTNode *n);
+static void rbt_rotate_right(RBTree *tree, RBTNode *n);
+static inline RBTNode *rbt_search(RBTree *tree, rbtree_key_t key);
+
+/**
  * Initializes an given Red-Back-Tree with given
  * max number of a given RBTNode
  */
-void init_rbtree(RBTree *tree, uint64_t max_nodes) {
+void init_rbtree(RBTree *tree, rbtree_key_t max_nodes) {
 
   tree->root        = NULL;                         
   LARY_INIT(RBTNode, tree->nodes, max_nodes);
@@ -25,7 +45,7 @@ void init_rbtree(RBTree *tree, uint64_t max_nodes) {
  * Searches for a given key and Returns RBT_TRUE or RBT_FALSE
  * if the given RBTree contains the key or not
  */
-uint8_t rbtree_contains(RBTree *tree, uint64_t key) {
+uint8_t rbtree_contains(RBTree *tree, rbtree_key_t key) {
   RBTNode *cur = tree->root;
 
   while (cur != NULL) {
@@ -45,7 +65,7 @@ uint8_t rbtree_contains(RBTree *tree, uint64_t key) {
  * Searches for a given key and Returns the RBTNode
  * containing that key, or NULL if there is no such key
  */
-RBTNode *rbt_search(RBTree *tree, uint64_t key) {
+static inline RBTNode *rbt_search(RBTree *tree, rbtree_key_t key) {
   RBTNode *cur = tree->root;
 
   while (cur != NULL) {
@@ -95,7 +115,7 @@ RBTNode *brother(RBTNode *n) {
 /**
  * Processes an right rotation on the given RBTNode
  */
-void rbt_rotate_right(RBTree *tree, RBTNode *n) {
+static void rbt_rotate_right(RBTree *tree, RBTNode *n) {
   RBTNode *l = n->left;
   
   n->left = l->right;
@@ -118,7 +138,7 @@ void rbt_rotate_right(RBTree *tree, RBTNode *n) {
 /**
  * Processes an left rotation on the given RBTNode
  */
-void rbt_rotate_left(RBTree *tree, RBTNode *n) {
+static void rbt_rotate_left(RBTree *tree, RBTNode *n) {
   RBTNode *r = n->right;
   
   n->right = r->left;
@@ -141,7 +161,11 @@ void rbt_rotate_left(RBTree *tree, RBTNode *n) {
 /**
  * Adds a given key to the given RBTree
  */
-void rbtree_add(RBTree *tree, uint64_t key) {
+#ifndef RBT_KEY_VALUE
+void rbtree_add(RBTree *tree, rbtree_key_t key) {
+#else
+void rbtree_add(RBTree *tree, rbtree_key_t key, rbtree_value_t value) {
+#endif
 
   // reserving memory for next element
   LARY_ADD_SPACE(tree->nodes);
@@ -150,6 +174,9 @@ void rbtree_add(RBTree *tree, uint64_t key) {
   RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
   
   new_node->key    = key;
+  #ifdef RBT_KEY_VALUE
+  new_node->value  = value;
+  #endif
   new_node->left   = NULL;
   new_node->right  = NULL;
   new_node->father = NULL;
@@ -193,7 +220,13 @@ void rbtree_add(RBTree *tree, uint64_t key) {
  * Adds a given key to the given RBTree if it not alreday in it
  * returns RBT_TRUE on success, else RBT_FALSE
  */
-uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
+#ifndef RBT_KEY_VALUE
+uint8_t rbtree_add_if_possible(RBTree *tree, rbtree_key_t key) {
+#else
+uint8_t rbtree_add_if_possible(RBTree *tree, 
+                               rbtree_key_t key, 
+                               rbtree_value_t value) {
+#endif
 
   // reserving memory for next element
   LARY_ADD_SPACE(tree->nodes);
@@ -202,6 +235,9 @@ uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
   RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
   
   new_node->key    = key;
+  #ifdef RBT_KEY_VALUE
+  new_node->value  = value;
+  #endif
   new_node->left   = NULL;
   new_node->right  = NULL;
   new_node->father = NULL;
@@ -242,10 +278,12 @@ uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
   tree->nodes.length++;
   return RBT_TRUE;
 }
+
 /**
  * Insert Case 1: the new RBTNode is the root
  */
-void rbt_insert_case1(RBTree *tree, RBTNode *n) {
+static void rbt_insert_case1(RBTree *tree, RBTNode *n) {
+
   if (n->father == NULL)
     n->color = RBT_BLACK;
   else
@@ -255,7 +293,7 @@ void rbt_insert_case1(RBTree *tree, RBTNode *n) {
 /**
  * Insert Case 2: the father of the new RBTNode is black
  */
-void rbt_insert_case2(RBTree *tree, RBTNode *n) {
+static inline void rbt_insert_case2(RBTree *tree, RBTNode *n) {
   if (n->father->color == RBT_BLACK)
     return;
   else
@@ -265,7 +303,7 @@ void rbt_insert_case2(RBTree *tree, RBTNode *n) {
 /**
  * Insert Case 3: uncle and father of the current node are red
  */
-void rbt_insert_case3(RBTree *tree, RBTNode *n) {
+static inline void rbt_insert_case3(RBTree *tree, RBTNode *n) {
   if (uncle(n) != NULL && uncle(n)->color == RBT_RED) {
     n->father->color      = RBT_BLACK;
     uncle(n)->color       = RBT_BLACK;
@@ -281,7 +319,7 @@ void rbt_insert_case3(RBTree *tree, RBTNode *n) {
  *  is the right child of his father which is the left child or
  *  is the left  child of his father which is the right child
  */
-void rbt_insert_case4(RBTree *tree, RBTNode *n) {
+static inline void rbt_insert_case4(RBTree *tree, RBTNode *n) {
   if (n == n->father->right && n->father == grandfather(n)->left) {
     rbt_rotate_left(tree, n->father);
     n = n->left;
@@ -298,7 +336,7 @@ void rbt_insert_case4(RBTree *tree, RBTNode *n) {
  *  is the right child of his father which is the right child or
  *  is the left  child of his father which is the left  child
  */
-void rbt_insert_case5(RBTree *tree, RBTNode *n) {
+static inline void rbt_insert_case5(RBTree *tree, RBTNode *n) {
   n->father->color      = RBT_BLACK;
   grandfather(n)->color = RBT_RED;
 
@@ -313,7 +351,7 @@ void rbt_insert_case5(RBTree *tree, RBTNode *n) {
  *
  * returns RBT_TRUE or RBT_FALSE if the key could be removed
  */
-uint8_t rbtree_remove(RBTree *tree, uint64_t key) {
+uint8_t rbtree_remove(RBTree *tree, rbtree_key_t key) {
   RBTNode *n = rbt_search(tree, key);
 
   if (n == NULL) {
@@ -343,7 +381,7 @@ uint8_t rbtree_remove(RBTree *tree, uint64_t key) {
 /**
  * Deletes an RBTNode which have onely one right child
  */
-void rbt_delete_one_child(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_one_child(RBTree *tree, RBTNode *n) {
 
   RBTNode *child = (n->left != NULL) ? n->left : n->right;
   rbt_repleace(tree, n, child);
@@ -359,13 +397,14 @@ void rbt_delete_one_child(RBTree *tree, RBTNode *n) {
   
   rbt_free_node(tree, n);
 }
+
 /**
  * repleaces the first given node with the second  nodes in the given RBTree
  *
  * Note this function should one be called by rbt_delete_one_child
  * because it guesses that src is a chield of dst
  */
-void rbt_repleace(RBTree *tree, RBTNode *dst, RBTNode *src) {
+static inline void rbt_repleace(RBTree *tree, RBTNode *dst, RBTNode *src) {
 
   // repleace dst with src
   if (src != NULL)
@@ -390,7 +429,7 @@ void rbt_repleace(RBTree *tree, RBTNode *dst, RBTNode *src) {
  * NOTE: the RBTNode should be first undocked from the rbtree
  * bevor calling this
  */
-void rbt_free_node(RBTree *tree, RBTNode *n) {
+static inline void rbt_free_node(RBTree *tree, RBTNode *n) {
 
 #ifdef DEBUG
   if (n->father != NULL) {
@@ -427,12 +466,15 @@ void rbt_free_node(RBTree *tree, RBTNode *n) {
       tree->root = n;
   }
 
+  #ifdef RBT_FREE_VALUE
+  free(n->value);
+  #endif
 }
 
 /**
  *  Delete Case 1: The new RBTNode is the root
  */
-void rbt_delete_case1(RBTree *tree, RBTNode *n) {
+static void rbt_delete_case1(RBTree *tree, RBTNode *n) {
   if (n->father == NULL)
     return;
   else
@@ -442,7 +484,7 @@ void rbt_delete_case1(RBTree *tree, RBTNode *n) {
 /**
  * Delete Case 1_nil_node
  */
-void rbt_delete_case1_nil_node(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case1_nil_node(RBTree *tree, RBTNode *n) {
 
   if (n->father == NULL)
     return;
@@ -477,7 +519,7 @@ void rbt_delete_case1_nil_node(RBTree *tree, RBTNode *n) {
 /**
  * Delete Case 2: The Borther of n is red
  */
-void rbt_delete_case2(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case2(RBTree *tree, RBTNode *n) {
   if (brother(n) != NULL && brother(n)->color == RBT_RED) {
     n->father->color  = RBT_RED;
     brother(n)->color = RBT_BLACK;
@@ -496,7 +538,7 @@ void rbt_delete_case2(RBTree *tree, RBTNode *n) {
  * Delete Case 3: The Father of n his brother and 
  * the children of his brother are black
  */
-void rbt_delete_case3(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case3(RBTree *tree, RBTNode *n) {
   if ( n->father->color == RBT_BLACK 
        && brother(n) != NULL 
        && brother(n)->color == RBT_BLACK 
@@ -515,7 +557,7 @@ void rbt_delete_case3(RBTree *tree, RBTNode *n) {
  * Delete Case 4: the brother and the children of 
  * the brother of n are black, bu the father of n are red
  */
-void rbt_delete_case4(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case4(RBTree *tree, RBTNode *n) {
   if ( n->father->color == RBT_RED 
        && brother(n) != NULL 
        && brother(n)->color == RBT_BLACK 
@@ -535,7 +577,7 @@ void rbt_delete_case4(RBTree *tree, RBTNode *n) {
  * the other and the brother of n are black
  * TODO correct describtion
  */
-void rbt_delete_case5(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case5(RBTree *tree, RBTNode *n) {
   if ( n == n->father->left 
        && brother(n) != NULL 
        && brother(n)->color == RBT_BLACK 
@@ -568,7 +610,7 @@ void rbt_delete_case5(RBTree *tree, RBTNode *n) {
  * and the brother of n are black
  * TODO correct describtion
  */
-void rbt_delete_case6(RBTree *tree, RBTNode *n) {
+static inline void rbt_delete_case6(RBTree *tree, RBTNode *n) {
   brother(n)->color = n->father->color;
   n->father->color  = RBT_BLACK;
 
@@ -603,7 +645,7 @@ void rbtree_clone(RBTree *dst, RBTree *src) {
 /**
  * Returns the Maximum key in the given RBTree
  */
-uint64_t rbtree_max(RBTree *tree) {
+rbtree_key_t rbtree_max(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
@@ -618,7 +660,7 @@ uint64_t rbtree_max(RBTree *tree) {
 /**
  * Returns the Minimum key in the given RBTree
  */
-uint64_t rbtree_min(RBTree *tree) {
+rbtree_key_t rbtree_min(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
