@@ -364,4 +364,51 @@ char is_b64(const unsigned char *str) {
   return 1;
 }
 
+/**
+ * Puts a given string in revers order
+ */
+void str_reverse(char *str) {
+  
+  char tmp = 0;
+
+  size_t i, j;
+  for (i = 0, j = strlen(str) - 1; i < j; i++, j--) {
+    tmp = str[i];
+    str[i] = str[j];
+    str[j] = tmp;
+  }
+}
+
+/**
+ * converts a given integer to a string
+ */
+char *itoa(int64_t i) {
+
+  char *a = malloc(sizeof(char) * 22);
+
+  if (i == 0) {
+    a[0] = '0';
+    a[1] = '\0';
+    return a;
+  }
+
+  char is_neg = (i < 0);
+
+  if (is_neg)
+    i *= -1;
+
+  int j;
+  for (j = 0; i != 0; j++, i /= 10)
+    a[j] = 48 + (i % 10);
+
+  if (is_neg) {
+     a[j] = '-';
+    j++;
+  }
+
+  a[j] = '\0';
+  str_reverse(a);
+  return a;
+}
+
 #endif /* __STRING__ */

@@ -94,4 +94,14 @@ char is_b64(const unsigned char *str);
  */
 #define str_chop(str) str[strlen(str) - 1] = '\0'
 
+/**
+ * converts a given integer to a string
+ */
+char *itoa(int64_t i);
+
+/**
+ * Puts a given string in revers order
+ */
+void str_reverse(char *str);
+
 #endif /* __STRING_H__ */
