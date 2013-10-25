@@ -51,6 +51,11 @@ typedef struct {                          \
 #define ARY_AT(ARY, INDEX) (ARY).ptr[INDEX]
 
 /**
+ * returns the pointer to the given index
+ */
+#define ARY_PTR(ARY, INDEX) ((ARY).ptr + (INDEX))
+
+/**
  * returns the last Element of the given ARY
  */
 #define ARY_LAST(ARY) ARY_AT(ARY, (ARY).length - 1)
