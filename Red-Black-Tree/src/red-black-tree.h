@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../Long-Array/src/long-array.h"
+#include "../../Dynamic-Array/src/dynamic-array.h"
 
 /**
  * Some Makros
@@ -22,6 +22,15 @@
 #define RBT_FALSE   0
 #ifndef NULL
   #define NULL      0
+#endif
+
+/**
+ * uint64_t long array
+ * and void pinter long ary
+ */
+DEF_ARY(uint64_t, Uint64Ary);
+#ifdef RBT_KEY_VALUE
+DEF_ARY(void *, VoidPtrAry);
 #endif
 
 /**
@@ -40,13 +49,14 @@ struct RBTNode {
 /**
  * Long Array for storing the RBTNodes
  */
-DEF_LARY(RBTNode, RBTNodeAry);
+DEF_ARY(RBTNode, RBTNodeAry);
 
 /**
  * The Red-Balck-Tree 
  */
 typedef struct {                             
   RBTNode *root;                                
+  RBTNode *cur;     /* used for itterating */
   RBTNodeAry nodes;                              
 } RBTree;
 
@@ -112,5 +122,46 @@ uint64_t rbtree_max(RBTree *tree);
  * Returns the Minimum key in the given RBTree
  */
 uint64_t rbtree_min(RBTree *tree);
+
+/**
+ * converts the given RBTree to an sorted value array
+ */
+Uint64Ary *rbtree_to_key_ary(RBTree *tree);
+
+#ifdef RBT_KEY_VALUE
+/**
+ * converts the given RBTree to an sorted value array
+ */
+VoidPtrAry *rbtree_to_value_ary(RBTree *tree);
+#endif
+
+/**
+ * starts an iterationg over the given RBTree
+ */
+void rbtree_start_iteration(RBTree *tree);
+
+/**
+ * returns the curent key of the iteration
+ * if iteration was not initialized an SIGSEGV is raised
+ */
+#define rbtree_cur_key(tree) tree->cur->key
+#define rbtree_cur_value(tree) tree->cur->value
+
+
+/**
+ * Gos on to the next node in the itteration
+ */
+void rbtree_next(RBTree *tree);
+
+/**
+ * return wether rbtree_next has reatch the end of iteration
+ * (no more element)
+ */
+#define rbtree_iteration_finished(tree) (tree->cur == NULL)
+
+/**
+ * prints an red black tree
+ */
+void rbtree_print(RBTree *tree);
 
 #endif // __RED_BLACK_TREE_H__

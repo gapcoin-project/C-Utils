@@ -7,6 +7,8 @@
 #ifndef __RED_BLACK_TREE__
 #define __RED_BLACK_TREE__
 #include "red-black-tree.h"
+#include <math.h>
+#include "../../String/src/string.h"
 
 /**
  * static functions
@@ -36,8 +38,9 @@ static inline RBTNode *rbt_search(RBTree *tree, uint64_t key);
  */
 void init_rbtree(RBTree *tree, uint64_t max_nodes) {
 
-  tree->root        = NULL;                         
-  LARY_INIT(RBTNode, tree->nodes, max_nodes);
+  tree->root = NULL;                         
+  tree->cur  = NULL;
+  ARY_INIT(RBTNode, tree->nodes, max_nodes);
 
 }
 
@@ -168,10 +171,10 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 #endif
 
   // reserving memory for next element
-  LARY_ADD_SPACE(tree->nodes);
+  ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
 
   // pointer to the last element
-  RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
+  RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
   
   new_node->key    = key;
   #ifdef RBT_KEY_VALUE
@@ -227,10 +230,10 @@ uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
 #endif
 
   // reserving memory for next element
-  LARY_ADD_SPACE(tree->nodes);
+  ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
 
   // pointer to the last element
-  RBTNode *new_node = LARY_PTR(tree->nodes, tree->nodes.length);
+  RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
   
   new_node->key    = key;
   #ifdef RBT_KEY_VALUE
@@ -439,7 +442,7 @@ static inline void rbt_free_node(RBTree *tree, RBTNode *n) {
 #endif
   
   tree->nodes.length--;
-  RBTNode *last_node = LARY_PTR(tree->nodes, tree->nodes.length);
+  RBTNode *last_node = ARY_PTR(tree->nodes, tree->nodes.length);
 
   // copy last element from the RBTNodes Array to dst
   if (n != last_node) {
@@ -628,7 +631,7 @@ static inline void rbt_delete_case6(RBTree *tree, RBTNode *n) {
  * frees an given RedBlackTree
  */
 void rbtree_free(RBTree *tree) {
-  LARY_FREE(tree->nodes);
+  ARY_FREE(tree->nodes);
 }
 
 
@@ -637,7 +640,7 @@ void rbtree_free(RBTree *tree) {
  */
 void rbtree_clone(RBTree *dst, RBTree *src) {
   dst->root = src->root;
-  LARY_CLONE(dst->nodes, src->nodes);
+  ARY_CLONE(dst->nodes, src->nodes);
 }
 
 /**
@@ -669,4 +672,164 @@ uint64_t rbtree_min(RBTree *tree) {
 
   return cur->key;
 }
+
+/**
+ * progress a deep first search to fill a sorted key array
+ */
+static void rbt_to_key_ary(RBTNode *n, Uint64Ary *ary) {
+  
+  if (n->left != NULL)
+    rbt_to_key_ary(n->left, ary);
+
+  ARY_PUSH(*ary, n->key);
+
+  if (n->right != NULL)
+    rbt_to_key_ary(n->right, ary);
+
+}
+
+/**
+ * converts the given RBTree to an sorted value array
+ */
+Uint64Ary *rbtree_to_key_ary(RBTree *tree) {
+  
+  Uint64Ary *ary = malloc(sizeof(Uint64Ary));
+  ARY_INIT(uint64_t, *ary, ARY_LEN(tree->nodes));
+
+  rbt_to_key_ary(tree->root, ary);
+
+  return ary;
+}
+
+#ifdef RBT_KEY_VALUE
+/**
+ * progress a deep first search to fill a sorted value array
+ * (soretd by keys)
+ */
+static void rbt_to_value_ary(RBTNode *n, VoidPtrAry *ary) {
+  
+  if (n->left != NULL)
+    rbt_to_value_ary(n->left, ary);
+
+  ARY_PUSH(*ary, n->value);
+
+  if (n->right != NULL)
+    rbt_to_value_ary(n->right, ary);
+
+}
+
+/**
+ * converts the given RBTree to an sorted value array
+ */
+VoidPtrAry *rbtree_to_value_ary(RBTree *tree) {
+  
+  VoidPtrAry *ary = malloc(sizeof(VoidPtrAry));
+  ARY_INIT(void *, *ary, ARY_LEN(tree->nodes));
+
+  rbt_to_value_ary(tree->root, ary);
+
+  return ary;
+}
+#endif
+
+/**
+ * starts an iterationg over the given RBTree
+ */
+void rbtree_start_iteration(RBTree *tree) {
+  
+  for (tree->cur = tree->root; 
+       tree->cur->left != NULL; 
+       tree->cur = tree->cur->left);
+
+}
+
+/**
+ * returns the curent key of the iteration
+ * if iteration was not initialized an SIGSEGV is raised
+ */
+#define rbtree_cur_key(tree) tree->cur->key
+#define rbtree_cur_value(tree) tree->cur->value
+
+
+/**
+ * Gos on to the next node in the itteration
+ */
+void rbtree_next(RBTree *tree) {
+  
+  if (tree->cur->right != NULL) {
+
+    for (tree->cur = tree->cur->right; 
+         tree->cur->left != NULL;
+         tree->cur = tree->cur->left);
+
+  } else if (tree->cur == tree->root) {
+    tree->cur = NULL;
+  
+  } else if (tree->cur->father->left == tree->cur) {
+    tree->cur = tree->cur->father;
+  
+  } else {
+    for (; tree->cur != tree->root && 
+           tree->cur->father->right == tree->cur;
+           tree->cur = tree->cur->father);
+
+    if (tree->cur != tree->root)
+      tree->cur = tree->cur->father;
+    else
+      tree->cur = NULL;
+  }
+}
+
+/**
+ * return wether rbtree_next has reatch the end of iteration
+ * (no more element)
+ */
+#define rbtree_iteration_finished(tree) (tree->cur == NULL)
+
+/**
+ * prints an rbtree from a given note on
+ */
+void rbt_print(RBTNode *n, RBTNodeAry *ary, int deep) {
+  
+  ARY_PUSH(ary[deep], *n);
+
+  if (n->right != NULL)
+    rbt_print(n->right, ary, deep + 1);
+
+  if (n->left != NULL)
+    rbt_print(n->left, ary, deep + 1);
+
+}
+
+/**
+ * prints an red black tree
+ */
+void rbtree_print(RBTree *tree) { 
+
+  uint64_t len = log2(ARY_LEN(tree->nodes)) * 2;
+  RBTNodeAry *ary = malloc(sizeof(RBTNodeAry) * len);
+
+  uint64_t i, j;
+  for (i = 0; i < len; i++)
+    ARY_INIT(RBTNode, ary[i], (i + 1) * (i + 1));
+
+  rbt_print(tree->root, ary, 0);
+
+
+  for (i = 0; i < len; i++) {
+    for (j = 0; j < ARY_LEN(ary[i]); j++) {
+
+      printf("%" PRIu64 ":(%s, %s) ",
+             ARY_AT(ary[i], j).key,
+             (ARY_AT(ary[i], j).right != NULL) ? 
+              itoa(ARY_AT(ary[i], j).right->key) : "N",
+             (ARY_AT(ary[i], j).left != NULL) ? 
+              itoa(ARY_AT(ary[i], j).left->key) : "N");
+    }
+
+    printf("\n");
+  }
+}
+
+
 #endif // __RED_BLACK_TREE__
