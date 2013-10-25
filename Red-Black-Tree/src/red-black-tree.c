@@ -1,8 +1,6 @@
 /**
  * These File contains an implementaion of an Red Black Tree
  * and its operation fuctions
- *
- * set RBT_KEY_VALUE debugflag if you want a key value mapping
  */
 #ifndef __RED_BLACK_TREE__
 #define __RED_BLACK_TREE__
@@ -164,11 +162,7 @@ static void rbt_rotate_left(RBTree *tree, RBTNode *n) {
 /**
  * Adds a given key to the given RBTree
  */
-#ifndef RBT_KEY_VALUE
-void rbtree_add(RBTree *tree, uint64_t key) {
-#else
 void rbtree_add(RBTree *tree, uint64_t key, void *value) {
-#endif
 
   // reserving memory for next element
   ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
@@ -177,9 +171,7 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value) {
   RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
   
   new_node->key    = key;
-  #ifdef RBT_KEY_VALUE
   new_node->value  = value;
-  #endif
   new_node->left   = NULL;
   new_node->right  = NULL;
   new_node->father = NULL;
@@ -223,11 +215,7 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value) {
  * Adds a given key to the given RBTree if it not alreday in it
  * returns RBT_TRUE on success, else RBT_FALSE
  */
-#ifndef RBT_KEY_VALUE
-uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key) {
-#else
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
-#endif
 
   // reserving memory for next element
   ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
@@ -236,9 +224,7 @@ uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
   RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
   
   new_node->key    = key;
-  #ifdef RBT_KEY_VALUE
   new_node->value  = value;
-  #endif
   new_node->left   = NULL;
   new_node->right  = NULL;
   new_node->father = NULL;
@@ -467,9 +453,8 @@ static inline void rbt_free_node(RBTree *tree, RBTNode *n) {
       tree->root = n;
   }
 
-  #ifdef RBT_FREE_VALUE
-  free(n->value);
-  #endif
+  if (tree->free_value)
+    free(n->value);
 }
 
 /**
@@ -701,7 +686,6 @@ Uint64Ary *rbtree_to_key_ary(RBTree *tree) {
   return ary;
 }
 
-#ifdef RBT_KEY_VALUE
 /**
  * progress a deep first search to fill a sorted value array
  * (soretd by keys)
@@ -730,7 +714,6 @@ VoidPtrAry *rbtree_to_value_ary(RBTree *tree) {
 
   return ary;
 }
-#endif
 
 /**
  * starts an iterationg over the given RBTree
@@ -744,17 +727,9 @@ void rbtree_start_iteration(RBTree *tree) {
 }
 
 /**
- * returns the curent key of the iteration
- * if iteration was not initialized an SIGSEGV is raised
- */
-#define rbtree_cur_key(tree) tree->cur->key
-#define rbtree_cur_value(tree) tree->cur->value
-
-
-/**
  * Gos on to the next node in the itteration
  */
-void rbtree_next(RBTree *tree) {
+void rbtree_iteration_next(RBTree *tree) {
   
   if (tree->cur->right != NULL) {
 
@@ -779,12 +754,6 @@ void rbtree_next(RBTree *tree) {
       tree->cur = NULL;
   }
 }
-
-/**
- * return wether rbtree_next has reatch the end of iteration
- * (no more element)
- */
-#define rbtree_iteration_finished(tree) (tree->cur == NULL)
 
 /**
  * prints an rbtree from a given note on

@@ -29,9 +29,7 @@
  * and void pinter long ary
  */
 DEF_ARY(uint64_t, Uint64Ary);
-#ifdef RBT_KEY_VALUE
 DEF_ARY(void *, VoidPtrAry);
-#endif
 
 /**
  * RBTNode for an Red-Balck-Tree
@@ -41,9 +39,8 @@ struct RBTNode {
   RBTNode *left, *right, *father;   
   char color;                 
   uint64_t key;
-  #ifdef RBT_KEY_VALUE
   void *value;
-  #endif
+  char free_value;
 };
 
 /**
@@ -80,21 +77,16 @@ uint8_t rbtree_contains(RBTree *tree, uint64_t key);
 /**
  * Adds a given key to the given RBTree
  */
-#ifndef RBT_KEY_VALUE
-void rbtree_add(RBTree *tree, uint64_t key);
-#else
+#define rbtree_add(tree, key) rbtree_add(tree, key, NULL)
 void rbtree_add(RBTree *tree, uint64_t key, void *value);
-#endif
 
 /**
  * Adds a given key to the given RBTree if it not alreday in it
  * returns RBT_TRUE on success, else RBT_FALSE
  */
-#ifndef RBT_KEY_VALUE
-uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key);
-#else
+#define rbtree_add_if_possible(tree, key) \
+  rbtree_add_if_possible(tree, key, NULL)
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value);
-#endif
 
 /**
  * Removes a given key from the given RBTree
@@ -128,12 +120,10 @@ uint64_t rbtree_min(RBTree *tree);
  */
 Uint64Ary *rbtree_to_key_ary(RBTree *tree);
 
-#ifdef RBT_KEY_VALUE
 /**
  * converts the given RBTree to an sorted value array
  */
 VoidPtrAry *rbtree_to_value_ary(RBTree *tree);
-#endif
 
 /**
  * starts an iterationg over the given RBTree
@@ -147,14 +137,13 @@ void rbtree_start_iteration(RBTree *tree);
 #define rbtree_cur_key(tree) tree->cur->key
 #define rbtree_cur_value(tree) tree->cur->value
 
-
 /**
  * Gos on to the next node in the itteration
  */
-void rbtree_next(RBTree *tree);
+void rbtree_iteration_next(RBTree *tree);
 
 /**
- * return wether rbtree_next has reatch the end of iteration
+ * return wether rbtree_iteration_next has reatch the end of iteration
  * (no more element)
  */
 #define rbtree_iteration_finished(tree) (tree->cur == NULL)
