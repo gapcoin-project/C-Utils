@@ -719,8 +719,11 @@ VoidPtrAry *rbtree_to_value_ary(RBTree *tree) {
  * starts an iterationg over the given RBTree
  */
 void rbtree_start_iteration(RBTree *tree) {
-  
-  for (tree->cur = tree->root; 
+
+  if (tree->root == NULL)
+    tree->cur = NULL;
+  else
+    for (tree->cur = tree->root; 
        tree->cur->left != NULL; 
        tree->cur = tree->cur->left);
 

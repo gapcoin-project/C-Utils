@@ -40,7 +40,6 @@ struct RBTNode {
   char color;                 
   uint64_t key;
   void *value;
-  char free_value;
 };
 
 /**
@@ -55,7 +54,13 @@ typedef struct {
   RBTNode *root;                                
   RBTNode *cur;     /* used for itterating */
   RBTNodeAry nodes;                              
+  char free_value;
 } RBTree;
+
+/**
+ * returns the length of an red black tree
+ */
+#define rbtree_length(tree) (ARY_LEN((tree)->nodes))
 
 /**
  * Clears an RBTree (sets the num of elements to zero)
@@ -75,17 +80,39 @@ void init_rbtree(RBTree *tree, uint64_t max_nodes);
 uint8_t rbtree_contains(RBTree *tree, uint64_t key);
 
 /**
+ * to use rbtree_add without giving a value
+ * (backward compatibility)
+ */
+#define rbtree_add1(tree, key) rbtree_add(tree, key, NULL)
+#define rbtree_add2(tree, key, value) rbtree_add(tree, key, value)
+#define rbtree_addx(X, Y, A, B, F, ...) F
+#define rbtree_add(...) rbtree_addx(, ##__VA_ARGS__,            \
+                                    rbtree_add2(__VA_ARGS__),   \
+                                    rbtree_add1(__VA_ARGS__))
+
+/**
  * Adds a given key to the given RBTree
  */
-#define rbtree_add(tree, key) rbtree_add(tree, key, NULL)
 void rbtree_add(RBTree *tree, uint64_t key, void *value);
+
+/**
+ * to use rbtree_add_if_possible without giving a value
+ * (backward compatibility)
+ */
+#define rbtree_add_if_possible1(tree, key) \
+  rbtree_add_if_possible(tree, key, NULL)
+#define rbtree_add_if_possible2(tree, key, value) \
+  rbtree_add_if_possible(tree, key, value)
+#define rbtree_add_if_possiblex(X, Y, A, B, F, ...) F
+#define rbtree_add_if_possible(...)                               \
+  rbtree_add_if_possiblex(, ##__VA_ARGS__,                        \
+                          rbtree_add_if_possible2(__VA_ARGS__),   \
+                          rbtree_add_if_possible1(__VA_ARGS__))
 
 /**
  * Adds a given key to the given RBTree if it not alreday in it
  * returns RBT_TRUE on success, else RBT_FALSE
  */
-#define rbtree_add_if_possible(tree, key) \
-  rbtree_add_if_possible(tree, key, NULL)
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value);
 
 /**
@@ -134,8 +161,8 @@ void rbtree_start_iteration(RBTree *tree);
  * returns the curent key of the iteration
  * if iteration was not initialized an SIGSEGV is raised
  */
-#define rbtree_cur_key(tree) tree->cur->key
-#define rbtree_cur_value(tree) tree->cur->value
+#define rbtree_cur_key(tree) (tree)->cur->key
+#define rbtree_cur_value(tree) (tree)->cur->value
 
 /**
  * Gos on to the next node in the itteration
@@ -146,7 +173,7 @@ void rbtree_iteration_next(RBTree *tree);
  * return wether rbtree_iteration_next has reatch the end of iteration
  * (no more element)
  */
-#define rbtree_iteration_finished(tree) (tree->cur == NULL)
+#define rbtree_iteration_finished(tree) ((tree)->cur == NULL)
 
 /**
  * prints an red black tree
