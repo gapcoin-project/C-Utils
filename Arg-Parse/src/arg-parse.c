@@ -1,8 +1,10 @@
 /**
  *  simple Argumnet parsing functions
  */
-#ifndef __ARG-PARSE__
-#define __ARG-PARSE__
+#ifndef __ARG_PARSE__
+#define __ARG_PARSE__
+
+#include <string.h>
 
 /**
  * Returns if the given args conatinig the given arg
@@ -44,4 +46,4 @@ char *get_arg(int argc,
   return NULL;
 }
 
-#endif /* __ARG-PARSE__ */
+#endif /* __ARG_PARSE__ */
