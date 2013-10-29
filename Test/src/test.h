@@ -7,6 +7,7 @@
 #include "../../Dynamic-Array/src/dynamic-array.h"
 #include "../../String/src/string.h"
 #include "../../Time-Diff/src/time-diff.h"
+#include "../../Arg-Parse/src/arg-parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -552,46 +553,6 @@ static inline void print_usage(char *name) {
          "        3: 2 + failurs\n"
          "        4: 3 + one-line test info (default)\n"
          "        5: 4 + extendet test info\n");
-}
-
-/**
- * Returns if the given args conatinig the given arg
- */
-static char has_arg(int argc, 
-                    char *argv[], 
-                    const char *short_arg, 
-                    const char *long_arg) {
-
-  int i;
-  for (i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], short_arg) ||
-        !strcmp(argv[i], long_arg)) {
-      
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-/**
- * Returns the given argument arg
- */
-static char *get_arg(int argc, 
-                     char *argv[], 
-                     const char *short_arg, 
-                     const char *long_arg) {
-
-  int i;
-  for (i = 1; i < argc - 1; i++) {
-    if (!strcmp(argv[i], short_arg) ||
-        !strcmp(argv[i], long_arg)) {
-      
-      return argv[i + 1];
-    }
-  }
-
-  return NULL;
 }
 
 /**
