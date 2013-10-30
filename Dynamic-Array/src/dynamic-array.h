@@ -190,7 +190,7 @@ typedef struct {                          \
 #define ARY_FREE(ARY)         \
 do {                          \
   if ((ARY).ptr != NULL) {    \
-    free((ARY).ptr)           \
+    free((ARY).ptr);          \
     (ARY).ptr = NULL;         \
   }                           \
 } while (0)
