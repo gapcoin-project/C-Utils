@@ -153,10 +153,18 @@ typedef struct {                        \
 #define LONG_ARY_FREE(ARY)                                                  \
   do {                                                                      \
     uint64_t laryfree_i;                                                    \
-    for (laryfree_i = 0; laryfree_i < (ARY).cur_rows; laryfree_i++) {       \
-      free((ARY).ptr[laryfree_i]);                                          \
+    if ((ARY).ptr != NULL) {                                                \
+      for (laryfree_i = 0; laryfree_i < (ARY).cur_rows; laryfree_i++) {     \
+        if ((ARY).ptr[laryfree_i] != NULL) {                                \
+          free((ARY).ptr[laryfree_i]);                                      \
+          (ARY).ptr[laryfree_i] = NULL                                      \
+        }                                                                   \
+      }                                                                     \
     }                                                                       \
-    free((ARY).ptr);                                                        \
+    if ((ARY).ptr != NULL) {                                                \
+      free((ARY).ptr);                                                      \
+      (ARY).ptr = NULL;                                                     \
+    }                                                                       \
   } while (0)
 
 /**

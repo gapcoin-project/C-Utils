@@ -187,7 +187,13 @@ typedef struct {                          \
 /**
  * frees an given ARY
  */
-#define ARY_FREE(ARY) free((ARY).ptr)
+#define ARY_FREE(ARY)         \
+do {                          \
+  if ((ARY).ptr != NULL) {    \
+    free((ARY).ptr)           \
+    (ARY).ptr = NULL;         \
+  }                           \
+} while (0)
 
 /**
  * Returns wheter the given Array is empty or not
