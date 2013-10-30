@@ -101,7 +101,7 @@ static uint8_t get_byte(const uint8_t byte, int i) {
 /**
  * CRC32 implementation
  */
-uint32_t crc32(const char *str, uint32_t len) {
+uint32_t str_crc32(const char *str, uint32_t len) {
   
   uint32_t shift = 0x0;
   uint32_t crc  = 0x04C11DB7;

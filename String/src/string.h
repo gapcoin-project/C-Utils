@@ -23,7 +23,7 @@ char **split(char *str, const char *seperator);
 /**
  * CRC32 implementation
  */
-uint32_t crc32(const char *str, uint32_t len);
+uint32_t str_crc32(const char *str, uint32_t len);
 
 /**
  * clone a string
