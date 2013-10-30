@@ -43,5 +43,10 @@ char *get_arg(int argc,
                                 get_arg2(__VA_ARGS__),    \
                                 get_arg1(__VA_ARGS__))
 
+/**
+ * to get integer args
+ */
+#define get_i_arg(...)                                          \
+  (has_arg(__VA_ARGS__) ? atoi(get_arg(__VA_ARGS__)) : -1)
 
 #endif /* __ARG_PARSE_H__ */
