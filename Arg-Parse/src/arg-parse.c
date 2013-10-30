@@ -16,8 +16,8 @@ char has_arg(int argc,
 
   int i;
   for (i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], short_arg) ||
-        !strcmp(argv[i], long_arg)) {
+    if ((short_arg != NULL && !strcmp(argv[i], short_arg)) ||
+        (long_arg != NULL  && !strcmp(argv[i], long_arg))) {
       
       return 1;
     }
@@ -36,8 +36,8 @@ char *get_arg(int argc,
 
   int i;
   for (i = 1; i < argc - 1; i++) {
-    if (!strcmp(argv[i], short_arg) ||
-        !strcmp(argv[i], long_arg)) {
+    if ((short_arg != NULL && !strcmp(argv[i], short_arg)) ||
+        (long_arg != NULL  && !strcmp(argv[i], long_arg))) {
       
       return argv[i + 1];
     }
