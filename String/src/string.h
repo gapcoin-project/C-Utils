@@ -104,4 +104,10 @@ char *itoa(int64_t i);
  */
 void str_reverse(char *str);
 
+/**
+ * returns if the given string ends with the given second given string
+ */
+#define str_end_with(str1, str2)                      \
+  !strcmp(str1 + strlen(str1) - strlen(str2), str2)
+
 #endif /* __STRING_H__ */
