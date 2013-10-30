@@ -157,7 +157,7 @@ typedef struct {                        \
       for (laryfree_i = 0; laryfree_i < (ARY).cur_rows; laryfree_i++) {     \
         if ((ARY).ptr[laryfree_i] != NULL) {                                \
           free((ARY).ptr[laryfree_i]);                                      \
-          (ARY).ptr[laryfree_i] = NULL                                      \
+          (ARY).ptr[laryfree_i] = NULL;                                     \
         }                                                                   \
       }                                                                     \
     }                                                                       \
