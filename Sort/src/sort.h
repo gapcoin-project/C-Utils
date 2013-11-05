@@ -154,6 +154,7 @@ typedef struct {
       }                                                                       \
                                                                               \
     }                                                                         \
+    ARY_FREE(qis_stack);                                                      \
                                                                               \
   } while (0)                                                                 
                                                                               
@@ -228,6 +229,7 @@ typedef struct {
       }                                                                       \
                                                                               \
     }                                                                         \
+    ARY_FREE(qis_stack);                                                      \
                                                                               \
   } while (0)                                                                 
 
@@ -290,6 +292,7 @@ typedef struct {
       }                                                                       \
                                                                               \
     }                                                                         \
+    ARY_FREE(qs_stack);                                                       \
                                                                               \
   } while (0)                                                                 
                                                                               
