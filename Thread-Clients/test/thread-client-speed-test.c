@@ -75,6 +75,13 @@ int main (int argc, char *argv[]) {
   PRINT_TIMEVAL(clients_r);
   printf("\n");
 
+  for (i = 0; i < n_threads; i++)
+    tc_free(&clients[i]);
+
+  free(threads);
+  free(clients);
+
+
   return 0;
 
 }

@@ -17,55 +17,53 @@ static void *tc_client_func(void *);
 void init_thread_client(TClient *tc) {
   
   tc->running = 1;
-  tc->do_work = 0;
   tc->func    = NULL;
   tc->args    = NULL;
+  pthread_mutex_init(&tc->add, NULL);
+  pthread_mutex_init(&tc->run, NULL);
+  pthread_mutex_init(&tc->join, NULL);
+
+  /* a function have to be added first */
+  pthread_mutex_lock(&tc->join);
+  pthread_mutex_lock(&tc->add);
 
   pthread_create(&tc->thread, NULL, tc_client_func, (void *) tc);
 
 }
 
 /**
- * adds a function to process
- * Note: this onely works if the given client is nor do_work
- */
-char tc_add_func(TClient *tc, void *(*func)(void *), void *args) {
-
-  if (tc->do_work) {
-    DBG_MSG("failed to add func TC is do_work");
-    return 0;
-  }
-
-  tc->func    = func;
-  tc->args    = args;
-  tc->do_work = 1;
-
-  return 1;
-
-}
-
-/**
- * Yields the processor until the given client has finished work
- * returns the return value of the processed function
- */
-void *tc_join(TClient *tc) {
-  
-  while (tc->do_work)
-    sched_yield();
-
-  return tc->ret;
-
-}
-
-/**
- * waits untill the current work is done an then stops and frees given client
+ * Frees a given TClient
+ * Note: you shuld have called join bevore this
+ *       else the behavior is unexpected!
  */
 void tc_free(TClient *tc) {
 
-  tc->running = 0;
-  pthread_join(tc->thread, NULL);
-  free(tc);
+  tc->running = (char) 0;
 
+  /* unlock mutexes to exit tc_client_func */
+  pthread_mutex_trylock(&tc->add);
+  pthread_mutex_unlock(&tc->add);
+
+  pthread_mutex_trylock(&tc->run);
+  pthread_mutex_unlock(&tc->run);
+
+  /* wait for tc_client_func to become finished */
+  pthread_join(tc->thread, NULL);
+
+  /* unlock all mutexes */
+  pthread_mutex_trylock(&tc->add);
+  pthread_mutex_unlock(&tc->add);
+
+  pthread_mutex_trylock(&tc->run);
+  pthread_mutex_unlock(&tc->run);
+
+  pthread_mutex_trylock(&tc->join);
+  pthread_mutex_unlock(&tc->join);
+
+  /* destroy the mutexes */
+  pthread_mutex_destroy(&tc->add);
+  pthread_mutex_destroy(&tc->run);
+  pthread_mutex_destroy(&tc->join);
 }
 
 /**
@@ -74,8 +72,21 @@ void tc_free(TClient *tc) {
 void tc_kill(TClient *tc) {
 
   pthread_cancel(tc->thread);
-  free(tc);
 
+  /* unlock all mutexes */
+  pthread_mutex_trylock(&tc->add);
+  pthread_mutex_unlock(&tc->add);
+
+  pthread_mutex_trylock(&tc->run);
+  pthread_mutex_unlock(&tc->run);
+
+  pthread_mutex_trylock(&tc->join);
+  pthread_mutex_unlock(&tc->join);
+
+  /* destroy the mutexes */
+  pthread_mutex_destroy(&tc->add);
+  pthread_mutex_destroy(&tc->run);
+  pthread_mutex_destroy(&tc->join);
 }
 
 /**
@@ -87,20 +98,19 @@ static void *tc_client_func(void *arg) {
   TClient *tc = (TClient *) arg;
 
   while (tc->running) {
+
+    pthread_mutex_lock(&tc->add);
+    pthread_mutex_lock(&tc->run);
     
-    if (tc->do_work) {
+    if (tc->running) {
+      tc->ret  = tc->func(tc->args);
+      tc->func = NULL;
+    }
 
-      tc->ret = tc->func(tc->args);
-      tc->do_work = 0;
-
-    } else
-      while (!tc->do_work && tc->running)
-        sched_yield();
-
+    pthread_mutex_unlock(&tc->join);
   }
 
   return NULL;
-
 }
 
 

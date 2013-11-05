@@ -2,7 +2,7 @@ VERSION = 1.0.0
 CC			= gcc
 OTFLAGS = -march=native -O2
 DBFLAGS	= -g -D DEBUG
-CFLAGS	= -Wall -Wextra -Werror -c $(OTFLAGS) $(DBFLAGS)
+CFLAGS	= -Wall -Wextra -Werror -c -Winline $(OTFLAGS) $(DBFLAGS)
 LDFLAGS	=  -lpthread -lm
 BIN   	= ./bin
 SRC			= ./src
@@ -47,3 +47,6 @@ speed-test: thread-client
 	$(CC) $(CFLAGS) $(SPEED_TEST_SRC) -o $(SPEED_TEST_OBJ)
 	$(CC) $(LDFLAGS) $(THREAD_CLIENT_OBJ) $(SPEED_TEST_OBJ) \
 				../Time-Diff/bin/time-diff.o -o $(SPEED_TEST_BIN)
+
+clean:
+	@rm -rf $(BIN)
