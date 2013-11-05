@@ -112,13 +112,14 @@ static inline char tc_only_add_func(TClient *tc,
 
 /**
  * Sets only the old function and the args, so you can call rerun afterwards 
+ * (int doesnt start computing, you have to call rerun to start it)
  *
  * Note: it failes if a previous function hasend finished
  *       (returns true if function coud be added else false)
  */
-static inline char tc_set_old_func(TClient *tc, 
-                                   void *(*func)(void *), 
-                                   void *args) {
+static inline char tc_set_rerun_func(TClient *tc, 
+                                     void *(*func)(void *), 
+                                     void *args) {
 
   if (tc->func != NULL)
     return 0;
