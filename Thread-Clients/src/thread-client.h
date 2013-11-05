@@ -12,6 +12,7 @@
 typedef struct {
   pthread_t thread;             /* the thread of this client                 */
   char      running;            /* indicates if thread client is running     */
+  void      *(*old) (void *);   /* function to process                       */
   void      *(*func) (void *);  /* function to process                       */
   void      *args;              /* function parameter                        */
   void      *ret;               /* function return value                     */
@@ -73,12 +74,57 @@ static inline char tc_add_func(TClient *tc,
     return 0;
 
   tc->func    = func;
+  tc->old     = func;
   tc->args    = args;
 
   pthread_mutex_unlock(&tc->add);
 
   return 1;
+}
 
+
+/**
+ * adds a function to process, but dont start to progressing it,
+ * tc_run hav to be called for that
+ *
+ * Note: it failes if a previous function hasend finished
+ *       (returns true if function cluld be added else false)
+ */
+static inline char tc_only_add_func(TClient *tc, 
+                                    void *(*func)(void *), 
+                                    void *args) {
+
+  if (tc->func != NULL)
+    return 0;
+
+  tc->func = func;
+  tc->old  = func;
+  tc->args = args;
+
+  return 1;
+}
+
+/**
+ * starts progressing an tc function if only_add had be unsed
+ * Note: the behavior is unexpected if normal add function was used
+ */
+#define tc_run(tc) pthread_mutex_unlock(&(tc)->add)
+
+/**
+ * reruns the last added function, with the last added args
+ * Note: it failes if a previous function hasend finished
+ *       (returns true if function cluld be added else false)
+ */
+static inline char tc_rerun(TClient *tc) {
+
+  if (tc->func != NULL)
+    return 0;
+
+  tc->func = tc->old;
+
+  pthread_mutex_unlock(&tc->add);
+
+  return 1;
 }
 
 /**
