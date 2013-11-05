@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "../src/thread-client.h"
 #include "../../Time-Diff/src/time-diff.h"
 
@@ -16,8 +17,8 @@ void *thread_func(void *arg) {
 
 int main (int argc, char *argv[]) {
 
-  if (argc != 3) {
-    printf("%s <times> <threads>\n", argv[0]);
+  if (argc != 5) {
+    printf("%s <times> <threads> <sched policy> <sched priority>\n", argv[0]);
     exit(1);
   }
 
@@ -25,13 +26,38 @@ int main (int argc, char *argv[]) {
 
   int times = atoi(argv[1]);
   int n_threads = atoi(argv[2]);
+  times /= n_threads;
+
+  int priority = atoi(argv[4]);
+  int policy   = 0;
+
+  if (!strcmp("SCHED_OTHER", argv[3]))
+    policy = SCHED_OTHER;
+#ifdef SCHED_BATCH
+  else if (!strcmp("SCHED_BATCH", argv[3]))
+    policy = SCHED_BATCH;
+#endif
+#ifdef SCHED_IDLE
+  else if (!strcmp("SCHED_IDLE", argv[3]))
+    policy = SCHED_IDLE;
+#endif
+  else if (!strcmp("SCHED_FIFO", argv[3]))
+    policy = SCHED_FIFO;
+  else if (!strcmp("SCHED_RR", argv[3]))
+    policy = SCHED_RR;
+  else {
+    printf("unknowen policy!\n");
+    exit(EXIT_FAILURE);
+  }
 
   pthread_t *threads = malloc(sizeof(pthread_t) * n_threads);
   TClient   *clients = malloc(sizeof(TClient)   * n_threads);
 
   int i, j;
-  for (i = 0; i < n_threads; i++)
+  for (i = 0; i < n_threads; i++) {
     init_thread_client(&clients[i]);
+    tc_set_scheduler(&clients[i], policy, priority);
+  }
 
   
   struct timeval clients_r, pthreads_r; // result

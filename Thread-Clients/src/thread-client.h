@@ -5,7 +5,6 @@
 #ifndef __THREAD_CLIENT_H__
 #define __THREAD_CLIENT_H__
 #include <pthread.h>
-#include <semaphore.h>
 
 /**
  * Thread-Client struct containing inforamtion of one thread client
@@ -25,6 +24,29 @@ typedef struct {
  * inits a given Thread-Client;
  */
 void init_thread_client(TClient *);
+
+
+/**
+ * sets the scheduling policy and priority of the tc thread
+ */
+static inline void tc_set_scheduler(TClient *tc, int policy, int priority) {
+  
+  struct sched_param param;
+  param.sched_priority = priority;
+
+  pthread_setschedparam(tc->thread, policy, &param);
+}
+
+/**
+ * returns the scheduling policy adn priority of the tc thread
+ */
+static inline void tc_get_scheduler(TClient *tc, int *policy, int *priority) {
+
+  struct sched_param param;
+  pthread_getschedparam(tc->thread, policy, &param);
+
+  *priority = param.sched_priority;
+}
 
 /**
  * Frees a given TClient
