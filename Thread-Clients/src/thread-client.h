@@ -64,7 +64,7 @@ void tc_kill(TClient *);
 /**
  * adds a function to process
  * Note: it failes if a previous function hasend finished
- *       (returns true if function cluld be added else false)
+ *       (returns true if function coud be added else false)
  */
 static inline char tc_add_func(TClient *tc, 
                                void *(*func)(void *), 
@@ -88,7 +88,7 @@ static inline char tc_add_func(TClient *tc,
  * tc_run hav to be called for that
  *
  * Note: it failes if a previous function hasend finished
- *       (returns true if function cluld be added else false)
+ *       (returns true if function coud be added else false)
  */
 static inline char tc_only_add_func(TClient *tc, 
                                     void *(*func)(void *), 
@@ -111,9 +111,28 @@ static inline char tc_only_add_func(TClient *tc,
 #define tc_run(tc) pthread_mutex_unlock(&(tc)->add)
 
 /**
+ * Sets only the old function and the args, so you can call rerun afterwards 
+ *
+ * Note: it failes if a previous function hasend finished
+ *       (returns true if function coud be added else false)
+ */
+static inline char tc_set_old_func(TClient *tc, 
+                                   void *(*func)(void *), 
+                                   void *args) {
+
+  if (tc->func != NULL)
+    return 0;
+
+  tc->old  = func;
+  tc->args = args;
+
+  return 1;
+}
+
+/**
  * reruns the last added function, with the last added args
  * Note: it failes if a previous function hasend finished
- *       (returns true if function cluld be added else false)
+ *       (returns true if function coud be added else false)
  */
 static inline char tc_rerun(TClient *tc) {
 
