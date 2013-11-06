@@ -374,17 +374,18 @@
  * the seeds internal usage only
  * (thread seed and serial seed)
  */
+static uint32_t **rand32_seeds;
 static uint32_t rand32_seed;
 
 /**
  * sets the serial seed to the given value
  */
-#define init_rand32(seed) rand32_serial_seed = seed
+#define init_rand32_serial(seed) rand32_serial_seed = seed
 
 /**
  * returns the next serial rand
  */
-static inline uint32_t next_rand32() {
+static inline uint32_t next_rand32_serial() {
   
   uint32_t hi, lo;
 
@@ -398,5 +399,61 @@ static inline uint32_t next_rand32() {
 
   return (rand32_seed = lo);
 }
+
+/**
+ * returns the next rand number for the given thread index
+ */
+static inline uint32_t next_rand32(uint16_t index) {
+
+  uint32_t hi, lo = 0;
+
+  lo = 16807 * ((*(rand32_seeds[index])) & 0xFFFF);
+  hi = 16807 * (*rand32_seeds[index] >> 16);
+
+  lo += (hi & 0x7FFF) << 16;
+  lo += hi >> 15;
+
+  if (lo > 0x7FFFFFFF) lo -= 0x7FFFFFFF;
+
+  return (*rand32_seeds[index] = lo);
+}
+
+/**
+ * initialzes rand with a given number of threads
+ * (also initializes the seed with the current time)
+ */
+static inline void init_rand32(uint16_t num_threads) {
+  
+  rand32_seeds = malloc(sizeof(uint32_t *) * num_threads);
+  
+  if (rand32_seeds == NULL) {
+    perror("malloc failed in init_rand32");
+    exit(1);
+  }
+
+  uint16_t i;
+  for (i = 0; i < num_threads; i++) {
+    rand32_seeds[i] = malloc(sizeof(uint32_t));
+
+    if (rand32_seeds[i] == NULL) {
+      perror("malloc failed in init_rand32");
+      exit(1);
+    }
+
+    *rand32_seeds[i] = ((i == 0) ? time(NULL) : next_rand32(i - 1));
+  }
+}
+
+/**
+ * shorter macro
+ */
+#define rand32_0() next_rand32_serial()
+#define rand32_1(thread) next_rand32(thread)
+#define rand32_x(x, a, b, f, ...) f
+#define rand32(...) rand32_x(, ##__VA_ARGS__,             \
+                              rand32_1(__VA_ARGS__),      \
+                              rand32_0(__VA_ARGS__))      
+                              
+
 
 #endif /* __RAND_H_ */
