@@ -448,11 +448,11 @@ static inline void init_rand32(uint16_t num_threads) {
  * shorter macro
  */
 #define rand32_0() next_rand32_serial()
-#define rand32_1(thread) next_rand32(thread)
-#define rand32_x(x, a, b, f, ...) f
-#define rand32(...) rand32_x(, ##__VA_ARGS__,             \
-                              rand32_1(__VA_ARGS__),      \
-                              rand32_0(__VA_ARGS__))      
+#define rand32_1(a) next_rand32(a)
+#define rand32_x(x, a, f, ...) f
+#define rand32(...) rand32_x(,##__VA_ARGS__,             \
+                             rand32_1(__VA_ARGS__),      \
+                             rand32_0(__VA_ARGS__))      
                               
 
 
