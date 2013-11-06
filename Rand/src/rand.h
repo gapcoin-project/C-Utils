@@ -396,7 +396,7 @@ static inline uint32_t next_rand32() {
 
   if (lo > 0x7FFFFFFF) lo -= 0x7FFFFFFF;
 
-  return (rand32_serial_seed = lo);
+  return (rand32_seed = lo);
 }
 
 #endif /* __RAND_H_ */
