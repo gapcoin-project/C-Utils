@@ -380,7 +380,7 @@ static uint32_t rand32_seed;
 /**
  * sets the serial seed to the given value
  */
-#define init_rand32_serial(seed) rand32_serial_seed = seed
+#define init_rand32_serial(seed) rand32_seed = seed
 
 /**
  * returns the next serial rand
