@@ -5,14 +5,48 @@
 #include "../src/thread-client.h"
 #include "../../Time-Diff/src/time-diff.h"
 
-void *thread_func(void *arg) {
+/**
+ * as higher as longe the test take
+ */
+#define TEST_HARDNES 1000000
 
-  int *a = (int *) arg;
+typedef struct {
+  int a, b, c, d, e, f;
+} Vektor;
 
-  (*a)++;
+void *thread_func(void *opts) {
+  (void) opts;
 
-  return (void *) a;
+  Vektor v;
+  v.a = (rand() % 100) - 50;
+  v.b = (rand() % 100) - 50;
+  v.c = (rand() % 100) - 50;
+  v.d = (rand() % 100) - 50;
+  v.e = (rand() % 100) - 50;
+  v.f = (rand() % 100) - 50;
+  
+  int i;
+  for (i = 0; i < TEST_HARDNES; i++) {
+    v.a = v.b + v.e;
+    v.f = v.a + v.a;
+    v.b = v.e + v.b;
+    v.c = v.d + v.d;
+    v.d = v.a + v.f;
+    v.e = v.b + v.a;
+    v.a = v.e + v.b;
+    v.d = v.f + v.c;
+    v.e = v.c + v.e;
+    v.f = v.a + v.d;
+    v.a = v.e + v.f;
+    v.b = v.f + v.e;
+    v.c = v.d + v.c;
+    v.f = v.d + v.a;
+    v.d = v.a + v.d;
+    v.e = v.b + v.e;
+    v.c = v.e + v.f;
+  }
 
+  return NULL;
 }
 
 int main (int argc, char *argv[]) {
