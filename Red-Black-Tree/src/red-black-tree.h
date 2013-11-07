@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../Dynamic-Array/src/dynamic-array.h"
+#include "../../Long-Array/src/long-array.h"
 
 /**
  * Some Makros
