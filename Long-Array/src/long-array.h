@@ -200,6 +200,11 @@ typedef struct {                        \
 #define LONG_ARY_LENGTH(ARY) (ARY).length
 
 /**
+ * access the un initialized element after the last added element
+ */
+#define LONG_ARY_AT_LENGTH(ARY) LONG_ARY_AT(ARY, ((ARY).length))
+
+/**
  * Some shorter Markros
  */
 #ifndef LARY
