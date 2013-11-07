@@ -38,7 +38,7 @@ void init_rbtree(RBTree *tree, uint64_t max_nodes) {
 
   tree->root = NULL;                         
   tree->cur  = NULL;
-  ARY_INIT(RBTNode, tree->nodes, max_nodes);
+  LARY_INIT(RBTNode, tree->nodes, max_nodes);
 
 }
 
@@ -165,10 +165,10 @@ static void rbt_rotate_left(RBTree *tree, RBTNode *n) {
 void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 
   // reserving memory for next element
-  ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
+  LARY_GROW(tree->nodes, LARY_LEN(tree->nodes));
 
   // pointer to the last element
-  RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
+  RBTNode *new_node = LARY_PTR(tree->nodes, LARY_LEN(tree->nodes));
   
   new_node->key    = key;
   new_node->value  = value;
@@ -218,10 +218,10 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
 
   // reserving memory for next element
-  ARY_GROW(tree->nodes, ARY_LEN(tree->nodes));
+  LARY_GROW(tree->nodes, LARY_LEN(tree->nodes));
 
   // pointer to the last element
-  RBTNode *new_node = ARY_PTR(tree->nodes, ARY_LEN(tree->nodes));
+  RBTNode *new_node = LARY_PTR(tree->nodes, LARY_LEN(tree->nodes));
   
   new_node->key    = key;
   new_node->value  = value;
@@ -428,7 +428,7 @@ static inline void rbt_free_node(RBTree *tree, RBTNode *n) {
 #endif
   
   tree->nodes.length--;
-  RBTNode *last_node = ARY_PTR(tree->nodes, tree->nodes.length);
+  RBTNode *last_node = LARY_PTR(tree->nodes, tree->nodes.length);
 
   // copy last element from the RBTNodes Array to dst
   if (n != last_node) {
@@ -616,7 +616,7 @@ static inline void rbt_delete_case6(RBTree *tree, RBTNode *n) {
  * frees an given RedBlackTree
  */
 void rbtree_free(RBTree *tree) {
-  ARY_FREE(tree->nodes);
+  LARY_FREE(tree->nodes);
 }
 
 
@@ -625,7 +625,7 @@ void rbtree_free(RBTree *tree) {
  */
 void rbtree_clone(RBTree *dst, RBTree *src) {
   dst->root = src->root;
-  ARY_CLONE(dst->nodes, src->nodes);
+  LARY_CLONE(dst->nodes, src->nodes);
 }
 
 /**
@@ -666,7 +666,7 @@ static void rbt_to_key_ary(RBTNode *n, Uint64Ary *ary) {
   if (n->left != NULL)
     rbt_to_key_ary(n->left, ary);
 
-  ARY_PUSH(*ary, n->key);
+  LARY_PUSH(*ary, n->key);
 
   if (n->right != NULL)
     rbt_to_key_ary(n->right, ary);
@@ -679,7 +679,7 @@ static void rbt_to_key_ary(RBTNode *n, Uint64Ary *ary) {
 Uint64Ary *rbtree_to_key_ary(RBTree *tree) {
   
   Uint64Ary *ary = malloc(sizeof(Uint64Ary));
-  ARY_INIT(uint64_t, *ary, ARY_LEN(tree->nodes));
+  LARY_INIT(uint64_t, *ary, LARY_LEN(tree->nodes));
 
   rbt_to_key_ary(tree->root, ary);
 
@@ -695,7 +695,7 @@ static void rbt_to_value_ary(RBTNode *n, VoidPtrAry *ary) {
   if (n->left != NULL)
     rbt_to_value_ary(n->left, ary);
 
-  ARY_PUSH(*ary, n->value);
+  LARY_PUSH(*ary, n->value);
 
   if (n->right != NULL)
     rbt_to_value_ary(n->right, ary);
@@ -708,7 +708,7 @@ static void rbt_to_value_ary(RBTNode *n, VoidPtrAry *ary) {
 VoidPtrAry *rbtree_to_value_ary(RBTree *tree) {
   
   VoidPtrAry *ary = malloc(sizeof(VoidPtrAry));
-  ARY_INIT(void *, *ary, ARY_LEN(tree->nodes));
+  LARY_INIT(void *, *ary, LARY_LEN(tree->nodes));
 
   rbt_to_value_ary(tree->root, ary);
 
@@ -763,7 +763,7 @@ void rbtree_iteration_next(RBTree *tree) {
  */
 void rbt_print(RBTNode *n, RBTNodeAry *ary, int deep) {
   
-  ARY_PUSH(ary[deep], *n);
+  LARY_PUSH(ary[deep], *n);
 
   if (n->right != NULL)
     rbt_print(n->right, ary, deep + 1);
@@ -778,25 +778,25 @@ void rbt_print(RBTNode *n, RBTNodeAry *ary, int deep) {
  */
 void rbtree_print(RBTree *tree) { 
 
-  uint64_t len = log2(ARY_LEN(tree->nodes)) * 2;
+  uint64_t len = log2(LARY_LEN(tree->nodes)) * 2;
   RBTNodeAry *ary = malloc(sizeof(RBTNodeAry) * len);
 
   uint64_t i, j;
   for (i = 0; i < len; i++)
-    ARY_INIT(RBTNode, ary[i], (i + 1) * (i + 1));
+    LARY_INIT(RBTNode, ary[i], (i + 1) * (i + 1));
 
   rbt_print(tree->root, ary, 0);
 
 
   for (i = 0; i < len; i++) {
-    for (j = 0; j < ARY_LEN(ary[i]); j++) {
+    for (j = 0; j < LARY_LEN(ary[i]); j++) {
 
       printf("%" PRIu64 ":(%s, %s) ",
-             ARY_AT(ary[i], j).key,
-             (ARY_AT(ary[i], j).right != NULL) ? 
-              itoa(ARY_AT(ary[i], j).right->key) : "N",
-             (ARY_AT(ary[i], j).left != NULL) ? 
-              itoa(ARY_AT(ary[i], j).left->key) : "N");
+             LARY_AT(ary[i], j).key,
+             (LARY_AT(ary[i], j).right != NULL) ? 
+              itoa(LARY_AT(ary[i], j).right->key) : "N",
+             (LARY_AT(ary[i], j).left != NULL) ? 
+              itoa(LARY_AT(ary[i], j).left->key) : "N");
     }
 
     printf("\n");

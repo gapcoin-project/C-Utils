@@ -28,8 +28,8 @@
  * uint64_t long array
  * and void pinter long ary
  */
-DEF_ARY(uint64_t, Uint64Ary);
-DEF_ARY(void *, VoidPtrAry);
+DEF_LARY(uint64_t, Uint64Ary);
+DEF_LARY(void *, VoidPtrAry);
 
 /**
  * RBTNode for an Red-Balck-Tree
@@ -45,7 +45,7 @@ struct RBTNode {
 /**
  * Long Array for storing the RBTNodes
  */
-DEF_ARY(RBTNode, RBTNodeAry);
+DEF_LARY(RBTNode, RBTNodeAry);
 
 /**
  * The Red-Balck-Tree 
@@ -60,7 +60,7 @@ typedef struct {
 /**
  * returns the length of an red black tree
  */
-#define rbtree_length(tree) (ARY_LEN((tree)->nodes))
+#define rbtree_length(tree) (LARY_LEN((tree)->nodes))
 
 /**
  * Clears an RBTree (sets the num of elements to zero)
