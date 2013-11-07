@@ -165,7 +165,7 @@ static void rbt_rotate_left(RBTree *tree, RBTNode *n) {
 void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 
   // reserving memory for next element
-  LARY_GROW(tree->nodes, LARY_LEN(tree->nodes));
+  LARY_ADD_SPACE(tree->nodes);
 
   // pointer to the last element
   RBTNode *new_node = LARY_PTR(tree->nodes, LARY_LEN(tree->nodes));
@@ -218,7 +218,7 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value) {
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value) {
 
   // reserving memory for next element
-  LARY_GROW(tree->nodes, LARY_LEN(tree->nodes));
+  LARY_ADD_SPACE(tree->nodes);
 
   // pointer to the last element
   RBTNode *new_node = LARY_PTR(tree->nodes, LARY_LEN(tree->nodes));
