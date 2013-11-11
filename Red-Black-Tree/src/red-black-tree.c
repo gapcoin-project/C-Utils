@@ -36,8 +36,9 @@ static inline RBTNode *rbt_search(RBTree *tree, uint64_t key);
  */
 void init_rbtree(RBTree *tree, uint64_t max_nodes) {
 
-  tree->root = NULL;                         
-  tree->cur  = NULL;
+  tree->root       = NULL;                         
+  tree->cur        = NULL;
+  tree->free_value = 0;
   LARY_INIT(RBTNode, tree->nodes, max_nodes);
 
 }
@@ -621,11 +622,20 @@ void rbtree_free(RBTree *tree) {
 
 
 /**
- * Clones a given RBTree fromsrc into dst
+ * Clones a given RBTree from src into dst
  */
 void rbtree_clone(RBTree *dst, RBTree *src) {
-  dst->root = src->root;
-  LARY_CLONE(dst->nodes, src->nodes);
+  
+  dst->root = NULL;                         
+  dst->cur  = NULL;
+  LARY_CLEAR(dst->nodes);
+
+  for (rbtree_start_iteration(src);
+       !rbtree_iteration_finished(src);
+       rbtree_iteration_next(src)) {
+
+    rbtree_add(dst, rbtree_cur_key(src), rbtree_cur_value(src));
+  }
 }
 
 /**
