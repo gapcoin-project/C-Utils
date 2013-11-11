@@ -38,7 +38,7 @@ typedef struct {                        \
 #define LONG_ARY_INIT(TYPE, ARY, MAX_LEN)                               \
   do {                                                                  \
     (ARY).col_len = (ARY).max_rows = (uint64_t) sqrt(MAX_LEN) + 1;      \
-    (ARY).ptr = (TYPE **) malloc(sizeof(TYPE *) * (ARY).col_len);       \
+    (ARY).ptr = (TYPE **) calloc(sizeof(TYPE *), (ARY).col_len);        \
     (ARY).ptr[0] = (TYPE *) malloc(sizeof(TYPE) * (ARY).col_len);       \
     (ARY).length = 0;                                                   \
     (ARY).max_len = MAX_LEN;                                            \
@@ -175,21 +175,25 @@ typedef struct {                        \
  */
 #define LONG_ARY_CLONE(DST, SRC)                                              \
   do {                                                                        \
-    LARY_FREE(DST);                                                           \
+    if ((DST).ptr == NULL                ||                                   \
+        (DST).col_len  != (SRC).col_len)                                      \
+      LARY_FREE(DST);                                                         \
+                                                                              \
     (DST).length   = (SRC).length;                                            \
     (DST).col_len  = (SRC).col_len;                                           \
     (DST).max_rows = (SRC).max_rows;                                          \
     (DST).cur_rows = (SRC).cur_rows;                                          \
     (DST).max_len  = (SRC).max_len;                                           \
-    (DST).ptr      = malloc(sizeof((SRC).ptr[0]) * (DST).col_len);            \
+    (DST).ptr      = calloc(sizeof((SRC).ptr[0]), (DST).col_len);             \
                                                                               \
     uint64_t lary_clone_i;                                                    \
     for (lary_clone_i = 0;                                                    \
          lary_clone_i < (DST).cur_rows;                                       \
          lary_clone_i++) {                                                    \
                                                                               \
-      (DST).ptr[lary_clone_i] = malloc(sizeof((SRC).ptr[0][0])                \
-                                              * (DST).col_len);               \
+      if ((DST).ptr[lary_clone_i] == NULL)                                    \
+        (DST).ptr[lary_clone_i] = malloc(sizeof((SRC).ptr[0][0])              \
+                                                * (DST).col_len);             \
       memcpy((DST).ptr[lary_clone_i],                                         \
              (SRC).ptr[lary_clone_i],                                         \
              sizeof((SRC).ptr[0][0]) * (DST).col_len);                        \
