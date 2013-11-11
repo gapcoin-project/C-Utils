@@ -10,6 +10,14 @@
 #include <inttypes.h>
 
 /**
+ * struct for stroring information about an binary String
+ */
+typedef struct {
+  char *str;
+  uint64_t len;
+} BinaryString;
+
+/**
  * reads a line from a given file descriptor
  * returns line length or -1 by error
  */
@@ -109,5 +117,10 @@ void str_reverse(char *str);
  */
 #define str_end_with(str1, str2)                      \
   !strcmp(str1 + strlen(str1) - strlen(str2), str2)
+
+/**
+ * reads and returns entire file 
+ */
+BinaryString *read_file(int fd);
 
 #endif /* __STRING_H__ */
