@@ -171,34 +171,11 @@ typedef struct {                        \
 /**
  * Clones an given LongArray into DST.
  *
- * Note both Arrays should have the same TYPE
+ * also initializes it
  */
 #define LONG_ARY_CLONE(DST, SRC)                                              \
   do {                                                                        \
-    (DST).length   = (SRC).length;                                            \
-    (DST).col_len  = (SRC).col_len;                                           \
-    (DST).max_rows = (SRC).max_rows;                                          \
-    (DST).cur_rows = (SRC).cur_rows;                                          \
-    (DST).max_len  = (SRC).max_len;                                           \
-                                                                              \
-    uint64_t lary_clone_i;                                                    \
-    for (lary_clone_i = 0;                                                    \
-         lary_clone_i < (DST).cur_rows;                                       \
-         lary_clone_i++) {                                                    \
-                                                                              \
-      memcpy((DST).ptr[lary_clone_i],                                         \
-             (SRC).ptr[lary_clone_i],                                         \
-             sizeof((SRC).ptr[0][0]) * (DST).col_len);                        \
-    }                                                                         \
-  } while (0)
-
-/**
- * Clones an given LongArray into DST.
- *
- * also initializes it
- */
-#define LONG_ARY_CLONE_INIT(DST, SRC)                                         \
-  do {                                                                        \
+    LARY_FREE(DST);                                                           \
     (DST).length   = (SRC).length;                                            \
     (DST).col_len  = (SRC).col_len;                                           \
     (DST).max_rows = (SRC).max_rows;                                          \
@@ -255,7 +232,6 @@ typedef struct {                        \
 #define LARY_PULL(ARY, VALUE)           LONG_ARY_PULL(ARY, VALUE)
 #define LARY_FREE(ARY)                  LONG_ARY_FREE(ARY)
 #define LARY_CLONE(DST, SRC)            LONG_ARY_CLONE(DST, SRC)
-#define LARY_CLONE_INIT(DST, SRC)       LONG_ARY_CLONE_INIT(DST, SRC)
 #define LARY_DUB(DST, SRC)              LONG_ARY_DUB(DST, SRC)
 #define LARY_LAST(ARY)                  LONG_ARY_LAST(ARY)
 #define LARY_AT_LEN(ARY)                LONG_ARY_AT_LENGTH(ARY)
