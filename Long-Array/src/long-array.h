@@ -219,6 +219,11 @@ typedef struct {                        \
 #define LONG_ARY_AT_LENGTH(ARY) LONG_ARY_AT(ARY, ((ARY).length))
 
 /**
+ * clears an LARY (sets it size to zero)
+ */
+#define LONG_ARY_CLEAR(ARY) (ARY).length = 0
+
+/**
  * Some shorter Markros
  */
 #ifndef LARY
@@ -237,6 +242,7 @@ typedef struct {                        \
 #define LARY_AT_LEN(ARY)                LONG_ARY_AT_LENGTH(ARY)
 #define LARY_ADD_SPACE(ARY)             LONG_ARY_ADD_SPACE(ARY)
 #define LARY_LEN(ARY)                   LONG_ARY_LENGTH(ARY)                        
+#define LARY_CLEAR(ARY)                 LONG_ARY_CLEAR(ARY)
 #endif
 
 #endif // __LONG_ARRAY_H__
