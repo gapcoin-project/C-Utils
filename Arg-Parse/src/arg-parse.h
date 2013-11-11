@@ -49,4 +49,10 @@ char *get_arg(int argc,
 #define get_i_arg(...)                                          \
   (has_arg(__VA_ARGS__) ? atoi(get_arg(__VA_ARGS__)) : -1)
 
+/**
+ * to get float args
+ */
+#define get_f_arg(...)                                         \
+  (has_arg(__VA_ARGS__) ? atof(get_arg(__VA_ARGS__)) : -1.0)
+
 #endif /* __ARG_PARSE_H__ */
