@@ -245,13 +245,13 @@ do {                                                                         \
  * adds an elemnt to the given hash unsing a string as key
  */
 #define HASH_ADD_STR(HASH, STR, E)                          \
-  HASH_ADD(HASH, crc32(STR, strlen(STR)), E)
+  HASH_ADD(HASH, str_crc32(STR, strlen(STR)), E)
 
 /**
  * saves the wanted element in E uses a sting as key
  */
 #define HASH_GET_STR(HASH, STR, E)                          \
-  HASH_GET(HASH, crc32(STR, strlen(STR)), E)
+  HASH_GET(HASH, str_crc32(STR, strlen(STR)), E)
 
 
 #endif /* __HASH_H__ */
