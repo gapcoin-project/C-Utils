@@ -145,8 +145,34 @@ char *strn_clone(const char *str, size_t n) {
 }
 
 /**
+ * receving an complete line, not size limited
+ * the renturnd ptr have to be freed by you
+ */
+char *recv_complete_line(int sock_fd, int flags) {
+
+  size_t buf_len = 1024;
+  char *buffer = NULL;
+  
+  ssize_t size = 0, recvd = 0;
+
+  do {
+    char *buffer = realloc(buffer, sizeof(char) * buf_len);
+
+    recvd = recv_line(sock_fd, buffer + size, buf_len, flags);
+    size += recvd;
+    
+    buf_len *= 2;
+
+  } while (recvd > 0 && buffer[size - 1] != '\n');
+
+  if (recvd < 0) return NULL;
+
+  return buffer;  
+}
+
+/**
  * receve one line from a socket fd
- * (not includeing the new line char)
+ * (not including the new line char)
  */
 ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
   
