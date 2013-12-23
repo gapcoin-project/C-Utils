@@ -145,73 +145,100 @@ char *strn_clone(const char *str, size_t n) {
 }
 
 /**
- * receving an complete line, not size limited
- * the renturnd ptr have to be freed by you
+ * returns the possition of the first new line character in the given string
  */
-char *recv_complete_line(int sock_fd, int flags) {
-
-  size_t buf_len = 1024;
-  char *buffer = NULL;
+static inline ssize_t new_line_pos(char *str, size_t len) {
   
-  ssize_t size = 0, recvd = 0;
+  size_t i;
+  for (i = 0; i < len && str[i] != '\n'; i++);
 
-  do {
-    char *buffer = realloc(buffer, sizeof(char) * buf_len);
-
-    recvd = recv_line(sock_fd, buffer + size, buf_len, flags);
-    size += recvd;
-    
-    buf_len *= 2;
-
-  } while (recvd > 0 && buffer[size - 1] != '\n');
-
-  if (recvd < 0) return NULL;
-
-  return buffer;  
+  return i;
 }
 
 /**
- * receve one line from a socket fd
- * (not including the new line char)
+ * reallocs new space if needed
  */
-ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags) {
+static inline ssize_t check_memory(char **buffer, ssize_t *capacity, ssize_t wanted) {
+
+  if (*capacity < 1024) {
+    *capacity = 1024;
+    char *ptr = realloc(*buffer, *capacity);
+
+    if (ptr == NULL)
+      return -1;
+
+    *buffer = ptr;
+  }
   
-  static char recv_buff[512];
-  static ssize_t size = 0;
-  ssize_t i, k = 0;
+  while (*capacity < wanted) {
+    *capacity *= 2;
+    
+    char *ptr = realloc(*buffer, *capacity);
+
+    if (ptr == NULL)
+      return -1;
+
+   *buffer = ptr;
+  }
+
+  return 0;
+}
+
+/**
+ * recives on line form a given socket file descriptor
+ * Note: it reallocs space if needed
+ * NOTE: *buffer hav to be an dynamic allocated address
+ */
+ssize_t recv_line(int sock_fd, char **buffer, ssize_t *capacity, int flags) {
+  
+  static char recv_buff[1024];
+  static ssize_t recved_size = 0;
+
+  ssize_t size = 0, size_one = 0;
 
   for (;;) {
     
-    for (i = 0; i < size && i + k < (ssize_t) len; i++) {
-      buffer[i + k] = recv_buff[i];
- 
-      if (recv_buff[i] == '\n') {
-        size -= i + 1;
+    /* malloc new space if needed */
+    if (check_memory(buffer, capacity, size + 1023) == -1)
+      return -1;
 
-        if (size > 0)
-          memmove(recv_buff, recv_buff + i + 1, size);
+    /* recev on portion form sender or use old recvied portion */
+    if (recved_size > 0) {
+      
+      memmove(*buffer, recv_buff, recved_size);
+      size_one = recved_size;
+      recved_size = 0;
+    } else
+      size_one = recv(sock_fd, (*buffer) + size, 1023, flags);
 
-        buffer[i + k] = '\0';
-        return i + k;
-      }
+    /* check for errors */
+    if (size_one == -1) return -1;
+
+    /* search fo an new line char */
+    ssize_t new_line_char = new_line_pos((*buffer) + size, size_one);
+
+    /* adjust size */
+    new_line_char += size;
+    size += size_one;
+
+    /* we found a new line char */
+    if (size > new_line_char) {
+      
+      /* part of the next line */
+      recved_size = size - (new_line_char + 1);
+
+      /* save part of the next line for futer calls */
+      if (recved_size > 0)
+        memmove(recv_buff, (*buffer) + new_line_char + 1, recved_size);
+
+      (*buffer)[new_line_char] = 0x0;
+
+      size = new_line_char;
+      break;
     }
-    
-    if (i + k >= (ssize_t) len) {
-    
-        size -= i;
+  } 
 
-        if (size > 0)
-          memmove(recv_buff, recv_buff + i, size);
-    
-      buffer[i + k - 1] = '\0';
-      return i + k - 1;
-    }
-
-    size = recv(sock_fd, recv_buff, 512, flags);
-    if (size == -1) return -1;
-
-    k += i;
-  }
+  return size;
 }
 
 /**

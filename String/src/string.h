@@ -44,15 +44,11 @@ char *str_clone(const char *str);
 char *strn_clone(const char *str, size_t n);
 
 /**
- * receving an complete line, not size limited
- * the renturnd ptr have to be freed by you
+ * recives on line form a given socket file descriptor
+ * Note: it reallocs space if needed
+ * NOTE: *buffer hav to be an dynamic allocated address
  */
-char *recv_complete_line(int sock_fd, int flags);
-
-/**
- * receve one line from a socket fd
- */
-ssize_t recv_line(int sock_fd, char *buffer, size_t len, int flags);
+ssize_t recv_line(int sock_fd, char **buffer, ssize_t *capacity, int flags);
 
 /**
  * returns wheretre the given string matches the given regex
