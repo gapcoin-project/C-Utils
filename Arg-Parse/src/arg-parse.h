@@ -29,7 +29,8 @@ char *get_arg(int argc,
   has_arg(argc, argv, short_arg, long_arg)
 #define has_argx(X, T1, T2, T3, T4, FUNC, ...) FUNC
 #define has_arg(...) has_argx(, ##__VA_ARGS__,            \
-                                has_arg4(__VA_ARGS__),,   \
+                                has_arg4(__VA_ARGS__),    \
+                                "3 args not allowed",     \
                                 has_arg2(__VA_ARGS__),    \
                                 has_arg1(__VA_ARGS__))
 
@@ -39,7 +40,8 @@ char *get_arg(int argc,
   get_arg(argc, argv, short_arg, long_arg)
 #define get_argx(X, T1, T2, T3, T4, FUNC, ...) FUNC
 #define get_arg(...) get_argx(, ##__VA_ARGS__,            \
-                                get_arg4(__VA_ARGS__),,   \
+                                get_arg4(__VA_ARGS__),    \
+                                "3 args not allowed",     \
                                 get_arg2(__VA_ARGS__),    \
                                 get_arg1(__VA_ARGS__))
 
