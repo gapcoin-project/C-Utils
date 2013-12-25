@@ -44,6 +44,7 @@ DEF_ARY(struct sigaction, SIGAry);
 typedef struct {
   void   *(*func) (void *); /* the test function */
   char   failed;            /* indecates if this test failed */
+  char   skipped;           /* indecates if tis test was skipped */
   char   error;             /* indecates if this test failed do to an error */
   const  char *test_name;   /* the name of the test */
   SIGAry signals;           /* the old siganl handlers of this */
@@ -282,6 +283,21 @@ do {                                                          \
                                                               \
 } while (0)
 
+/**
+ * Skip the current test
+ */
+#define SKIP_TEST(...)                                                       \
+do {                                                                         \
+  TEST_MSG3("[WW] skipping %s:", ARY_AT(tunit.tests, tunit.i).test_name);    \
+  TEST_MSG3(" " __VA_ARGS__);                                                \
+  TEST_MSG3("\n");                                                           \
+                                                                             \
+  CUR_TEST_SKIPPED = 1;                                                      \
+                                                                             \
+  /* return the args given by bevor */                                       \
+  return args;                                                               \
+} while (0);
+
 
 /**
  * assert that the condition is false 
@@ -453,6 +469,11 @@ void __attribute__ ((constructor(101))) init_tunit() {
  * returns if the current test failed
  */
 #define CUR_TEST_FAILED CUR_TEST.failed
+
+/**
+ * returns if the current test was skipped
+ */
+#define CUR_TEST_SKIPPED CUR_TEST.skipped
 
 /**
  * structur to hold infomation about an signal
@@ -826,9 +847,11 @@ static inline void do_test_info(Test *test) {
  */
 static inline void do_test_summary(char *name) {
   
-  unsigned int n_failurs, n_errors, i;
+  unsigned int n_failurs, n_errors, n_skipped, i;
 
-  for (i = 0, n_failurs = 0, n_errors = 0; i < ARY_LEN(tunit.tests); i++) {
+  for (i = 0, n_failurs = 0, n_errors = 0, n_skipped = 0;
+       i < ARY_LEN(tunit.tests); 
+       i++) {
 
     if (ARY_AT(tunit.tests, i).failed)
       n_failurs++;
@@ -836,6 +859,8 @@ static inline void do_test_summary(char *name) {
     if (ARY_AT(tunit.tests, i).error)
       n_errors++;
 
+    if (ARY_AT(tunit.tests, i).skipped)
+      n_skipped++;
   }
 
   if (n_errors)
@@ -850,6 +875,7 @@ static inline void do_test_summary(char *name) {
            ARY_LEN(tunit.tests));
 
   TEST_MSG1("[II] Succes: %" PRIu64 "\n", ARY_LEN(tunit.tests) - n_failurs);
+  TEST_MSG1("[II] Skiped: %u\n", n_skipped);
   TEST_MSG1("[II] Failed: %u\n", n_failurs);
   TEST_MSG1("[II] Errors: %u\n", n_errors);
 
