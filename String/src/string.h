@@ -125,4 +125,18 @@ void str_reverse(char *str);
  */
 BinaryString *read_file(int fd);
 
+
+/**
+ * returns the size of an given file path
+ */
+static inline int64_t file_len(const char *path) {
+  
+  struct stat file_info;
+  
+  if (stat(path, &file_info) == -1)
+    return -1;
+
+  return file_info.st_size;
+}
+
 #endif /* __STRING_H__ */
