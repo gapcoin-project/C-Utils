@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <regex.h>
 
 /**
@@ -468,47 +470,26 @@ char *itoa(int64_t i) {
  * reads and returns entire file 
  */
 BinaryString *read_file(int fd) {
-  
-  uint64_t max_len = 1024;
-  ssize_t  size = 0;
+
   BinaryString *bstr = malloc(sizeof(BinaryString));
-  
+
   if (bstr == NULL) return NULL;
 
-  bstr->str = malloc(sizeof(char) * 1024);
-  bstr->len = 0;
+  /* get file length */
+  struct stat file_info;
 
-  if (bstr->str == NULL) {
-    free(bstr);
+  if(fstat(fd, &file_info) == -1)
     return NULL;
-  }
+
+  bstr->len = file_info.st_size;
+  bstr->str = malloc(sizeof(char) * file_info.st_size);
+
+  if (bstr->str == NULL) 
+    return NULL;
+
+  if (read(fd, bstr->str, bstr->len) != bstr->len)
+    return NULL;
   
-  do {
-    if ((max_len - bstr->len) < 1024) {
-      
-      char *ptr = realloc(bstr->str, sizeof(char) * max_len * 2);
-      max_len *= 2;
-      
-      if (ptr == NULL) {
-        free(bstr->str);
-        free(bstr);
-        return NULL;
-      }
-      
-      bstr->str = ptr;
-      size = read(fd, bstr->str + bstr->len, 1024);
-
-      bstr->len += (uint64_t) size;
-
-      if (size < 0) {
-        free(bstr->str);
-        free(bstr);
-        return NULL;
-      }
-    }
-
-  } while (size > 0);
-
   return bstr;
 }
 
