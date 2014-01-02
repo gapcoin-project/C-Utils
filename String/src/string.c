@@ -493,4 +493,37 @@ BinaryString *read_file(int fd) {
   return bstr;
 }
 
+/**
+ * creates an readable string from a uint64_t
+ */
+char *ui_to_str(uint64_t num) {
+  
+  char buffer[64];
+
+  if (num == 0) {
+    buffer[0] = '0';
+    buffer[1] = 0;
+    return str_clone(buffer);
+  }
+
+  uint64_t i, j;
+  for (i = 0, j = 0; num != 0 && i < 64; num /= 10, i++, j++) {
+    
+    buffer[i] = 48 + num % 10;
+
+    if (i != 0 && (j + 1) % 3 == 0) {
+      i++;
+      buffer[i] = 39;
+    }
+  }
+
+  if (buffer[i - 1] == 39)
+    i--;
+
+  buffer[i] = 0;
+  str_reverse(buffer);
+
+  return str_clone(buffer);
+}
+
 #endif /* __STRING__ */

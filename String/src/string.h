@@ -141,4 +141,9 @@ static inline int64_t file_len(const char *path) {
   return file_info.st_size;
 }
 
+/**
+ * creates an readable string from a uint64_t
+ */
+char *ui_to_str(uint64_t num);
+
 #endif /* __STRING_H__ */
