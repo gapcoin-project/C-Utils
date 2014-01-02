@@ -487,7 +487,7 @@ BinaryString *read_file(int fd) {
   if (bstr->str == NULL) 
     return NULL;
 
-  if (read(fd, bstr->str, bstr->len) != (ssize_t) bstr->len)
+  if (read(fd, bstr->str, bstr->len) == -1)
     return NULL;
   
   return bstr;
