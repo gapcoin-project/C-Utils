@@ -31,11 +31,11 @@ typedef struct {
  */
 static inline void bary_init(BoolArray *bary, uint64_t len, uint8_t init) {
   
-  bary->ptr     = malloc(sizeof(uint8_t) * len / 8);
-  bary->len = len / 8;
-  bary->init    = (init != 0) ? 255 : 0;
+  bary->ptr  = malloc(sizeof(uint8_t) * len / 8);
+  bary->len  = len;
+  bary->init = (init != 0) ? 255 : 0;
 
-  memset(bary->ptr, bary->init, bary->len * sizeof(uint8_t));
+  memset(bary->ptr, bary->init, bary->len / 8 * sizeof(uint8_t));
 }
 
 /**
@@ -46,7 +46,10 @@ static inline void bary_grow(BoolArray *bary, uint64_t len) {
   while (bary->len <= len) {
 
     bary->len *= 2;
-    bary->ptr      = realloc(bary->ptr, sizeof(uint8_t) * len / 8);
+    bary->ptr      = realloc(bary->ptr, sizeof(uint8_t) * bary->len / 8);
+    memset(bary->ptr + (bary->len / 2), 
+           bary->init, 
+           bary->len / 16 * sizeof(uint8_t));
   }
 }
 
