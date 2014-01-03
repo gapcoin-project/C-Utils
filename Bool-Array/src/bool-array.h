@@ -7,7 +7,9 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
-#include <memory.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
   uint8_t *ptr;
