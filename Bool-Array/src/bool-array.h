@@ -53,7 +53,7 @@ static inline void bary_grow(BoolArray *bary, uint64_t len) {
 /**
  * Sets the given Possition
  */
-static inline void bary_set(BoolArray *bary, i) {
+static inline void bary_set(BoolArray *bary, uint64_t i) {
 
   switch (i % 8) {                                        
     case 0 : bary->ptr[i / 8] |= BIT0; break;       
@@ -70,7 +70,7 @@ static inline void bary_set(BoolArray *bary, i) {
 /**
  * Unsets the given Possition
  */
-static inline void bary_unset(BoolArray *bary, i) {
+static inline void bary_unset(BoolArray *bary, uint64_t i) {
                                                                   
   switch (i % 8) {                                            
     case 0 : bary->ptr[i / 8] &= ~BIT0; break;          
@@ -87,7 +87,7 @@ static inline void bary_unset(BoolArray *bary, i) {
 /**
  * returns wether the given index is setted or not
  */
-static inline uint8_t bary_at(BoolArray *bary, i) {
+static inline uint8_t bary_at(BoolArray *bary, uint64_t i) {
 
   switch (i % 8) {                                        
     case 0 : return bary->ptr[i / 8] & BIT0;       
