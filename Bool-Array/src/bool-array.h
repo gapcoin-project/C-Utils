@@ -58,16 +58,7 @@ static inline void bary_grow(BoolArray *bary, uint64_t len) {
  */
 static inline void bary_set(BoolArray *bary, uint64_t i) {
 
-  switch (i % 8) {                                        
-    case 0 : bary->ptr[i / 8] |= BIT0; break;       
-    case 1 : bary->ptr[i / 8] |= BIT1; break;       
-    case 2 : bary->ptr[i / 8] |= BIT2; break;       
-    case 3 : bary->ptr[i / 8] |= BIT3; break;       
-    case 4 : bary->ptr[i / 8] |= BIT4; break;       
-    case 5 : bary->ptr[i / 8] |= BIT5; break;       
-    case 6 : bary->ptr[i / 8] |= BIT6; break;       
-    case 7 : bary->ptr[i / 8] |= BIT7; break;       
-  }                                                         
+  bary->ptr[i / 8] |= (1 << (1 % 8));
 }
     
 /**
@@ -75,16 +66,7 @@ static inline void bary_set(BoolArray *bary, uint64_t i) {
  */
 static inline void bary_unset(BoolArray *bary, uint64_t i) {
                                                                   
-  switch (i % 8) {                                            
-    case 0 : bary->ptr[i / 8] &= ~BIT0; break;          
-    case 1 : bary->ptr[i / 8] &= ~BIT1; break;          
-    case 2 : bary->ptr[i / 8] &= ~BIT2; break;          
-    case 3 : bary->ptr[i / 8] &= ~BIT3; break;          
-    case 4 : bary->ptr[i / 8] &= ~BIT4; break;          
-    case 5 : bary->ptr[i / 8] &= ~BIT5; break;          
-    case 6 : bary->ptr[i / 8] &= ~BIT6; break;          
-    case 7 : bary->ptr[i / 8] &= ~BIT7; break;          
-  }                                                             
+  bary->ptr[i / 8] &= ~(1 << (1 % 8));
 }
 
 /**
@@ -92,19 +74,7 @@ static inline void bary_unset(BoolArray *bary, uint64_t i) {
  */
 static inline uint8_t bary_at(BoolArray *bary, uint64_t i) {
 
-  switch (i % 8) {                                        
-    case 0 : return bary->ptr[i / 8] & BIT0;       
-    case 1 : return bary->ptr[i / 8] & BIT1;       
-    case 2 : return bary->ptr[i / 8] & BIT2;       
-    case 3 : return bary->ptr[i / 8] & BIT3;       
-    case 4 : return bary->ptr[i / 8] & BIT4;       
-    case 5 : return bary->ptr[i / 8] & BIT5;       
-    case 6 : return bary->ptr[i / 8] & BIT6;       
-    case 7 : return bary->ptr[i / 8] & BIT7;       
-  }                                                         
-
-  printf("SOMETHING WENT WRONG IN: %s:%d\n", __FILE__, __LINE__);
-  exit(EXIT_FAILURE);
+  return bary->ptr[i / 8] & (1 << (1 % 8));
 }
 
 
