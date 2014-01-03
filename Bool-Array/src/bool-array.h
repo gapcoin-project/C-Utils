@@ -1,6 +1,6 @@
 /**
  * Header for an Bool Array
- * Minimizes spaces if only True or False is Neccesary
+ * Minimizes spaces if only True or False is Neccesbary
  */
 #ifndef __BARY_H__
 #define __BARY_H__
@@ -27,7 +27,7 @@ typedef struct {
 /**
  * Inits Array with the given bool init value and the given length
  */
-static inline void bary_init(BoolArray *ary, uint64_t len, uint8_t init) {
+static inline void bary_init(BoolArray *bary, uint64_t len, uint8_t init) {
   
   bary->ptr     = malloc(sizeof(uint8_t) * len / 8);
   bary->len = len / 8;
@@ -51,7 +51,7 @@ static inline void bary_grow(BoolArray *bary, uint64_t len) {
 /**
  * Sets the given Possition
  */
-static inline void bary_set(BoolArray *ary, i) {
+static inline void bary_set(BoolArray *bary, i) {
 
   switch (i % 8) {                                        
     case 0 : bary->ptr[i / 8] |= BIT0; break;       
@@ -68,7 +68,7 @@ static inline void bary_set(BoolArray *ary, i) {
 /**
  * Unsets the given Possition
  */
-static inline void bary_unset(BoolArray *ary, i) {
+static inline void bary_unset(BoolArray *bary, i) {
                                                                   
   switch (i % 8) {                                            
     case 0 : bary->ptr[i / 8] &= ~BIT0; break;          
@@ -81,4 +81,26 @@ static inline void bary_unset(BoolArray *ary, i) {
     case 7 : bary->ptr[i / 8] &= ~BIT7; break;          
   }                                                             
 }
+
+/**
+ * returns wether the given index is setted or not
+ */
+static inline uint8_t bary_at(BoolArray *bary, i) {
+
+  switch (i % 8) {                                        
+    case 0 : return bary->ptr[i / 8] & BIT0;       
+    case 1 : return bary->ptr[i / 8] & BIT1;       
+    case 2 : return bary->ptr[i / 8] & BIT2;       
+    case 3 : return bary->ptr[i / 8] & BIT3;       
+    case 4 : return bary->ptr[i / 8] & BIT4;       
+    case 5 : return bary->ptr[i / 8] & BIT5;       
+    case 6 : return bary->ptr[i / 8] & BIT6;       
+    case 7 : return bary->ptr[i / 8] & BIT7;       
+  }                                                         
+
+  printf("SOMETHING WENT WRONG IN: %s:%d\n", __FILE__, __LINE__);
+  exit(EXIT_FAILURE);
+}
+
+
 #endif // __BARY_H__
