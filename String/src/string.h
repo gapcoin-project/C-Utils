@@ -160,8 +160,8 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
     if (high < 10) hex[0] = 0x30 + high;
     else           hex[0] = 0x37 + high;
 
-    if (low < 10)  hex[1] = 0x30 + high;
-    else           hex[1] = 0x37 + high;
+    if (low < 10)  hex[1] = 0x30 + low;
+    else           hex[1] = 0x37 + low;
   }
 }
 
