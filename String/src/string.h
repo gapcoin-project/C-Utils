@@ -149,7 +149,7 @@ char *ui_to_str(uint64_t num);
 /**
  * Converts an string to his hexadecimal repersentation
  */
-inline void to_hex(char *hex, unsigned char *str, int len) {
+static inline void to_hex(char *hex, unsigned char *str, int len) {
   
   int i;
   for (i = 0; i < len; i++, str++, hex += 2) {
