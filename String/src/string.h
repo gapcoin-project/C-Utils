@@ -146,4 +146,24 @@ static inline int64_t file_len(const char *path) {
  */
 char *ui_to_str(uint64_t num);
 
+/**
+ * Converts an string to his hexadecimal repersentation
+ */
+inline void to_hex(char *hex, char *str, int len) {
+  
+  int i;
+  for (i = 0; i < len; i++, str++, hex += 2) {
+
+    char high = *str >> 4
+    char low  = *str & 0xF
+      
+    if (high < 10) hex[0] = 0x30 + high;
+    else           hex[0] = 0x37 + high;
+
+    if (low < 10)  hex[1] = 0x30 + high;
+    else           hex[1] = 0x37 + high;
+  }
+}
+
+
 #endif /* __STRING_H__ */
