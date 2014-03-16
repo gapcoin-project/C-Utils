@@ -154,8 +154,8 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   int i;
   for (i = 0; i < len; i++, str++, hex += 2) {
 
-    char high = *str >> 4;
-    char low  = *str & 0xF;
+    char high = (*str) >> 4;
+    char low  = (*str) & 0xF;
       
     if (high < 10) hex[0] = 0x30 + high;
     else           hex[0] = 0x37 + high;
