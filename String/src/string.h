@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <math.h>
 
 /**
  * struct for stroring information about an binary String
@@ -229,5 +230,33 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
                  ((SRC2)[_i] & 1));         \
                                             \
 } while (0)
+
+/**
+ * compares tweo strings by the computing the
+ * Cosine similarity
+ *
+ * this means it returns and long double between
+ * 0 - 1, 1 means the two strings are the same
+ */
+static inline long double str_similarity(uint64_t *a,
+                                         uint64_t *b, 
+                                         uint64_t len) {
+  
+  uint64_t i, pa, pb, pab;
+  for (i = 0, pa = 0, pb = 0, pab = 0; i < len; i++) {
+    
+    pa  += __builtin_popcountll(a[i]);
+    pb  += __builtin_popcountll(b[i]);
+    pab += __builtin_popcountll(a[i] & b[i]);
+  }
+
+  long double da, db, dab;
+
+  da  = pa;
+  db  = pb;
+  dab = pab;
+  
+  return dab / sqrtl(da * db);
+}
 
 #endif /* __STRING_H__ */
