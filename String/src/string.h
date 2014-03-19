@@ -172,7 +172,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = (SRC1)[i] | (SRC2)[i];       \
+    (DST)[_i] = (SRC1)[_i] | (SRC2)[_i];       \
                                             \
 } while (0)
 
@@ -180,7 +180,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = (SRC1)[i] & (SRC2)[i];       \
+    (DST)[_i] = (SRC1)[_i] & (SRC2)[_i];       \
                                             \
 } while (0)
 
@@ -188,7 +188,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = (SRC1)[i] ^ (SRC2)[i];       \
+    (DST)[_i] = (SRC1)[_i] ^ (SRC2)[_i];       \
                                             \
 } while (0)
 
@@ -196,7 +196,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = ~((SRC1)[i] | (SRC2)[i]);    \
+    (DST)[_i] = ~((SRC1)[_i] | (SRC2)[_i]);    \
                                             \
 } while (0)
 
@@ -204,7 +204,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = ~((SRC1)[i] & (SRC2)[i]);    \
+    (DST)[_i] = ~((SRC1)[_i] & (SRC2)[_i]);    \
                                             \
 } while (0)
 
@@ -212,7 +212,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   unsigned long long _i;                    \
                                             \
   for (_i = 0; _i < (LEN); _i++)            \
-    (DST)[i] = ~((SRC1)[i] ^ (SRC2)[i]);    \
+    (DST)[_i] = ~((SRC1)[_i] ^ (SRC2)[_i]);    \
                                             \
 } while (0)
 
