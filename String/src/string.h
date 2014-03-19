@@ -165,5 +165,55 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
   }
 }
 
+/**
+ * some bnary operations on strings
+ */
+#define STR_OR(DST, SRC1, SRC2, LEN) do {   \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = (SRC1)[i] | (SRC2)[i];       \
+                                            \
+} while (0)
+
+#define STR_AND(DST, SRC1, SRC2, LEN) do {  \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = (SRC1)[i] & (SRC2)[i];       \
+                                            \
+} while (0)
+
+#define STR_XOR(DST, SRC1, SRC2, LEN) do {  \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = (SRC1)[i] ^ (SRC2)[i];       \
+                                            \
+} while (0)
+
+#define STR_NOR(DST, SRC1, SRC2, LEN) do {  \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = ~((SRC1)[i] | (SRC2)[i]);    \
+                                            \
+} while (0)
+
+#define STR_NAND(DST, SRC1, SRC2, LEN) do { \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = ~((SRC1)[i] & (SRC2)[i]);    \
+                                            \
+} while (0)
+
+#define STR_XNOR(DST, SRC1, SRC2, LEN) do { \
+  unsigned long long _i;                    \
+                                            \
+  for (_i = 0; _i < (LEN); _i++)            \
+    (DST)[i] = ~((SRC1)[i] ^ (SRC2)[i]);    \
+                                            \
+} while (0)
 
 #endif /* __STRING_H__ */
