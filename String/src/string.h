@@ -245,9 +245,9 @@ static inline long double str_similarity(uint8_t *a,
   uint64_t i, pa, pb, pab;
   for (i = 0, pa = 0, pb = 0, pab = 0; i < len; i++) {
     
-    pa  += ((uint64_t) a[i]) * ((uint64_t) a[i])
-    pb  += ((uint64_t) b[i]) * ((uint64_t) b[i])
-    pab += ((uint64_t) a[i]) * ((uint64_t) b[i])
+    pa  += ((uint64_t) a[i]) * ((uint64_t) a[i]);
+    pb  += ((uint64_t) b[i]) * ((uint64_t) b[i]);
+    pab += ((uint64_t) a[i]) * ((uint64_t) b[i]);
   }
 
   long double da, db, dab;
