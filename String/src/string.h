@@ -238,16 +238,16 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
  * this means it returns and long double between
  * 0 - 1, 1 means the two strings are the same
  */
-static inline long double str_similarity(uint64_t *a,
-                                         uint64_t *b, 
-                                         uint64_t len) {
+static inline long double str_similarity(uint8_t *a,
+                                         uint8_t *b, 
+                                         uint8_t len) {
   
   uint64_t i, pa, pb, pab;
   for (i = 0, pa = 0, pb = 0, pab = 0; i < len; i++) {
     
-    pa  += __builtin_popcountll(a[i]);
-    pb  += __builtin_popcountll(b[i]);
-    pab += __builtin_popcountll(a[i] & b[i]);
+    pa  += ((uint64_t) a[i]) * ((uint64_t) a[i])
+    pb  += ((uint64_t) b[i]) * ((uint64_t) b[i])
+    pab += ((uint64_t) a[i]) * ((uint64_t) b[i])
   }
 
   long double da, db, dab;
@@ -256,7 +256,7 @@ static inline long double str_similarity(uint64_t *a,
   db  = pb;
   dab = pab;
   
-  return dab / sqrtl(da * db);
+  return dab / (sqrtl(da) * sqrtl(db));
 }
 
 #endif /* __STRING_H__ */
