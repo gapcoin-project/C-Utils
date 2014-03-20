@@ -240,7 +240,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
  */
 static inline long double str_similarity(uint8_t *a,
                                          uint8_t *b, 
-                                         uint8_t len) {
+                                         uint64_t len) {
   
   uint64_t i, pa, pb, pab;
   for (i = 0, pa = 0, pb = 0, pab = 0; i < len; i++) {
