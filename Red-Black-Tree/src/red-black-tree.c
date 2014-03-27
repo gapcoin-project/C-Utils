@@ -84,6 +84,42 @@ static inline RBTNode *rbt_search(RBTree *tree, uint64_t key) {
 }
 
 /**
+ * returns the value for the given key
+ */
+void *rbtree_get(RBTree *tree, uint64_t key) {
+  
+  RBTNode *n = rbt_search(tree, key);
+
+  return (n == NULL) ? NULL : n->value;
+}
+
+/**
+ * returns the value for the given key
+ * and deletes it form the RedBlackTree
+ */
+void *rbtree_pop(RBTree *tree, uint64_t key) {
+  
+  RBTNode *n  = rbt_search(tree, key);
+  void *value = (n == NULL) ? NULL : n->value;
+
+  if (n != NULL && n->left != NULL && n->right != NULL) {
+    RBTNode *cur = n->right;
+    
+    while (cur->left != NULL)
+      cur = cur->left;
+
+    // switch n and cur
+    n->key   = cur->key;
+    n->value = cur->value;
+    n = cur;
+  }
+
+  rbt_delete_one_child(tree, n);
+
+  return value;
+}
+
+/**
  * Returns the grand father of the given node
  */
 RBTNode *grandfather(RBTNode *n) {
@@ -357,7 +393,8 @@ uint8_t rbtree_remove(RBTree *tree, uint64_t key) {
       cur = cur->left;
 
     // switch n and cur
-    n->key = cur->key;
+    n->key   = cur->key;
+    n->value = cur->value;
     n = cur;
   }
 
@@ -641,7 +678,7 @@ void rbtree_clone(RBTree *dst, RBTree *src) {
 /**
  * Returns the Maximum key in the given RBTree
  */
-uint64_t rbtree_max(RBTree *tree) {
+uint64_t rbtree_max_key(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
@@ -656,7 +693,7 @@ uint64_t rbtree_max(RBTree *tree) {
 /**
  * Returns the Minimum key in the given RBTree
  */
-uint64_t rbtree_min(RBTree *tree) {
+uint64_t rbtree_min_key(RBTree *tree) {
   RBTNode *cur = tree->root;
 
   if (cur == NULL)
@@ -667,6 +704,76 @@ uint64_t rbtree_min(RBTree *tree) {
 
   return cur->key;
 }
+
+
+/**
+ * Returns the Maximum value in the given RBTree
+ */
+void *rbtree_max_value(RBTree *tree) {
+  RBTNode *cur = tree->root;
+
+  if (cur == NULL)
+    return NULL;
+
+  while (cur->right != NULL)
+    cur = cur->right;
+
+  return cur->value;
+}
+
+/**
+ * Returns the Minimum value in the given RBTree
+ */
+void *rbtree_min_value(RBTree *tree) {
+  RBTNode *cur = tree->root;
+
+  if (cur == NULL)
+    return NULL;
+
+  while (cur->left != NULL)
+    cur = cur->left;
+
+  return cur->value;
+}
+
+/**
+ * Returns the Maximum value in the given RBTree
+ * and deletes it
+ */
+void *rbtree_pop_max(RBTree *tree) {
+  RBTNode *cur = tree->root;
+
+  if (cur == NULL)
+    return NULL;
+
+  while (cur->right != NULL)
+    cur = cur->right;
+  
+  void *value = cur->value;
+  rbt_delete_one_child(tree, cur);
+
+  return value;
+}
+
+/**
+ * Returns the Minimum value in the given RBTree
+ * and deletes it
+ */
+void *rbtree_pop_min(RBTree *tree) {
+  RBTNode *cur = tree->root;
+
+  if (cur == NULL)
+    return NULL;
+
+  while (cur->left != NULL)
+    cur = cur->left;
+
+  void *value = cur->value;
+  rbt_delete_one_child(tree, cur);
+
+  return value;
+}
+
 
 /**
  * progress a deep first search to fill a sorted key array
