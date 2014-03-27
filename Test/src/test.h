@@ -526,7 +526,7 @@ void test_signal_handler(int signum) {
             sig.name, 
             sig.description);
 
-  show_backtrace();
+  show_backtrace(); // TODO avoid haning here!!
 
   void (*old_handler) (int);
   old_handler = ARY_AT(CUR_TEST.signals, i).sa_handler;
@@ -539,6 +539,7 @@ void test_signal_handler(int signum) {
   /* call old signal handler */
   } else if (old_handler != SIG_IGN)
     old_handler(signum);
+
 }
 
 /**
