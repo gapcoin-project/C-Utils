@@ -116,6 +116,17 @@ void rbtree_add(RBTree *tree, uint64_t key, void *value);
 uint8_t rbtree_add_if_possible(RBTree *tree, uint64_t key, void *value);
 
 /**
+ * returns the value for the given key
+ */
+void *rbtree_get(RBTree *tree, uint64_t key);
+
+/**
+ * returns the value for the given key
+ * and deletes it form the RedBlackTree
+ */
+void *rbtree_pop(RBTree *tree, uint64_t key);
+
+/**
  * Removes a given key from the given RBTree
  *
  * returns RBT_TRUE or RBT_FALSE if the key could be removed
@@ -135,12 +146,34 @@ void rbtree_clone(RBTree *dst, RBTree *src);
 /**
  * Returns the Maximum key in the given RBTree
  */
-uint64_t rbtree_max(RBTree *tree);
+uint64_t rbtree_max_key(RBTree *tree);
 
 /**
  * Returns the Minimum key in the given RBTree
  */
-uint64_t rbtree_min(RBTree *tree);
+uint64_t rbtree_min_key(RBTree *tree);
+
+/**
+ * Returns the Maximum value in the given RBTree
+ */
+void *rbtree_max_value(RBTree *tree);
+
+/**
+ * Returns the Minimum value in the given RBTree
+ */
+void *rbtree_min_value(RBTree *tree);
+
+/**
+ * Returns the Maximum value in the given RBTree
+ * and deletes it
+ */
+void *rbtree_pop_max(RBTree *tree);
+
+/**
+ * Returns the Minimum value in the given RBTree
+ * and deletes it
+ */
+void *rbtree_pop_min(RBTree *tree);
 
 /**
  * converts the given RBTree to an sorted value array
