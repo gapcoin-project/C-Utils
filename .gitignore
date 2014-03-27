@@ -13,3 +13,11 @@ a.out
 *.out
 TODO
 *.rb
+*.wav
+*bin/
+*.JPG
+*.PNG
+*.BMP
+*.bmp
+*.png
+*.jpg
