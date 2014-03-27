@@ -6,80 +6,7 @@
 
 #include "../../Thread-Clients/src/thread-client.h"
 #include "../../Time-Diff/src/time-diff.h"
-
-/**
- * the seeds internal usage only
- * (thread seed and serial seed)
- */
-static uint32_t **rand32_seeds;
-static uint32_t rand32_serial_seed;
-
-/**
- * sets the serial seed to the given value
- */
-#define init_serial_rand32(seed) rand32_serial_seed = seed
-
-/**
- * returns the next serial rand
- */
-static inline uint32_t next_serial_rand32() {
-  
-  uint32_t hi, lo;
-
-  lo = 16807 * (rand32_serial_seed & 0xFFFF);
-  hi = 16807 * (rand32_serial_seed >> 16);
-
-  lo += (hi & 0x7FFF) << 16;
-  lo += hi >> 15;
-
-  if (lo > 0x7FFFFFFF) lo -= 0x7FFFFFFF;
-
-  return (rand32_serial_seed = lo);
-}
-
-/**
- * returns the next rand number for the given thread index
- */
-static inline  uint32_t next_rand32(uint16_t index) {
-
-  uint32_t hi, lo = 0;
-
-  lo = 16807 * ((*(rand32_seeds[index])) & 0xFFFF);
-  hi = 16807 * (*rand32_seeds[index] >> 16);
-
-  lo += (hi & 0x7FFF) << 16;
-  lo += hi >> 15;
-
-  if (lo > 0x7FFFFFFF) lo -= 0x7FFFFFFF;
-
-  return (*rand32_seeds[index] = lo);
-}
-
-/**
- * initialzes rand with a given number of threads
- * (also initializes the seed with the current time)
- */
-static inline void init_rand32(uint16_t num_threads) {
-  
-  rand32_seeds = malloc(sizeof(uint32_t *) * num_threads);
-  
-  if (rand32_seeds == NULL) {
-    perror("malloc failed in init_rand32");
-    exit(1);
-  }
-
-  uint16_t i;
-  for (i = 0; i < num_threads; i++) {
-    rand32_seeds[i] = malloc(sizeof(uint32_t));
-
-    if (rand32_seeds[i] == NULL) {
-      perror("malloc failed in init_rand32");
-      exit(1);
-    }
-
-    *rand32_seeds[i] = ((i == 0) ? time(NULL) : next_rand32(i - 1));
-  }
-}
+#include "../src/rand.h"
 
 /**
  * thread args
@@ -97,7 +24,7 @@ void *serial_rand(void *opts) {
 
   uint64_t i;
   for (i = 0; i < args->num_rands / args->num_threads; i++)
-    *res += next_serial_rand32();
+    *res += rand32();
 
   return res;
 }
@@ -110,7 +37,7 @@ void *parallel_rand(void *opts) {
 
   uint64_t i;
   for (i = 0; i < args->num_rands / args->num_threads; i++)
-    *res += next_rand32(args->i);
+    *res += rand32(args->i);
 
   return res;
 }
@@ -139,7 +66,7 @@ int main(int argc, char *argv[]) {
   uint64_t i, j, num_rands = atoi(argv[1]);
   uint64_t num_threads     = atoi(argv[2]);
 
-  init_serial_rand32(time(NULL));
+  init_rand32_serial(time(NULL));
   init_rand32(num_threads);
   srand(time(NULL));
 
