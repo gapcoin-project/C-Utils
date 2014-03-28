@@ -53,16 +53,22 @@ char str_matches(const char *regex_str, const char *str);
 inline char *to_b64(uint8_t *bytes, const uint64_t len);
 
 /**
- * returns the length of an base64 encoded string
+ * returns the decode length of an base64 encoded string
  * (no new line chars are allowed)
  */
-inline size_t b64_len(const char *b64);
+inline size_t b64_dec_len(const char *b64);
+
+/**
+ * calculates the size an base64 encoded string will have
+ */
+#define b64_enc_len(len)                                                \
+  ((len + ((3 - (len % 3)) % 3)) / 3) * 4 + ((3 - (len % 3)) % 3)
 
 /**
  * decodes an b64 encoded string
  * (no new line chars are allowed)
  */
-#define b64_to_byte1(b64) b64_to_byte(b64, b64_len(b64))
+#define b64_to_byte1(b64) b64_to_byte(b64, b64_dec_len(b64))
 #define b64_to_byte2(b64, len) b64_to_byte(b64, len)
 #define b64_to_bytex(x, b1, b2, func, ...) func
 #define b64_to_byte(...) b64_to_bytex(, ##__VA_ARGS__,                \

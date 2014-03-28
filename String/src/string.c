@@ -205,5 +205,105 @@ char str_matches(const char *regex_str, const char *str) {
     return 1;
 }
 
+/**
+ * converts an byte array to base64
+ * Note tere should be more memory avilabel in the given array
+ * cause there will my be added filling bytes
+ */
+inline char *to_b64(uint8_t *bytes, uint64_t len) {
+  
+  static const char code[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "abcdefghijklmnopqrstuvwxyz"
+                             "0123456789+/";
+
+  /* number of filling bytes */
+  uint8_t n_fill = (3 - (len % 3)) % 3;
+
+  uint64_t b64_len = ((len + n_fill) / 3) * 4 + n_fill;
+  char *b64 = malloc(sizeof(char) * (b64_len + 1));
+
+  /* adding fill bytes */
+  uint64_t i;
+  for (i = 0; i < n_fill; i++)
+    bytes[len + i] = 0;
+
+  len += n_fill;
+
+  for (i = 0; i < len; i += 3) {
+    b64[(i / 3) * 4]     = code[bytes[i] >> 2];
+    b64[(i / 3) * 4 + 1] = code[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+    b64[(i / 3) * 4 + 2] = code[((bytes[i + 1] & 0xF) << 2) |
+                                (bytes[i + 2] >> 6)];
+    b64[(i / 3) * 4 + 3] = code[bytes[i + 2] & 0x3F];
+  }
+
+  for (i = i * 3; i < b64_len; i++)
+    b64[i] = '=';
+
+  b64[b64_len] = '\0';
+  return b64;  
+}
+
+/**
+ * returns the decode length of an base64 encoded string
+ * (no new line chars are allowed)
+ */
+inline size_t b64_dec_len(const char *b64) {
+  
+  size_t n_fill = 0;
+  size_t len    = strlen(b64);
+
+  if (b64[len - 1] == '=') {
+    n_fill++;
+
+    if (b64[len - 2] == '=')
+      n_fill++;
+  }
+
+  return (len / 4) * 3 - n_fill;
+}
+
+/**
+ * decodes an b64 encoded string
+ * (no new line chars are allowed)
+ */
+inline uint8_t *b64_to_byte(const char *b64, const uint64_t len) {
+  
+  /**
+   * Array which orders the base 64 elements to ist code
+   */
+  static const uint8_t code[] = { 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 
+    61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
+    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 
+    26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 
+    45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, };
+
+  uint8_t *bytes = malloc(sizeof(uint8_t) * len + 1);
+
+  uint8_t n_fill = (3 - (len % 3)) % 3;
+  uint64_t b64_len = ((len + n_fill) / 3) * 4 + n_fill;
+  
+  uint64_t i;
+  for (i = 0; i < b64_len; i += 4) {
+    bytes[(i / 4) * 3]      = (code[(uint8_t) b64[i]] << 2)     |
+                              (code[(uint8_t) b64[i + 1]] >> 4);
+    bytes[(i / 4) * 3 + 1]  = (code[(uint8_t) b64[i + 1]] << 4) |
+                              (code[(uint8_t) b64[i + 2]] >> 2);
+    bytes[(i / 4) * 3 + 2]  = (code[(uint8_t) b64[i + 2]] << 6) |
+                               code[(uint8_t) b64[i + 3]];
+  }
+
+  return bytes;
+}
 
 #endif /* __STRING__ */
