@@ -78,3 +78,8 @@ and give them work without recreating the threads (less syscalls)
 Time Diff
 --- 
 Just an util to calculate the diffenece between two times (timval struct)
+
+
+Timeout
+---
+A fork, shared memory and sigterm based timeout
