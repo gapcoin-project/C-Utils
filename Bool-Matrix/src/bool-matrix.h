@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
+#include <memory.h>
 
 typedef struct {
   uint8_t **ptr;
@@ -76,12 +77,12 @@ typedef struct {
  */
 #define MATRIX_SET(MATRIX, X, Y)                              \
   do {                                                        \
-    while ((MATRIX).width <= (X)) {                           \
-      MATRIX_GROW_X(MATRIX)                                   \
-    }                                                         \
-    while ((MATRIX).height <= (Y)) {                          \
-      MATRIX_GROW_Y(MATRIX)                                   \
-    }                                                         \
+    while ((MATRIX).width <= (X))                             \
+      MATRIX_GROW_X(MATRIX);                                  \
+                                                              \
+    while ((MATRIX).height <= (Y))                            \
+      MATRIX_GROW_Y(MATRIX);                                  \
+                                                              \
     switch ((Y) % 8) {                                        \
       case 0 : (MATRIX).ptr[X][(Y) / 8] |= BIT0; break;       \
       case 1 : (MATRIX).ptr[X][(Y) / 8] |= BIT1; break;       \
@@ -99,12 +100,12 @@ typedef struct {
  */
 #define MATRIX_UNSET(MATRIX, X, Y)                                \
   do {                                                            \
-    while (MATRIX.width <= (X)) {                                 \
-      MATRIX_GROW_X(MATRIX)                                       \
-    }                                                             \
-    while (MATRIX.height <= (Y)) {                                \
-      MATRIX_GROW_Y(MATRIX)                                       \
-    }                                                             \
+    while (MATRIX.width <= (X))                                   \
+      MATRIX_GROW_X(MATRIX);                                      \
+                                                                  \
+    while (MATRIX.height <= (Y))                                  \
+      MATRIX_GROW_Y(MATRIX);                                      \
+                                                                  \
     switch ((Y) % 8) {                                            \
       case 0 : (MATRIX).ptr[X][(Y) / 8] &= ~BIT0; break;          \
       case 1 : (MATRIX).ptr[X][(Y) / 8] &= ~BIT1; break;          \
@@ -122,8 +123,8 @@ typedef struct {
  */
 #define MATRIX_SET_BOTH(MATRIX, X, Y)       \
   do {                                      \
-    MATRIX_SET(MATRIX, X, Y)                \
-    MATRIX_SET(MATRIX, Y, X)                \
+    MATRIX_SET(MATRIX, X, Y);               \
+    MATRIX_SET(MATRIX, Y, X);               \
   } while (0)
 
 /**
@@ -131,8 +132,8 @@ typedef struct {
  */
 #define MATRIX_UNSET_BOTH(MATRIX, X, Y)       \
   do {                                        \
-    MATRIX_UNSET(MATRIX, X, Y)                \
-    MATRIX_UNSET(MATRIX, Y, X)                \
+    MATRIX_UNSET(MATRIX, X, Y);               \
+    MATRIX_UNSET(MATRIX, Y, X);               \
   } while (0)
 
 /**
@@ -151,16 +152,16 @@ typedef struct {
  */
 #define MATRIX_CLEAR_PART(MATRIX, N)                          \
   do {                                                        \
-    while ((MATRIX).width <= (N)) {                           \
-      MATRIX_GROW_X(MATRIX)                                   \
-    }                                                         \
-    while ((MATRIX).height <= (N)) {                          \
-      MATRIX_GROW_Y((MATRIX))                                 \
-    }                                                         \
+    while ((MATRIX).width <= (N))                             \
+      MATRIX_GROW_X(MATRIX);                                  \
+                                                              \
+    while ((MATRIX).height <= (N))                            \
+      MATRIX_GROW_Y((MATRIX));                                \
+                                                              \
     uint32_t i;                                               \
-    for (i = 0; i <= (N); i++) {                              \
+    for (i = 0; i <= (N); i++)                                \
       memset((MATRIX).ptr[i], 0, (MATRIX).height / 8);        \
-    }                                                         \
+                                                              \
   } while (0)
 
 /**
@@ -170,9 +171,9 @@ typedef struct {
   do {                                                                        \
     uint32_t i, min = ((MATRIX).width < (MATRIX).height) ? (MATRIX).width     \
                                                           : (MATRIX).height;  \
-    for (i = 0; i < min; i++) {                                               \
+    for (i = 0; i < min; i++)                                                 \
       MATRIX_SET(MATRIX, i, i);                                               \
-    }                                                                         \
+                                                                              \
   } while (0)
 
 /**
@@ -180,8 +181,8 @@ typedef struct {
  */
 #define MATRIX_SET_CLEAR_MAIN_DIAGONAL(MATRIX)            \
   do {                                                    \
-    MATRIX_CLEAR(MATRIX)                                  \
-    MATRIX_SET_MAIN_DIAGONAL(MATRIX)                      \
+    MATRIX_CLEAR(MATRIX);                                 \
+    MATRIX_SET_MAIN_DIAGONAL(MATRIX);                     \
   } while (0)
 
 /**
@@ -189,9 +190,10 @@ typedef struct {
  */
 #define MATRIX_SET_MAIN_DIAGONAL_PART(MATRIX, N)                              \
   do {                                                                        \
-    for (i = 0; i <= (N); i++) {                                              \
+    uint32_t i;                                                               \
+    for (i = 0; i <= (N); i++)                                                \
       MATRIX_SET(MATRIX, i, i);                                               \
-    }                                                                         \
+                                                                              \
   } while (0)
 
 /**
@@ -223,15 +225,12 @@ typedef struct {
 #define MATRIX_CALC_PATHS_WITHOUT(MATRIX, N)                                  \
   do {                                                                        \
     uint32_t k, i, j;                                                         \
-    for (k = 0; k <= N; k++) {                                                \
-      for (i = 0; i <= N; i++) {                                              \
-        for (j = 0; j <= N; j++) {                                            \
-          if ((MATRIX_AT(MATRIX, i, k) && MATRIX_AT(MATRIX, k, j))) {         \
-            MATRIX_SET(MATRIX, i , j)                                         \
-          }                                                                   \
-        }                                                                     \
-      }                                                                       \
-    }                                                                         \
+    for (k = 0; k <= N; k++)                                                  \
+      for (i = 0; i <= N; i++)                                                \
+        for (j = 0; j <= N; j++)                                              \
+          if ((MATRIX_AT(MATRIX, i, k) && MATRIX_AT(MATRIX, k, j)))           \
+            MATRIX_SET(MATRIX, i , j);                                        \
+                                                                              \
   } while (0)
 
 #endif // __BOOL_MATRIX_H__
