@@ -50,7 +50,13 @@ char str_matches(const char *regex_str, const char *str);
  * Note tere should be more memory avilabel in the given array
  * cause there will my be added filling bytes
  */
-inline char *to_b64(uint8_t *bytes, const uint64_t len);
+#define to_b641(bytes, len) to_b64(bytes, len, NULL)
+#define to_b642(bytes, len, b64) to_b64(bytes, len, b64)
+#define to_b64x(x, y, b1, b2, func, ...) func
+#define to_b64(...) to_b64x(, ##__VA_ARGS__,           \
+                              to_b642(__VA_ARGS__),    \
+                              to_b641(__VA_ARGS__))
+inline char *to_b64(uint8_t *bytes, uint64_t len, char *b64);
 
 /**
  * returns the decode length of an base64 encoded string
@@ -68,12 +74,13 @@ inline size_t b64_dec_len(const char *b64);
  * decodes an b64 encoded string
  * (no new line chars are allowed)
  */
-#define b64_to_byte1(b64) b64_to_byte(b64, b64_dec_len(b64))
-#define b64_to_byte2(b64, len) b64_to_byte(b64, len)
+#define b64_to_byte1(b64) b64_to_byte(b64, NULL)
+#define b64_to_byte2(b64, bytes) b64_to_byte(b64, bytes)
 #define b64_to_bytex(x, b1, b2, func, ...) func
 #define b64_to_byte(...) b64_to_bytex(, ##__VA_ARGS__,                \
                                         b64_to_byte2(__VA_ARGS__),    \
                                         b64_to_byte1(__VA_ARGS__))
-inline uint8_t *b64_to_byte(const char *b64, const uint64_t len);
+inline uint8_t *b64_to_byte(const char *b64, 
+                            uint8_t *bytes);
 
 #endif /* __STRING_H__ */

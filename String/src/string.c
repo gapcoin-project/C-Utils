@@ -210,17 +210,19 @@ char str_matches(const char *regex_str, const char *str) {
  * Note tere should be more memory avilabel in the given array
  * cause there will my be added filling bytes
  */
-inline char *to_b64(uint8_t *bytes, uint64_t len) {
+inline char *to_b64(uint8_t *bytes, uint64_t len, char *b64) {
   
   static const char code[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "abcdefghijklmnopqrstuvwxyz"
                              "0123456789+/";
 
   /* number of filling bytes */
-  uint8_t n_fill = (3 - (len % 3)) % 3;
-
+  uint64_t n_fill = (3 - (len % 3)) % 3;
   uint64_t b64_len = ((len + n_fill) / 3) * 4 + n_fill;
-  char *b64 = malloc(sizeof(char) * (b64_len + 1));
+
+  
+  if (b64 == NULL)
+    b64 = malloc(sizeof(char) * (b64_len + 1));
 
   /* adding fill bytes */
   uint64_t i;
@@ -237,7 +239,7 @@ inline char *to_b64(uint8_t *bytes, uint64_t len) {
     b64[(i / 3) * 4 + 3] = code[bytes[i + 2] & 0x3F];
   }
 
-  for (i = i * 3; i < b64_len; i++)
+  for (i = (i / 3) * 4; i < b64_len; i++)
     b64[i] = '=';
 
   b64[b64_len] = '\0';
@@ -267,7 +269,8 @@ inline size_t b64_dec_len(const char *b64) {
  * decodes an b64 encoded string
  * (no new line chars are allowed)
  */
-inline uint8_t *b64_to_byte(const char *b64, const uint64_t len) {
+inline uint8_t *b64_to_byte(const char *b64, 
+                            uint8_t *bytes) {
   
   /**
    * Array which orders the base 64 elements to ist code
@@ -288,12 +291,23 @@ inline uint8_t *b64_to_byte(const char *b64, const uint64_t len) {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, };
 
-  uint8_t *bytes = malloc(sizeof(uint8_t) * len + 1);
+  size_t n_fill  = 0;
+  size_t b64_len = strlen(b64);
 
-  uint8_t n_fill = (3 - (len % 3)) % 3;
-  uint64_t b64_len = ((len + n_fill) / 3) * 4 + n_fill;
+  if (b64[b64_len - 1] == '=') {
+    n_fill++;
+
+    if (b64[b64_len - 2] == '=')
+      n_fill++;
+  }
+
+  size_t byte_len = (b64_len / 4) * 3 - n_fill;
+
+  if (bytes == NULL)
+    bytes = malloc(sizeof(uint8_t) * byte_len + 1);
+
   
-  uint64_t i;
+  size_t i;
   for (i = 0; i < b64_len; i += 4) {
     bytes[(i / 4) * 3]      = (code[(uint8_t) b64[i]] << 2)     |
                               (code[(uint8_t) b64[i + 1]] >> 4);
