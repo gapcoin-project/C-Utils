@@ -1,12 +1,22 @@
 C-Utils
 ========
 
-Just a some usefull C-Utils:
+C-Utils is a collection of lowlovel speed improoved function and libraries for ansi c
+
+
+Arg-Parse
+---
+easy but low speed argument parsing
 
 
 BMP
 ---
 Low level implementation of the BMP file format
+
+
+Bool-Array
+---
+Low level implementation of an true false array (bit array)
 
 
 Bool Matrix
@@ -15,14 +25,14 @@ Low level implementation of an Bool Matrix (preprocessor macro based)
 (each Bit can be setted)
 
 
-Dynamic Array
---- 
-Low level implementation of an Dynamic Array (preprocessor macro based)
-
-
 Debug
 ---
 some helpfull debugging stuff
+
+
+Dynamic Array
+--- 
+Low level implementation of an Dynamic Array (preprocessor macro based)
 
 
 Hash
@@ -47,11 +57,21 @@ long block of free memory, Long Array uses many smal memory blocks and
 let they access you like one long Array.
 
 
+Memory
+---
+some memory related functions (get total memory, print bytes)
+
+
 Point
 --- 
 A simple two dimensional point impelementation
 as a struct and a uint64 which uses the higher 32 bits
 as y and the lower as x coordianate
+
+
+Rand
+---
+Low level 32 bit rand implementation
 
 
 Red Black Tree
@@ -84,11 +104,16 @@ With thread clients you can creat a amoung of threads once
 and give them work without recreating the threads (less syscalls)
 
 
+Timeout
+---
+A fork, shared memory and sigterm based timeout
+
+
 Time Diff
 --- 
 Just an util to calculate the diffenece between two times (timval struct)
 
 
-Timeout
+WAFE
 ---
-A fork, shared memory and sigterm based timeout
+Low level implementation of the WAVE-RIFF file format
