@@ -51,6 +51,12 @@ char *get_arg(int argc,
 #define get_i_arg(...)                                          \
   (has_arg(__VA_ARGS__) ? atoi(get_arg(__VA_ARGS__)) : -1)
 
+#define get_l_arg(...)                                          \
+  (has_arg(__VA_ARGS__) ? atol(get_arg(__VA_ARGS__)) : -1)
+
+#define get_ll_arg(...)                                         \
+  (has_arg(__VA_ARGS__) ? atoll(get_arg(__VA_ARGS__)) : -1)
+
 /**
  * to get float args
  */
