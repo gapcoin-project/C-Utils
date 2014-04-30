@@ -526,4 +526,52 @@ char *ui_to_str(uint64_t num) {
   return str_clone(buffer);
 }
 
+/**
+ * hexdumps the given string
+ */
+void hexdump(unsigned char *str, int len) {
+  
+  int i, n;
+  for (i = 0; i < len; i++) {
+    if (i % 8 == 0 && i > 0)
+      printf(" ");
+    if (i % 16 == 0 && i > 0) {
+      printf(" |");
+      
+      for (n = i - 16; n < i; n++) {
+        if (str[n] >= 32 && str[n] <= 126)
+          printf("%c", str[n]);
+        else
+          printf(".");
+      }
+      printf("|\n");
+    }
+    printf("%02x ", str[i]);
+  }
+
+  for (; ((i % 16) - 1) != 0; i++) {
+    if (i % 8 == 0 && i > 0)
+      printf(" ");
+    if (i % 16 == 0 && i > 0) {
+      printf(" |");
+      
+      for (n = i - 16; n < len; n++) {
+        if (str[n] >= 32 && str[n] <= 126)
+          printf("%c", str[n]);
+        else
+          printf(".");
+      }
+
+      for (; n < i; n++) {
+        printf(" ");
+      }
+      printf("|\n");
+    }
+
+    if (i % 16 != 0)
+      printf("   ");
+  }
+  printf("\n");
+}
+
 #endif /* __STRING__ */

@@ -259,4 +259,9 @@ static inline long double str_similarity(uint8_t *a,
   return dab / (sqrtl(da) * sqrtl(db));
 }
 
+/**
+ * hexdumps the given string
+ */
+void hexdump(unsigned char *str, int len);
+
 #endif /* __STRING_H__ */
