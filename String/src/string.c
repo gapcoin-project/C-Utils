@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <regex.h>
+#include <stdio.h>
 
 /**
  * reads a line from a given file descriptor
@@ -527,7 +528,7 @@ char *ui_to_str(uint64_t num) {
 }
 
 /**
- * hexdumps the given string
+ * hexdumps the given string to the given file descriptor
  */
 void hexdump(unsigned char *str, int len) {
   
