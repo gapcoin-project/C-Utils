@@ -48,7 +48,8 @@ typedef struct {                          \
 /**
  * returns the Element at the given possition
  */
-#define ARY_AT(ARY, INDEX) (ARY).ptr[INDEX]
+#define ARY_AT(ARY, INDEX) \
+ (((INDEX) >= (ARY).length) ? (typeof(*(ARY).ptr)) 0 : ((ARY).ptr[INDEX]))
 
 /**
  * returns the pointer to the given index
@@ -63,14 +64,28 @@ typedef struct {                          \
 /**
  * Initialize an given Array with an given start length
  * also initialize rand
+ *
+ * for backward compatibility defining muti arg macro
  */
-#define ARY_INIT(TYPE, ARY, START_LEN)                                \
+#define ARY_INIT3(TYPE, ARY, START_LEN)                               \
   do {                                                                \
     (ARY).ptr     = (TYPE *) malloc(sizeof(TYPE) * (START_LEN));      \
     (ARY).length  = 0;                                                \
     (ARY).max_len = START_LEN;                                        \
     srand(time(NULL) * rand());                                       \
   } while (0)
+
+#define ARY_INIT2(ARY, START_LEN) \
+  ARY_INIT3(typeof(*(ARY).ptr), ARY, START_LEN)
+
+#define ARY_INIT1(ARY) ARY_INIT2(ARY, 16)
+
+#define ARY_INITX(ARY, T1, T2, T3, FUNCT, ...) FUNC
+#define ARY_INIT(...) ARY_INITX(, ##__VA_ARGS__,            \
+                                  ARY_INIT3(__VA_ARGS__),   \
+                                  ARY_INIT2(__VA_ARGS__),   \
+                                  ARY_INIT1(__VA_ARGS__))
+  
 
 /**
  * Insert an given element at the end of a given Array 
@@ -90,6 +105,35 @@ typedef struct {                          \
     (ARY).ptr[(ARY).length] = E;                                          \
     (ARY).length++;                                                       \
   } while (0)
+
+/**
+ * Stors the given element at the given possition in the array
+ *
+ * Note it my reallocates space if array is to smal
+ *
+ * NOTE: the Array content type should be the same as the type of 
+ *       the given element!
+ */
+#define ARY_SET(ARY, E, I)                                                \
+  do {                                                                    \
+    if ((I) >= (ARY).max_len) {                                           \
+      while ((I) >= (ARY).max_len)                                        \
+        (ARY).max_len *= 2;                                               \
+                                                                          \
+      typeof((ARY).ptr[0]) *_ptr = calloc(sizeof((ARY).ptr[0]),           \
+                                         (ARY).max_len);                  \
+                                                                          \
+      if ((_ptr == NULL)                                                  \
+        perror("ARY_SET malloc failed!");                                 \
+                                                                          \
+      memcpy(_ptr, (ARY).ptr, sizeof((ARY).ptr[0]) * ARY_LEN(ARY));       \
+      free((ARY).ptr);                                                    \
+      (ARY).ptr = _ptr;                                                   \
+    }                                                                     \
+    (ARY).ptr[I] = E;                                                     \
+    (ARY).length = (I) + 1;                                               \
+  } while (0)
+
 
 /* other name */
 #define ARY_PUSH(ARY, E) ARY_ADD(ARY, E)
