@@ -46,9 +46,15 @@ typedef struct {                          \
 #define DEF_ARY(TYPE, NAME) DEFINE_ARRAY(TYPE, NAME)
 
 /**
- * returns the Element at the given possition
+ * Accesses the Element at the given possition
  */
-#define ARY_AT(ARY, INDEX) \
+#define ARY_AT(ARY, INDEX) (ARY).ptr[INDEX]
+
+/**
+ * returns the element at the given possition
+ * (avoids out of range acces)
+ */
+#define ARY_GET(ARY, INDEX) \
  (((INDEX) >= (ARY).length) ? (typeof(*(ARY).ptr)) 0 : ((ARY).ptr[INDEX]))
 
 /**
