@@ -232,7 +232,7 @@ static inline void to_hex(char *hex, unsigned char *str, int len) {
 } while (0)
 
 /**
- * compares tweo strings by the computing the
+ * compares two strings by the computing the
  * Cosine similarity
  *
  * this means it returns and long double between
@@ -250,13 +250,16 @@ static inline long double str_similarity(uint8_t *a,
     pab += ((uint64_t) a[i]) * ((uint64_t) b[i]);
   }
 
-  long double da, db, dab;
+  long double da, db, dab, sqrt;
 
   da  = pa;
   db  = pb;
   dab = pab;
+  sqrt = (sqrtl(da) * sqrtl(db));
+
+  if (sqrt == 0.0) return 0.0;
   
-  return dab / (sqrtl(da) * sqrtl(db));
+  return dab / sqrt;
 }
 
 /**
