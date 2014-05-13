@@ -80,7 +80,7 @@ typedef struct {                          \
 
 #define ARY_INIT1(ARY) ARY_INIT2(ARY, 16)
 
-#define ARY_INITX(ARY, T1, T2, T3, FUNCT, ...) FUNC
+#define ARY_INITX(ARY, T1, T2, T3, FUNC, ...) FUNC
 #define ARY_INIT(...) ARY_INITX(, ##__VA_ARGS__,            \
                                   ARY_INIT3(__VA_ARGS__),   \
                                   ARY_INIT2(__VA_ARGS__),   \
