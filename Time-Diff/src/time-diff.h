@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <inttypes.h>
 
 #define PRINT_TIMEVAL(TVAL)                                 \
   printf("%ld.%06ld", TVAL.tv_sec, TVAL.tv_usec);
@@ -38,5 +39,10 @@ char timeval_division(struct timeval *result,
  * Prints a Timevall struct
  */
 void timeval_print(struct timeval *tv);
+
+/**
+ * returns the current time in microseconds
+ */
+uint64_t gettime_usec();
 
 #endif // __TIME_DIFF_H__

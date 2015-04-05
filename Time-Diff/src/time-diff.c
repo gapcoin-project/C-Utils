@@ -67,4 +67,18 @@ void timeval_print(struct timeval *tv) {
     printf(" = %s.%06ld\n", buffer, tv->tv_usec);
 }
 
+
+/**
+ * returns the current time in microseconds
+ */
+uint64_t gettime_usec() {
+
+  struct timeval time;
+  if (gettimeofday(&time, NULL) == -1)
+    return ((uint64_t) -1);
+
+  return ((uint64_t) time.tv_sec) * ((uint64_t) 1000000) + 
+         ((uint64_t) time.tv_usec);
+}
+
 #endif // __TIME_DIFF__
