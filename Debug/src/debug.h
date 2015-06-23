@@ -1,5 +1,5 @@
 /**
- * some helpfull debunging Stuff to make code smaler
+ * some help full debugging Stuff to make code smaller
  * and work easier
  */
 #ifndef __DEBUG_H__
@@ -8,8 +8,8 @@
 #include <stdlib.h>
 
 /**
- * prints a debuging Message with file and line
- * if DEBUG flag are setted
+ * prints a debugging Message with file and line
+ * if DEBUG flag is setted
  */
 #ifdef DEBUG
 #define DBG_MSG(MSG)                                                    \
@@ -20,7 +20,7 @@
 
 /**
  * prints a Visible WARNING Message with file and line
- * if DEBUG flag are setted
+ * if DEBUG flag is setted
  */
 #ifdef DEBUG
 #define WARN_MSG(MSG)                                                     \
@@ -35,7 +35,7 @@
 
 /**
  * prints a Error message and exists Message with file and line
- * if DEBUG flag are setted
+ * if DEBUG flag is setted
  */
 #ifdef DEBUG
 #define ERR_MSG(MSG)                                                      \

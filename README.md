@@ -1,7 +1,7 @@
 C-Utils
 ========
 
-C-Utils is a collection of lowlovel speed improoved function and libraries for ansi c
+C-Utils is a collection of low level speed improved functions for ANSI C
 
 
 Arg-Parse
@@ -22,12 +22,12 @@ Low level implementation of an true false array (bit array)
 Bool Matrix
 ---
 Low level implementation of an Bool Matrix (preprocessor macro based)
-(each Bit can be setted)
+(each Bit can be accessed)
 
 
 Debug
 ---
-some helpfull debugging stuff
+some help full debugging stuff
 
 
 Dynamic Array
@@ -39,21 +39,21 @@ Hash
 ---
 
 Low level implementation of a macro based hash map with double hashing
-and multiplion method as hash functions
+and multiplication method as hash functions
 
-currently only inserting is supported
+Currently only inserting is supported
 
 
 Heap
 --- 
-Low level implementation of an Array based Heap, macrobased for the speed
+Low level implementation of an Array based Heap, macro based for the speed
 
 
 Long Array
 --- 
 Low level implementation of an Long Array (preprocessor macro based)
-Long Array is usefull when memory is fragmented and it faild to malloc an
-long block of free memory, Long Array uses many smal memory blocks and
+Long Array is useful when memory is fragmented and it failed to malloc an
+long block of free memory, Long Array uses many small memory blocks and
 let they access you like one long Array.
 
 
@@ -64,9 +64,9 @@ some memory related functions (get total memory, print bytes)
 
 Point
 --- 
-A simple two dimensional point impelementation
-as a struct and a uint64 which uses the higher 32 bits
-as y and the lower as x coordianate
+A simple two dimensional point implementation
+as a struct and an uint64 which uses the higher 32 bits
+as y and the lower as x coordinates
 
 
 Rand
@@ -76,20 +76,19 @@ Low level 32 bit rand implementation
 
 Red Black Tree
 --- 
-Implementation of an Red Black Tree, currently onley stores uint64 keys,
-but aditionaly void pointer could be added when nedded
+Implementation of an Red Black Tree, with uint64 keys and void pointer values
 
 
 Sort
 --- 
-Implementation of an improofed version of Quicksort, using Inserionsort
-at a sepecific min Array length.
+Implementation of an improved version of Quicksort, using Inserionsort
+at a specific min Array length.
 
-Severial versions are privided:
+Several versions are provided:
 
   + Void-pointer based
   + Macro based (25% faster than void-pointer)
-  + Paralell-void-pointer based (only tested with two cores litle bit faster
+  + Parallel-void-pointer based (only tested with two cores little bit faster
     than void-pointer but with more corse it will sure be the fastest version)
 
 
@@ -100,7 +99,7 @@ Just a bunch of string manipulation functions
 
 Thread Clients
 --- 
-With thread clients you can creat a amoung of threads once
+With thread clients you can create an among of threads once
 and give them work without recreating the threads (less syscalls)
 
 
@@ -111,9 +110,9 @@ A fork, shared memory and sigterm based timeout
 
 Time Diff
 --- 
-Just an util to calculate the diffenece between two times (timval struct)
+Just an until to calculate the difference between two times (timval struct)
 
 
-WAFE
+WAVE
 ---
 Low level implementation of the WAVE-RIFF file format
