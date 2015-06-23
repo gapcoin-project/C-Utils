@@ -45,33 +45,6 @@ void *rand128_new(void *opts) {
   return res;
 }
 
-void *serial_rand_old(void *opts) {
-  
-  ThreadArgs *args = (ThreadArgs *) opts;
-  uint32_t *res = malloc(sizeof(uint32_t));
-  *res = 0;
-
-  uint64_t i;
-  for (i = 0; i < args->num_rands / args->num_threads; i++)
-    *res += rand32_old();
-
-  return res;
-}
-
-void *parallel_rand_old(void *opts) {
-  
-  ThreadArgs *args = (ThreadArgs *) opts;
-  uint32_t *res = malloc(sizeof(uint32_t));
-  *res = 0;
-
-  uint64_t i;
-  for (i = 0; i < args->num_rands / args->num_threads; i++)
-    *res += rand32_old(args->i);
-
-  return res;
-}
-
-
 void *normal_rand(void *opts) {
   
   ThreadArgs *args = (ThreadArgs *) opts;
@@ -95,8 +68,6 @@ int main(int argc, char *argv[]) {
   uint64_t i, j, num_rands = atoi(argv[1]);
   uint64_t num_threads     = atoi(argv[2]);
 
-  init_rand32_serial(time(NULL));
-  init_rand32(num_threads);
   srand(time(NULL));
 
 
@@ -113,9 +84,9 @@ int main(int argc, char *argv[]) {
   }
 
   
-  struct timeval rand32_r, rand128_r, serial_r, parallel_r, normal_r;// result
-  struct timeval rand32_s, rand128_s, serial_s, parallel_s, normal_s;// start
-  struct timeval rand32_e, rand128_e, serial_e, parallel_e, normal_e;// end
+  struct timeval rand32_r, rand128_r, normal_r;// result
+  struct timeval rand32_s, rand128_s, normal_s;// start
+  struct timeval rand32_e, rand128_e, normal_e;// end
 
 
   gettimeofday(&rand32_s, NULL);
@@ -138,26 +109,6 @@ int main(int argc, char *argv[]) {
   gettimeofday(&rand128_e, NULL);
   timeval_subtract(&rand128_r, &rand128_e, &rand128_s);
 
-  gettimeofday(&serial_s, NULL);
-  for (j = 0; j < num_threads; j++)
-    tc_add_func(&clients[j], serial_rand_old, (void *) args[j]);
-  
-  for (j = 0; j < num_threads; j++) 
-    tc_join(&clients[j]);
-
-  gettimeofday(&serial_e, NULL);
-  timeval_subtract(&serial_r, &serial_e, &serial_s);
-
-  gettimeofday(&parallel_s, NULL);
-  for (j = 0; j < num_threads; j++)
-    tc_add_func(&clients[j], parallel_rand_old, (void *) args[j]);
-  
-  for (j = 0; j < num_threads; j++) 
-    tc_join(&clients[j]);
-  
-  gettimeofday(&parallel_e, NULL);
-  timeval_subtract(&parallel_r, &parallel_e, &parallel_s);
-
   gettimeofday(&normal_s, NULL);
   for (j = 0; j < num_threads; j++)
     tc_add_func(&clients[j], normal_rand, (void *) args[j]);
@@ -168,23 +119,15 @@ int main(int argc, char *argv[]) {
   gettimeofday(&normal_e, NULL);
   timeval_subtract(&normal_r, &normal_e, &normal_s);
 
-  printf("rand32:   ");
+  printf("rand32:  ");
   PRINT_TIMEVAL(rand32_r);
   printf("\n");
   
-  printf("rand128:  ");
+  printf("rand128: ");
   PRINT_TIMEVAL(rand128_r);
   printf("\n");
-  
-  printf("parallel: ");
-  PRINT_TIMEVAL(parallel_r);
-  printf("\n");
-  
-  printf("serial:   ");
-  PRINT_TIMEVAL(serial_r);
-  printf("\n");
 
-  printf("noarmal:  ");
+  printf("normal:  ");
   PRINT_TIMEVAL(normal_r);
   printf("\n");
 

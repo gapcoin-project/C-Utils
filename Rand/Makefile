@@ -14,5 +14,11 @@ speed-test: prepare
 	$(CC) $(CFLAGS) $(OTFLAGS) test/speed-test.c -o bin/speed-test.o
 	$(CC) $(LDFLAGS) bin/time-diff.o bin/tc.o bin/speed-test.o -o bin/speed-test
 
+speed-test-OO: prepare
+	$(CC) $(CFLAGS) ../Time-Diff/src/time-diff.c -o bin/time-diff.o
+	$(CC) $(CFLAGS) ../Thread-Clients/src/thread-client.c -o bin/tc.o
+	$(CC) $(CFLAGS) test/speed-test.c -o bin/speed-test.o
+	$(CC) $(LDFLAGS) bin/time-diff.o bin/tc.o bin/speed-test.o -o bin/speed-test
+
 clean:
 	@rm -rf $(BIN)
