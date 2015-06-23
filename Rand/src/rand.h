@@ -450,10 +450,41 @@ static inline void init_rand32(uint16_t num_threads) {
 #define rand32_0() next_rand32_serial()
 #define rand32_1(a) next_rand32(a)
 #define rand32_x(x, a, f, ...) f
-#define rand32(...) rand32_x(,##__VA_ARGS__,             \
-                             rand32_1(__VA_ARGS__),      \
-                             rand32_0(__VA_ARGS__))      
+#define rand32_old(...) rand32_x(,##__VA_ARGS__,             \
+                                 rand32_1(__VA_ARGS__),      \
+                                 rand32_0(__VA_ARGS__))      
                               
 
+inline uint32_t rand32(uint32_t *x) {
+  *x ^= *x << 13;
+  *x ^= *x >> 17;
+  *x ^= *x << 5;
+  return *x;
+}
+
+/* random value */
+typedef struct {
+  uint32_t x, y, z, w;
+} rand128_t; 
+
+inline rand128_t *new_rand128(uint32_t seed) {
+  rand128_t *rand = (rand128_t *) malloc(sizeof(rand128_t));
+
+  rand->x = rand32(&seed);
+  rand->y = rand32(&seed);
+  rand->z = rand32(&seed);
+  rand->w = rand32(&seed);
+
+  return rand;
+}
+                      
+inline uint32_t rand128(rand128_t *rand) {
+                               
+  uint32_t t = rand->x ^ (rand->x << 11);
+  rand->x = rand->y; rand->y = rand->z; rand->z = rand->w;
+  rand->w ^= (rand->w >> 19) ^ t ^ (t >> 8);
+                                      
+  return rand->w;
+}
 
 #endif /* __RAND_H_ */
