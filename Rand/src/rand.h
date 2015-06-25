@@ -35,4 +35,7 @@ static inline uint32_t rand128(rand128_t *rand) {
   return rand->w;
 }
 
+#define rand128_range(rand, start, end) ((rand128(rand) % ((end) - (start))) + (start))
+#define rand32_range(rand, start, end) ((rand32(rand) % ((end) - (start))) + (start))
+
 #endif /* __RAND_H_ */
