@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.8)
+PROJECT(C-Utils)
+
+add_subdirectory(Arg-Parse)
+add_subdirectory(String)
+add_subdirectory(Red-Black-Tree)
+add_subdirectory(BMP)
+add_subdirectory(Memory)
+add_subdirectory(Thread-Clients)
+add_subdirectory(Timeout)
+add_subdirectory(Sort)
+add_subdirectory(WAVE)
